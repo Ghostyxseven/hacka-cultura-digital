@@ -1,5 +1,6 @@
 // src/application/usecases/SuggestUnitsUseCase.ts
-import { Unit, SchoolYear } from "../../core/entities/Unit";
+import { Unit } from "../../core/entities/Unit";
+import { SchoolYear } from "../../core/entities/LessonPlan";
 import { IAIService } from "../../infrastructure/ai/IAIService";
 import { ILessonRepository } from "../../repository/ILessonRepository";
 
@@ -30,19 +31,48 @@ export class SuggestUnitsUseCase {
     gradeYear: SchoolYear,
     quantity: number = 5
   ): Promise<Unit[]> {
-    // Validações
+    // Validações de ID da disciplina
     if (!subjectId || subjectId.trim().length === 0) {
       throw new Error("ID da disciplina é obrigatório");
     }
 
-    if (quantity < 1 || quantity > 10) {
-      throw new Error("Quantidade deve ser entre 1 e 10");
+    // Validações de quantidade
+    if (!Number.isInteger(quantity)) {
+      throw new Error("A quantidade deve ser um número inteiro");
+    }
+
+    if (quantity < 1) {
+      throw new Error("A quantidade deve ser pelo menos 1");
+    }
+
+    if (quantity > 10) {
+      throw new Error("A quantidade não pode ser maior que 10");
+    }
+
+    // Validação de ano escolar
+    const validSchoolYears: SchoolYear[] = [
+      '6º Ano', '7º Ano', '8º Ano', '9º Ano',
+      '1º Ano EM', '2º Ano EM', '3º Ano EM'
+    ];
+    
+    if (!validSchoolYears.includes(gradeYear)) {
+      throw new Error(`Ano escolar inválido: "${gradeYear}"`);
     }
 
     // Verifica se a disciplina existe
     const subject = this.repository.getAllSubjects().find(s => s.id === subjectId);
     if (!subject) {
       throw new Error(`Disciplina com ID "${subjectId}" não encontrada`);
+    }
+
+    // Verifica se a série/ano está associada à disciplina (se a disciplina tiver séries definidas)
+    if (subject.gradeYears && subject.gradeYears.length > 0) {
+      if (!subject.gradeYears.includes(gradeYear)) {
+        throw new Error(
+          `A série "${gradeYear}" não está associada à disciplina "${subject.name}". ` +
+          `Séries disponíveis: ${subject.gradeYears.join(', ')}`
+        );
+      }
     }
 
     // Gera sugestões usando IA

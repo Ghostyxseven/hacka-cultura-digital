@@ -30,7 +30,7 @@ export default function NewSubjectPage() {
 
     try {
       const service = getLessonPlanService();
-      service.createSubject(
+      await service.createSubject(
         formData.name,
         formData.description || undefined,
         formData.color,

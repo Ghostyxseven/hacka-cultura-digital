@@ -17,6 +17,7 @@ export class DeleteSubjectUseCase {
    * @throws Error se o ID não for fornecido ou a disciplina não existir
    */
   execute(id: string): void {
+    // Validação de ID
     if (!id || id.trim().length === 0) {
       throw new Error("ID da disciplina é obrigatório");
     }
@@ -27,6 +28,16 @@ export class DeleteSubjectUseCase {
 
     if (!subject) {
       throw new Error(`Disciplina com ID "${id}" não encontrada`);
+    }
+
+    // Verifica se existem unidades associadas à disciplina
+    const units = this.repository.getUnitsBySubjectId(id);
+    if (units.length > 0) {
+      throw new Error(
+        `Não é possível excluir a disciplina "${subject.name}" porque ` +
+        `existem ${units.length} unidade(s) associada(s) a ela. ` +
+        `Exclua as unidades primeiro ou desvincule-as da disciplina.`
+      );
     }
 
     // Remove a disciplina
