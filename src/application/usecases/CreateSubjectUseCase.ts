@@ -1,5 +1,6 @@
 // src/application/usecases/CreateSubjectUseCase.ts
 import { Subject } from "../../core/entities/Subject";
+import { SchoolYear } from "../../core/entities/LessonPlan";
 import { ILessonRepository } from "../../repository/ILessonRepository";
 
 /**
@@ -19,6 +20,7 @@ export class CreateSubjectUseCase {
    * @param description - Descrição opcional da disciplina
    * @param color - Cor opcional para UI (ex: "blue-500")
    * @param icon - Ícone opcional (ex: "book", "monitor")
+   * @param gradeYears - Séries/anos associados à disciplina
    * @returns A disciplina criada
    * @throws Error se o nome for inválido ou já existir uma disciplina com o mesmo nome
    */
@@ -26,7 +28,8 @@ export class CreateSubjectUseCase {
     name: string,
     description?: string,
     color?: string,
-    icon?: string
+    icon?: string,
+    gradeYears?: SchoolYear[]
   ): Promise<Subject> {
     // Validações
     if (!name || name.trim().length === 0) {
@@ -52,6 +55,7 @@ export class CreateSubjectUseCase {
       description: description?.trim(),
       color: color?.trim(),
       icon: icon?.trim(),
+      gradeYears: gradeYears && gradeYears.length > 0 ? gradeYears : undefined,
       createdAt: new Date(),
     };
 
