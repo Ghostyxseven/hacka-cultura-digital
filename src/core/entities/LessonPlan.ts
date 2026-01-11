@@ -21,6 +21,7 @@ export interface LessonPlan {
   title: string;           // Tema da unidade 
   subject: string;         // Disciplina (Ex: Matemática, História)
   gradeYear: SchoolYear;   // Ano escolar tipado
+  unitId?: string;         // ID da unidade à qual pertence (RF04/05)
   
   // Seção Pedagógica (O que a banca quer ver)
   objectives: string[];    // Objetivos de aprendizagem
