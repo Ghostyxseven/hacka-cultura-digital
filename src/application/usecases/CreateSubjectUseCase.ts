@@ -1,5 +1,6 @@
 // src/application/usecases/CreateSubjectUseCase.ts
-import { Subject, SchoolYear } from "../../core/entities/Subject";
+import { Subject } from "../../core/entities/Subject";
+import { SchoolYear } from "../../core/entities/LessonPlan";
 import { ILessonRepository } from "../../repository/ILessonRepository";
 
 /**
