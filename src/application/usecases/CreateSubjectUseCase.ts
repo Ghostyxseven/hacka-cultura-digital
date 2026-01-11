@@ -20,7 +20,7 @@ export class CreateSubjectUseCase {
    * @param description - Descrição opcional da disciplina
    * @param color - Cor opcional para UI (ex: "blue-500")
    * @param icon - Ícone opcional (ex: "book", "monitor")
-   * @param gradeYears - Séries/anos associados à disciplina (RF01)
+   * @param gradeYears - Séries/anos associados à disciplina
    * @returns A disciplina criada
    * @throws Error se o nome for inválido ou já existir uma disciplina com o mesmo nome
    */

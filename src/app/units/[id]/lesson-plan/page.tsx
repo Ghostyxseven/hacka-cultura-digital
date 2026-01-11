@@ -7,7 +7,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { getLessonPlanService } from '@/lib/service';
 import { LessonPlan } from '@/core/entities/LessonPlan';
 import { Unit } from '@/core/entities/Unit';
-import Link from 'next/link';
+import { Header } from '@/components/layout/Header';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { Loading } from '@/components/ui/Loading';
+import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { showError, showSuccess } from '@/utils/notifications';
 
 export default function LessonPlanPage() {
   const params = useParams();
@@ -49,20 +54,16 @@ export default function LessonPlanPage() {
       const service = getLessonPlanService();
       const plan = await service.generateLessonPlanForUnit(unitId);
       setLessonPlan(plan);
-      alert('Plano de aula gerado com sucesso!');
+      showSuccess('Plano de aula gerado com sucesso!');
     } catch (error: any) {
-      alert(error.message || 'Erro ao gerar plano de aula');
+      showError(error.message || 'Erro ao gerar plano de aula');
     } finally {
       setGenerating(false);
     }
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-gray-600">Carregando...</div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (!unit) {
@@ -71,30 +72,22 @@ export default function LessonPlanPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href={`/subjects/${unit.subjectId}`} className="text-primary-600 hover:text-primary-700">
-            ← Voltar
-          </Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-2">
-            Plano de Aula: {unit.topic}
-          </h1>
-        </div>
-      </header>
+      <Header
+        title={`Plano de Aula: ${unit.topic}`}
+        backHref={`/subjects/${unit.subjectId}`}
+      />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <PageContainer maxWidth="md">
         {!lessonPlan ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-600 mb-6">
-              Nenhum plano de aula gerado para esta unidade ainda.
-            </p>
-            <button
-              onClick={handleGenerate}
-              disabled={generating}
-              className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
-            >
-              {generating ? 'Gerando...' : '🤖 Gerar Plano de Aula com IA'}
-            </button>
+            <EmptyState
+              title="Nenhum plano de aula gerado para esta unidade ainda."
+              action={
+                <Button onClick={handleGenerate} disabled={generating}>
+                  {generating ? 'Gerando...' : '🤖 Gerar Plano de Aula com IA'}
+                </Button>
+              }
+            />
           </div>
         ) : (
           <div className="space-y-6">
@@ -187,7 +180,7 @@ export default function LessonPlanPage() {
             </div>
           </div>
         )}
-      </main>
+      </PageContainer>
     </div>
   );
 }

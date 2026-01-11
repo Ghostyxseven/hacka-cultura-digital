@@ -119,9 +119,10 @@ export class LessonPlanService {
     name: string,
     description?: string,
     color?: string,
-    icon?: string
+    icon?: string,
+    gradeYears?: SchoolYear[]
   ): Subject {
-    return this.createSubjectUseCase.execute(name, description, color, icon);
+    return this.createSubjectUseCase.execute(name, description, color, icon, gradeYears);
   }
 
   /**
