@@ -1,6 +1,7 @@
 // src/application/services/LessonPlanService.ts
 import { LessonPlan, SchoolYear } from "../../core/entities/LessonPlan";
 import { Subject } from "../../core/entities/Subject";
+import { Unit } from "../../core/entities/Unit";
 import { ILessonRepository } from "../../repository/ILessonRepository";
 import { IAIService } from "../../infrastructure/ai/IAIService";
 import { GenerateLessonPlanUseCase } from "../usecases/GenerateLessonPlanUseCase";
@@ -10,6 +11,9 @@ import { DeleteSubjectUseCase } from "../usecases/DeleteSubjectUseCase";
 import { SaveLessonPlanUseCase } from "../usecases/SaveLessonPlanUseCase";
 import { GetLessonPlansUseCase } from "../usecases/GetLessonPlansUseCase";
 import { GetLessonPlanByIdUseCase } from "../usecases/GetLessonPlanByIdUseCase";
+import { CreateUnitUseCase } from "../usecases/CreateUnitUseCase";
+import { SuggestUnitsUseCase } from "../usecases/SuggestUnitsUseCase";
+import { GetUnitsUseCase } from "../usecases/GetUnitsUseCase";
 
 /**
  * Serviço principal de Planos de Aula
@@ -30,6 +34,11 @@ export class LessonPlanService {
   private getSubjectsUseCase: GetSubjectsUseCase;
   private deleteSubjectUseCase: DeleteSubjectUseCase;
 
+  // Casos de uso de Unidades
+  private createUnitUseCase: CreateUnitUseCase;
+  private suggestUnitsUseCase: SuggestUnitsUseCase;
+  private getUnitsUseCase: GetUnitsUseCase;
+
   constructor(
     private repository: ILessonRepository,
     private aiService: IAIService
@@ -43,6 +52,10 @@ export class LessonPlanService {
     this.createSubjectUseCase = new CreateSubjectUseCase(repository);
     this.getSubjectsUseCase = new GetSubjectsUseCase(repository);
     this.deleteSubjectUseCase = new DeleteSubjectUseCase(repository);
+
+    this.createUnitUseCase = new CreateUnitUseCase(repository);
+    this.suggestUnitsUseCase = new SuggestUnitsUseCase(repository, aiService);
+    this.getUnitsUseCase = new GetUnitsUseCase(repository);
   }
 
   // ========== MÉTODOS DE PLANOS DE AULA ==========
@@ -122,5 +135,39 @@ export class LessonPlanService {
    */
   deleteSubject(id: string): void {
     this.deleteSubjectUseCase.execute(id);
+  }
+
+  // ========== MÉTODOS DE UNIDADES ==========
+
+  /**
+   * Cria uma unidade de ensino manualmente
+   * RF02 - Criação manual de unidades
+   */
+  createUnit(
+    subjectId: string,
+    gradeYear: SchoolYear,
+    topic: string,
+    description?: string
+  ): Unit {
+    return this.createUnitUseCase.execute(subjectId, gradeYear, topic, description);
+  }
+
+  /**
+   * Sugere unidades de ensino automaticamente via IA
+   * RF03 - Sugestão automática de unidades via IA
+   */
+  async suggestUnits(
+    subjectId: string,
+    gradeYear: SchoolYear,
+    quantity?: number
+  ): Promise<Unit[]> {
+    return this.suggestUnitsUseCase.execute(subjectId, gradeYear, quantity);
+  }
+
+  /**
+   * Retorna unidades de ensino, opcionalmente filtradas por disciplina
+   */
+  getUnits(subjectId?: string): Unit[] {
+    return this.getUnitsUseCase.execute(subjectId);
   }
 }

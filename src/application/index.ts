@@ -9,6 +9,9 @@ export { DeleteSubjectUseCase } from "./usecases/DeleteSubjectUseCase";
 export { SaveLessonPlanUseCase } from "./usecases/SaveLessonPlanUseCase";
 export { GetLessonPlansUseCase } from "./usecases/GetLessonPlansUseCase";
 export { GetLessonPlanByIdUseCase } from "./usecases/GetLessonPlanByIdUseCase";
+export { CreateUnitUseCase } from "./usecases/CreateUnitUseCase";
+export { SuggestUnitsUseCase } from "./usecases/SuggestUnitsUseCase";
+export { GetUnitsUseCase } from "./usecases/GetUnitsUseCase";
 
 // Serviços
 export { LessonPlanService } from "./services/LessonPlanService";
