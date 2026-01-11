@@ -22,7 +22,7 @@ export interface LessonPlan {
   subject: string;         // Disciplina (Ex: Matemática, História)
   gradeYear: SchoolYear;   // Ano escolar tipado
   
- 
+  // Seção Pedagógica (O que a banca quer ver)
   objectives: string[];    // Objetivos de aprendizagem
   methodology: string;     // Como o professor deve aplicar a aula
   duration: string;        // Tempo estimado (Ex: "2 aulas de 50min")
@@ -31,7 +31,7 @@ export interface LessonPlan {
   content: string;         // Desenvolvimento do conteúdo da aula 
   quiz: QuizQuestion[];    // Atividade avaliativa estruturada 
   
-  
+ 
   metadata: {
     aiModel: string;       // Qual IA gerou? (Ex: Gemini-1.5-Flash)
     promptVersion: string; // Versão das instruções usadas
