@@ -1,17 +1,21 @@
 // src/hooks/useSubjects.ts
 import { useState, useEffect } from 'react';
 import { getLessonPlanService } from '@/lib/service';
-import { Subject } from '@/core/entities/Subject';
+import type { SubjectViewModel } from '@/app/types';
 
+/**
+ * Hook customizado para gerenciar disciplinas na camada de apresentação
+ * Usa ViewModels em vez de entidades do Core (seguindo Clean Architecture)
+ */
 export function useSubjects() {
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjects, setSubjects] = useState<SubjectViewModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
       const service = getLessonPlanService();
-      const allSubjects = service.getSubjects();
+      const allSubjects = service.getSubjectsViewModels();
       setSubjects(allSubjects);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar disciplinas');
@@ -24,7 +28,7 @@ export function useSubjects() {
     setLoading(true);
     try {
       const service = getLessonPlanService();
-      const allSubjects = service.getSubjects();
+      const allSubjects = service.getSubjectsViewModels();
       setSubjects(allSubjects);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao atualizar disciplinas');
