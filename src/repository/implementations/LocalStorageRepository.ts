@@ -1,12 +1,14 @@
 // src/repository/implementations/LocalStorageRepository.ts
 import { LessonPlan } from '../../core/entities/LessonPlan';
 import { Subject } from '../../core/entities/Subject';
+import { Unit } from '../../core/entities/Unit';
 import { ILessonRepository } from '../ILessonRepository';
 
 export class LocalStorageRepository implements ILessonRepository {
   private static instance: LocalStorageRepository;
   private readonly SUBJECTS_KEY = '@hacka-cultura:subjects';
   private readonly LESSON_PLANS_KEY = '@hacka-cultura:lesson-plans';
+  private readonly UNITS_KEY = '@hacka-cultura:units';
 
   // O construtor privado impede que outras classes criem novas instâncias (Singleton)
   private constructor() {}
@@ -39,7 +41,8 @@ export class LocalStorageRepository implements ILessonRepository {
   // Métodos de Planos de Aula
   saveLessonPlan(plan: LessonPlan): void {
     const plans = this.getAllLessonPlans();
-    plans.push(plan);
+    const index = plans.findIndex(p => p.id === plan.id);
+    index >= 0 ? (plans[index] = plan) : plans.push(plan);
     localStorage.setItem(this.LESSON_PLANS_KEY, JSON.stringify(plans));
   }
 
@@ -50,5 +53,35 @@ export class LocalStorageRepository implements ILessonRepository {
 
   getLessonPlanById(id: string): LessonPlan | undefined {
     return this.getAllLessonPlans().find(p => p.id === id);
+  }
+
+  // Métodos de Unidades
+  saveUnit(unit: Unit): void {
+    const units = this.getAllUnits();
+    const index = units.findIndex(u => u.id === unit.id);
+    if (index >= 0) {
+      units[index] = { ...unit, updatedAt: new Date() };
+    } else {
+      units.push(unit);
+    }
+    localStorage.setItem(this.UNITS_KEY, JSON.stringify(units));
+  }
+
+  getAllUnits(): Unit[] {
+    const data = localStorage.getItem(this.UNITS_KEY);
+    return data ? JSON.parse(data) : [];
+  }
+
+  getUnitById(id: string): Unit | undefined {
+    return this.getAllUnits().find(u => u.id === id);
+  }
+
+  getUnitsBySubjectId(subjectId: string): Unit[] {
+    return this.getAllUnits().filter(u => u.subjectId === subjectId);
+  }
+
+  deleteUnit(id: string): void {
+    const units = this.getAllUnits().filter(u => u.id !== id);
+    localStorage.setItem(this.UNITS_KEY, JSON.stringify(units));
   }
 }
