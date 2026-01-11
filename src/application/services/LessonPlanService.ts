@@ -14,6 +14,7 @@ import { GetLessonPlanByIdUseCase } from "../usecases/GetLessonPlanByIdUseCase";
 import { CreateUnitUseCase } from "../usecases/CreateUnitUseCase";
 import { SuggestUnitsUseCase } from "../usecases/SuggestUnitsUseCase";
 import { GetUnitsUseCase } from "../usecases/GetUnitsUseCase";
+import { GenerateLessonPlanForUnitUseCase } from "../usecases/GenerateLessonPlanForUnitUseCase";
 
 /**
  * Serviço principal de Planos de Aula
@@ -38,6 +39,7 @@ export class LessonPlanService {
   private createUnitUseCase: CreateUnitUseCase;
   private suggestUnitsUseCase: SuggestUnitsUseCase;
   private getUnitsUseCase: GetUnitsUseCase;
+  private generateLessonPlanForUnitUseCase: GenerateLessonPlanForUnitUseCase;
 
   constructor(
     private repository: ILessonRepository,
@@ -56,6 +58,7 @@ export class LessonPlanService {
     this.createUnitUseCase = new CreateUnitUseCase(repository);
     this.suggestUnitsUseCase = new SuggestUnitsUseCase(repository, aiService);
     this.getUnitsUseCase = new GetUnitsUseCase(repository);
+    this.generateLessonPlanForUnitUseCase = new GenerateLessonPlanForUnitUseCase(repository, aiService);
   }
 
   // ========== MÉTODOS DE PLANOS DE AULA ==========
@@ -169,5 +172,13 @@ export class LessonPlanService {
    */
   getUnits(subjectId?: string): Unit[] {
     return this.getUnitsUseCase.execute(subjectId);
+  }
+
+  /**
+   * Gera plano de aula e atividade para uma unidade específica
+   * RF04/05 - Geração automática por unidade
+   */
+  async generateLessonPlanForUnit(unitId: string): Promise<LessonPlan> {
+    return this.generateLessonPlanForUnitUseCase.execute(unitId);
   }
 }
