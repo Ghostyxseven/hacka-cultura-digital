@@ -2,11 +2,17 @@
 // Wireframe 2: Tela de Disciplina
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getLessonPlanService } from '@/lib/service';
 import { Subject } from '@/core/entities/Subject';
-import { Unit } from '@/core/entities/Unit';
+import { useUnits } from '@/hooks/useUnits';
+import { Header } from '@/components/layout/Header';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { Loading } from '@/components/ui/Loading';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Button } from '@/components/ui/Button';
+import { showError, showSuccess } from '@/utils/notifications';
 import Link from 'next/link';
 
 export default function SubjectDetailPage() {
@@ -15,9 +21,9 @@ export default function SubjectDetailPage() {
   const subjectId = params.id as string;
   
   const [subject, setSubject] = useState<Subject | null>(null);
-  const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
   const [suggesting, setSuggesting] = useState(false);
+  const { units, refresh: refreshUnits } = useUnits(subjectId);
 
   useEffect(() => {
     const service = getLessonPlanService();
@@ -32,7 +38,6 @@ export default function SubjectDetailPage() {
       }
       
       setSubject(foundSubject);
-      setUnits(service.getUnits(subjectId));
     } catch (error) {
       console.error('Erro ao carregar disciplina:', error);
     } finally {
@@ -46,12 +51,12 @@ export default function SubjectDetailPage() {
     setSuggesting(true);
     try {
       const service = getLessonPlanService();
-      // Pega o primeiro gradeYear da disciplina ou usa um padrão
       const gradeYear = subject.gradeYears?.[0] || '8º Ano';
-      const suggested = await service.suggestUnits(subjectId, gradeYear, 5);
-      setUnits([...suggested, ...units]);
+      await service.suggestUnits(subjectId, gradeYear, 5);
+      refreshUnits();
+      showSuccess('Unidades sugeridas com sucesso!');
     } catch (error: any) {
-      alert(error.message || 'Erro ao sugerir unidades');
+      showError(error.message || 'Erro ao sugerir unidades');
     } finally {
       setSuggesting(false);
     }
@@ -61,21 +66,15 @@ export default function SubjectDetailPage() {
     try {
       const service = getLessonPlanService();
       await service.generateLessonPlanForUnit(unitId);
-      // Recarrega as unidades
-      const updatedUnits = service.getUnits(subjectId);
-      setUnits(updatedUnits);
-      alert('Plano de aula gerado com sucesso!');
+      refreshUnits();
+      showSuccess('Plano de aula gerado com sucesso!');
     } catch (error: any) {
-      alert(error.message || 'Erro ao gerar plano de aula');
+      showError(error.message || 'Erro ao gerar plano de aula');
     }
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-gray-600">Carregando...</div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (!subject) {
@@ -84,36 +83,25 @@ export default function SubjectDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/" className="text-primary-600 hover:text-primary-700">
-            ← Voltar
-          </Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-2">
-            {subject.name}
-          </h1>
-          {subject.description && (
-            <p className="text-sm text-gray-600 mt-1">{subject.description}</p>
-          )}
-        </div>
-      </header>
+      <Header
+        title={subject.name}
+        subtitle={subject.description}
+        backHref="/"
+      />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <PageContainer>
         {/* Ações */}
         <div className="flex gap-4 mb-6">
-          <Link
-            href={`/subjects/${subjectId}/units/new`}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-          >
-            ➕ Nova Unidade
+          <Link href={`/subjects/${subjectId}/units/new`}>
+            <Button>➕ Nova Unidade</Button>
           </Link>
-          <button
+          <Button
+            variant="success"
             onClick={handleSuggestUnits}
             disabled={suggesting}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
           >
             {suggesting ? 'Sugerindo...' : '🤖 Sugerir Unidades (IA)'}
-          </button>
+          </Button>
         </div>
 
         {/* Unidades */}
@@ -125,14 +113,10 @@ export default function SubjectDetailPage() {
           </div>
           <div className="p-6">
             {units.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">
-                  Nenhuma unidade cadastrada ainda.
-                </p>
-                <p className="text-sm text-gray-400">
-                  Crie manualmente ou use a IA para sugerir unidades.
-                </p>
-              </div>
+              <EmptyState
+                title="Nenhuma unidade cadastrada ainda."
+                description="Crie manualmente ou use a IA para sugerir unidades."
+              />
             ) : (
               <div className="space-y-4">
                 {units.map((unit) => (
@@ -152,19 +136,18 @@ export default function SubjectDetailPage() {
                       </div>
                       <div className="flex gap-2 ml-4">
                         {!unit.lessonPlanId && (
-                          <button
+                          <Button
                             onClick={() => handleGenerateLessonPlan(unit.id)}
-                            className="px-3 py-1 bg-primary-600 text-white text-sm rounded hover:bg-primary-700 transition-colors"
+                            className="text-sm"
                           >
                             Gerar Plano
-                          </button>
+                          </Button>
                         )}
                         {unit.lessonPlanId && (
-                          <Link
-                            href={`/units/${unit.id}/lesson-plan`}
-                            className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
-                          >
-                            Ver Plano
+                          <Link href={`/units/${unit.id}/lesson-plan`}>
+                            <Button variant="success" className="text-sm">
+                              Ver Plano
+                            </Button>
                           </Link>
                         )}
                       </div>
@@ -175,7 +158,7 @@ export default function SubjectDetailPage() {
             )}
           </div>
         </div>
-      </main>
+      </PageContainer>
     </div>
   );
 }

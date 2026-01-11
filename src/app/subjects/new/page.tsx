@@ -6,17 +6,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getLessonPlanService } from '@/lib/service';
 import { SchoolYear } from '@/core/entities/LessonPlan';
+import { SCHOOL_YEARS } from '@/constants/schoolYears';
+import { Header } from '@/components/layout/Header';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { Button } from '@/components/ui/Button';
+import { showError, showSuccess } from '@/utils/notifications';
 import Link from 'next/link';
-
-const SCHOOL_YEARS: SchoolYear[] = [
-  '6º Ano',
-  '7º Ano',
-  '8º Ano',
-  '9º Ano',
-  '1º Ano EM',
-  '2º Ano EM',
-  '3º Ano EM',
-];
 
 export default function NewSubjectPage() {
   const router = useRouter();
@@ -43,9 +38,10 @@ export default function NewSubjectPage() {
         formData.gradeYears.length > 0 ? formData.gradeYears : undefined
       );
       
+      showSuccess('Disciplina criada com sucesso!');
       router.push('/');
     } catch (error: any) {
-      alert(error.message || 'Erro ao criar disciplina');
+      showError(error.message || 'Erro ao criar disciplina');
     } finally {
       setLoading(false);
     }
@@ -62,18 +58,9 @@ export default function NewSubjectPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/" className="text-primary-600 hover:text-primary-700">
-            ← Voltar
-          </Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-2">
-            Nova Disciplina
-          </h1>
-        </div>
-      </header>
+      <Header title="Nova Disciplina" backHref="/" />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <PageContainer maxWidth="md">
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
           <div className="space-y-6">
             {/* Nome */}
@@ -158,23 +145,16 @@ export default function NewSubjectPage() {
 
             {/* Botões */}
             <div className="flex gap-4 pt-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
-              >
+              <Button type="submit" disabled={loading} className="flex-1">
                 {loading ? 'Salvando...' : 'Salvar Disciplina'}
-              </button>
-              <Link
-                href="/"
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancelar
+              </Button>
+              <Link href="/">
+                <Button variant="secondary">Cancelar</Button>
               </Link>
             </div>
           </div>
         </form>
-      </main>
+      </PageContainer>
     </div>
   );
 }
