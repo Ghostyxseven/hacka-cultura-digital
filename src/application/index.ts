@@ -12,6 +12,7 @@ export { GetLessonPlanByIdUseCase } from "./usecases/GetLessonPlanByIdUseCase";
 export { CreateUnitUseCase } from "./usecases/CreateUnitUseCase";
 export { SuggestUnitsUseCase } from "./usecases/SuggestUnitsUseCase";
 export { GetUnitsUseCase } from "./usecases/GetUnitsUseCase";
+export { GenerateLessonPlanForUnitUseCase } from "./usecases/GenerateLessonPlanForUnitUseCase";
 
 // Serviços
 export { LessonPlanService } from "./services/LessonPlanService";
