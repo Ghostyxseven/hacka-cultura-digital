@@ -115,14 +115,14 @@ export class LessonPlanService {
    * Cria uma nova disciplina
    * RF01 - Gestão de Disciplinas
    */
-  createSubject(
+  async createSubject(
     name: string,
     description?: string,
     color?: string,
     icon?: string,
     gradeYears?: SchoolYear[]
-  ): Subject {
-    return this.createSubjectUseCase.execute(name, description, color, icon, gradeYears);
+  ): Promise<Subject> {
+    return await this.createSubjectUseCase.execute(name, description, color, icon, gradeYears);
   }
 
   /**
