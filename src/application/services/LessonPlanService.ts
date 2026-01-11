@@ -7,6 +7,7 @@ import { IAIService } from "../../infrastructure/ai/IAIService";
 import { GenerateLessonPlanUseCase } from "../usecases/GenerateLessonPlanUseCase";
 import { CreateSubjectUseCase } from "../usecases/CreateSubjectUseCase";
 import { GetSubjectsUseCase } from "../usecases/GetSubjectsUseCase";
+import { GetSubjectByIdUseCase } from "../usecases/GetSubjectByIdUseCase";
 import { DeleteSubjectUseCase } from "../usecases/DeleteSubjectUseCase";
 import { SaveLessonPlanUseCase } from "../usecases/SaveLessonPlanUseCase";
 import { GetLessonPlansUseCase } from "../usecases/GetLessonPlansUseCase";
@@ -14,7 +15,15 @@ import { GetLessonPlanByIdUseCase } from "../usecases/GetLessonPlanByIdUseCase";
 import { CreateUnitUseCase } from "../usecases/CreateUnitUseCase";
 import { SuggestUnitsUseCase } from "../usecases/SuggestUnitsUseCase";
 import { GetUnitsUseCase } from "../usecases/GetUnitsUseCase";
+import { GetUnitByIdUseCase } from "../usecases/GetUnitByIdUseCase";
 import { GenerateLessonPlanForUnitUseCase } from "../usecases/GenerateLessonPlanForUnitUseCase";
+import { PresentationMapper } from "../mappers/PresentationMapper";
+import type {
+  SubjectViewModel,
+  UnitViewModel,
+  LessonPlanViewModel,
+  SchoolYearViewModel,
+} from "../../app/types";
 
 /**
  * Serviço principal de Planos de Aula
@@ -33,12 +42,14 @@ export class LessonPlanService {
   // Casos de uso de Disciplinas
   private createSubjectUseCase: CreateSubjectUseCase;
   private getSubjectsUseCase: GetSubjectsUseCase;
+  private getSubjectByIdUseCase: GetSubjectByIdUseCase;
   private deleteSubjectUseCase: DeleteSubjectUseCase;
 
   // Casos de uso de Unidades
   private createUnitUseCase: CreateUnitUseCase;
   private suggestUnitsUseCase: SuggestUnitsUseCase;
   private getUnitsUseCase: GetUnitsUseCase;
+  private getUnitByIdUseCase: GetUnitByIdUseCase;
   private generateLessonPlanForUnitUseCase: GenerateLessonPlanForUnitUseCase;
 
   constructor(
@@ -53,11 +64,13 @@ export class LessonPlanService {
 
     this.createSubjectUseCase = new CreateSubjectUseCase(repository);
     this.getSubjectsUseCase = new GetSubjectsUseCase(repository);
+    this.getSubjectByIdUseCase = new GetSubjectByIdUseCase(repository);
     this.deleteSubjectUseCase = new DeleteSubjectUseCase(repository);
 
     this.createUnitUseCase = new CreateUnitUseCase(repository);
     this.suggestUnitsUseCase = new SuggestUnitsUseCase(repository, aiService);
     this.getUnitsUseCase = new GetUnitsUseCase(repository);
+    this.getUnitByIdUseCase = new GetUnitByIdUseCase(repository);
     this.generateLessonPlanForUnitUseCase = new GenerateLessonPlanForUnitUseCase(repository, aiService);
   }
 
@@ -134,6 +147,29 @@ export class LessonPlanService {
   }
 
   /**
+   * Retorna todas as disciplinas como ViewModels (para a camada de apresentação)
+   */
+  getSubjectsViewModels(): SubjectViewModel[] {
+    const subjects = this.getSubjectsUseCase.execute();
+    return PresentationMapper.toSubjectViewModels(subjects);
+  }
+
+  /**
+   * Busca uma disciplina pelo ID
+   */
+  getSubjectById(id: string): Subject | undefined {
+    return this.getSubjectByIdUseCase.execute(id);
+  }
+
+  /**
+   * Busca uma disciplina pelo ID como ViewModel (para a camada de apresentação)
+   */
+  getSubjectByIdViewModel(id: string): SubjectViewModel | undefined {
+    const subject = this.getSubjectByIdUseCase.execute(id);
+    return subject ? PresentationMapper.toSubjectViewModel(subject) : undefined;
+  }
+
+  /**
    * Remove uma disciplina pelo ID
    * RF01 - Gestão de Disciplinas
    */
@@ -176,10 +212,101 @@ export class LessonPlanService {
   }
 
   /**
+   * Retorna unidades de ensino como ViewModels (para a camada de apresentação)
+   */
+  getUnitsViewModels(subjectId?: string): UnitViewModel[] {
+    const units = this.getUnitsUseCase.execute(subjectId);
+    return PresentationMapper.toUnitViewModels(units);
+  }
+
+  /**
+   * Busca uma unidade pelo ID
+   */
+  getUnitById(id: string): Unit | undefined {
+    return this.getUnitByIdUseCase.execute(id);
+  }
+
+  /**
+   * Busca uma unidade pelo ID como ViewModel (para a camada de apresentação)
+   */
+  getUnitByIdViewModel(id: string): UnitViewModel | undefined {
+    const unit = this.getUnitByIdUseCase.execute(id);
+    return unit ? PresentationMapper.toUnitViewModel(unit) : undefined;
+  }
+
+  /**
    * Gera plano de aula e atividade para uma unidade específica
    * RF04/05 - Geração automática por unidade
    */
   async generateLessonPlanForUnit(unitId: string): Promise<LessonPlan> {
     return this.generateLessonPlanForUnitUseCase.execute(unitId);
+  }
+
+  /**
+   * Gera plano de aula e atividade para uma unidade específica como ViewModel
+   * RF04/05 - Geração automática por unidade (para a camada de apresentação)
+   */
+  async generateLessonPlanForUnitViewModel(unitId: string): Promise<LessonPlanViewModel> {
+    const lessonPlan = await this.generateLessonPlanForUnitUseCase.execute(unitId);
+    return PresentationMapper.toLessonPlanViewModel(lessonPlan);
+  }
+
+  /**
+   * Busca um plano de aula pelo ID como ViewModel (para a camada de apresentação)
+   */
+  getLessonPlanByIdViewModel(id: string): LessonPlanViewModel | undefined {
+    const lessonPlan = this.getLessonPlanByIdUseCase.execute(id);
+    return lessonPlan ? PresentationMapper.toLessonPlanViewModel(lessonPlan) : undefined;
+  }
+
+  /**
+   * Retorna planos de aula como ViewModels (para a camada de apresentação)
+   */
+  getLessonPlansViewModels(filters?: {
+    subjectId?: string;
+    subjectName?: string;
+    gradeYear?: string;
+  }): LessonPlanViewModel[] {
+    const lessonPlans = this.getLessonPlansUseCase.execute(filters);
+    return PresentationMapper.toLessonPlanViewModels(lessonPlans);
+  }
+
+  /**
+   * Cria uma disciplina e retorna como ViewModel (para a camada de apresentação)
+   */
+  async createSubjectViewModel(
+    name: string,
+    description?: string,
+    color?: string,
+    icon?: string,
+    gradeYears?: SchoolYear[]
+  ): Promise<SubjectViewModel> {
+    const subject = await this.createSubjectUseCase.execute(name, description, color, icon, gradeYears);
+    return PresentationMapper.toSubjectViewModel(subject);
+  }
+
+  /**
+   * Cria uma unidade e retorna como ViewModel (para a camada de apresentação)
+   */
+  createUnitViewModel(
+    subjectId: string,
+    gradeYear: SchoolYear,
+    topic: string,
+    description?: string
+  ): UnitViewModel {
+    const unit = this.createUnitUseCase.execute(subjectId, gradeYear, topic, description);
+    return PresentationMapper.toUnitViewModel(unit);
+  }
+
+  /**
+   * Sugere unidades e retorna como ViewModels (para a camada de apresentação)
+   */
+  async suggestUnitsViewModels(
+    subjectId: string,
+    gradeYear: SchoolYear,
+    quantity?: number
+  ): Promise<UnitViewModel[]> {
+    const units = await this.suggestUnitsUseCase.execute(subjectId, gradeYear, quantity);
+    return PresentationMapper.toUnitViewModels(units);
   }
 }

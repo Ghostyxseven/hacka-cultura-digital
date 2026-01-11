@@ -3,3 +3,5 @@
 
 export { useSubjects } from './useSubjects';
 export { useUnits } from './useUnits';
+export { useFormValidation } from './useFormValidation';
+export type { ValidationRule, FieldValidation, FormErrors } from './useFormValidation';
