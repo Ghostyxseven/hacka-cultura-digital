@@ -8,10 +8,8 @@ import { getLessonPlanService } from '@/lib/service';
 import { Subject } from '@/core/entities/Subject';
 import { SchoolYear } from '@/core/entities/LessonPlan';
 import { SCHOOL_YEARS } from '@/constants/schoolYears';
-import { Header } from '@/components/layout/Header';
-import { PageContainer } from '@/components/layout/PageContainer';
-import { Loading } from '@/components/ui/Loading';
-import { Button } from '@/components/ui/Button';
+import { Header, PageContainer, Loading, Button, Input, Textarea, Select } from '@/components';
+import { useFormValidation } from '@/hooks';
 import { showError, showSuccess } from '@/utils/notifications';
 import Link from 'next/link';
 
@@ -29,6 +27,40 @@ export default function NewUnitPage() {
     gradeYear: '8º Ano' as SchoolYear,
   });
 
+  // Validação de formulário
+  const { validateForm, validateAndSetError, getError, clearError } = useFormValidation({
+    topic: [
+      {
+        validator: (value: string) => !!value && value.trim().length > 0,
+        message: 'Tema da unidade é obrigatório',
+      },
+      {
+        validator: (value: string) => !value || value.trim().length >= 3,
+        message: 'O tema deve ter pelo menos 3 caracteres',
+      },
+      {
+        validator: (value: string) => !value || value.trim().length <= 200,
+        message: 'O tema não pode ter mais de 200 caracteres',
+      },
+    ],
+    description: [
+      {
+        validator: (value: string) => !value || value.trim().length <= 1000,
+        message: 'A descrição não pode ter mais de 1000 caracteres',
+      },
+    ],
+  });
+
+  // Filtrar séries disponíveis baseado na disciplina
+  const availableGradeYears: SchoolYear[] = subject?.gradeYears && subject.gradeYears.length > 0
+    ? SCHOOL_YEARS.filter(year => subject.gradeYears!.includes(year))
+    : SCHOOL_YEARS;
+
+  const gradeYearOptions = availableGradeYears.map(year => ({
+    value: year,
+    label: year,
+  }));
+
   useEffect(() => {
     const service = getLessonPlanService();
     const allSubjects = service.getSubjects();
@@ -40,6 +72,7 @@ export default function NewUnitPage() {
     }
     
     setSubject(foundSubject);
+    // Define o primeiro ano disponível como padrão
     if (foundSubject.gradeYears && foundSubject.gradeYears.length > 0) {
       setFormData(prev => ({ ...prev, gradeYear: foundSubject.gradeYears![0] }));
     }
@@ -48,6 +81,13 @@ export default function NewUnitPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validação do formulário
+    if (!validateForm(formData)) {
+      showError('Por favor, corrija os erros no formulário');
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -55,8 +95,8 @@ export default function NewUnitPage() {
       service.createUnit(
         subjectId,
         formData.gradeYear,
-        formData.topic,
-        formData.description || undefined
+        formData.topic.trim(),
+        formData.description.trim() || undefined
       );
       
       showSuccess('Unidade criada com sucesso!');
@@ -66,6 +106,18 @@ export default function NewUnitPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Limpa o erro quando o usuário começa a digitar
+    if (getError(field)) {
+      clearError(field);
+    }
+  };
+
+  const handleFieldBlur = (field: string, value: any) => {
+    validateAndSetError(field, value);
   };
 
   if (loading) {
@@ -87,51 +139,47 @@ export default function NewUnitPage() {
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
           <div className="space-y-6">
             {/* Tema */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tema da Unidade/Aula *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.topic}
-                onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="Ex: Equações do 2º grau, Revolução Francesa, etc."
-              />
-            </div>
+            <Input
+              id="topic"
+              label="Tema da Unidade/Aula"
+              type="text"
+              required
+              value={formData.topic}
+              onChange={(e) => handleFieldChange('topic', e.target.value)}
+              onBlur={(e) => handleFieldBlur('topic', e.target.value)}
+              placeholder="Ex: Equações do 2º grau, Revolução Francesa, etc."
+              error={getError('topic')}
+              helperText="Tema principal da unidade de ensino"
+            />
 
             {/* Ano/Série */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ano/Série *
-              </label>
-              <select
-                value={formData.gradeYear}
-                onChange={(e) => setFormData({ ...formData, gradeYear: e.target.value as SchoolYear })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                {SCHOOL_YEARS.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              id="gradeYear"
+              label="Ano/Série"
+              required
+              value={formData.gradeYear}
+              onChange={(e) => handleFieldChange('gradeYear', e.target.value as SchoolYear)}
+              options={gradeYearOptions}
+              error={getError('gradeYear')}
+              helperText={
+                subject.gradeYears && subject.gradeYears.length > 0
+                  ? `Séries disponíveis para ${subject.name}`
+                  : 'Selecione o ano/série'
+              }
+            />
 
             {/* Descrição */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Descrição (Opcional)
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="Descrição adicional da unidade de ensino"
-              />
-            </div>
+            <Textarea
+              id="description"
+              label="Descrição"
+              value={formData.description}
+              onChange={(e) => handleFieldChange('description', e.target.value)}
+              onBlur={(e) => handleFieldBlur('description', e.target.value)}
+              rows={4}
+              placeholder="Descrição adicional da unidade de ensino"
+              error={getError('description')}
+              helperText="Opcional: descrição detalhada da unidade"
+            />
 
             {/* Botões */}
             <div className="flex gap-4 pt-4">

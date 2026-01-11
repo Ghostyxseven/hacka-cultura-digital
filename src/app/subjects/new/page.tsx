@@ -7,9 +7,8 @@ import { useRouter } from 'next/navigation';
 import { getLessonPlanService } from '@/lib/service';
 import { SchoolYear } from '@/core/entities/LessonPlan';
 import { SCHOOL_YEARS } from '@/constants/schoolYears';
-import { Header } from '@/components/layout/Header';
-import { PageContainer } from '@/components/layout/PageContainer';
-import { Button } from '@/components/ui/Button';
+import { Header, PageContainer, Button, Input, Textarea } from '@/components';
+import { useFormValidation } from '@/hooks';
 import { showError, showSuccess } from '@/utils/notifications';
 import Link from 'next/link';
 
@@ -24,17 +23,54 @@ export default function NewSubjectPage() {
     gradeYears: [] as SchoolYear[],
   });
 
+  // Validação de formulário
+  const { validateForm, validateAndSetError, getError, clearError } = useFormValidation({
+    name: [
+      {
+        validator: (value: string) => !!value && value.trim().length > 0,
+        message: 'Nome da disciplina é obrigatório',
+      },
+      {
+        validator: (value: string) => !value || value.trim().length >= 3,
+        message: 'O nome deve ter pelo menos 3 caracteres',
+      },
+      {
+        validator: (value: string) => !value || value.trim().length <= 100,
+        message: 'O nome não pode ter mais de 100 caracteres',
+      },
+    ],
+    description: [
+      {
+        validator: (value: string) => !value || value.trim().length <= 500,
+        message: 'A descrição não pode ter mais de 500 caracteres',
+      },
+    ],
+    color: [
+      {
+        validator: (value: string) => !value || /^[a-z]+-[0-9]{1,3}$/.test(value.trim()),
+        message: 'Formato de cor inválido. Use o formato Tailwind (ex: blue-500, red-600)',
+      },
+    ],
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validação do formulário
+    if (!validateForm(formData)) {
+      showError('Por favor, corrija os erros no formulário');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const service = getLessonPlanService();
       await service.createSubject(
-        formData.name,
-        formData.description || undefined,
-        formData.color,
-        formData.icon,
+        formData.name.trim(),
+        formData.description.trim() || undefined,
+        formData.color.trim() || undefined,
+        formData.icon.trim() || undefined,
         formData.gradeYears.length > 0 ? formData.gradeYears : undefined
       );
       
@@ -56,6 +92,18 @@ export default function NewSubjectPage() {
     }));
   };
 
+  const handleFieldChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Validação em tempo real
+    if (getError(field)) {
+      validateAndSetError(field, value);
+    }
+  };
+
+  const handleFieldBlur = (field: string, value: any) => {
+    validateAndSetError(field, value);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header title="Nova Disciplina" backHref="/" />
@@ -64,33 +112,31 @@ export default function NewSubjectPage() {
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
           <div className="space-y-6">
             {/* Nome */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nome da Disciplina *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="Ex: Matemática, História, Cultura Digital"
-              />
-            </div>
+            <Input
+              id="name"
+              label="Nome da Disciplina"
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => handleFieldChange('name', e.target.value)}
+              onBlur={(e) => handleFieldBlur('name', e.target.value)}
+              placeholder="Ex: Matemática, História, Cultura Digital"
+              error={getError('name')}
+              helperText="Nome único da disciplina"
+            />
 
             {/* Descrição */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Descrição
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="Breve descrição da disciplina"
-              />
-            </div>
+            <Textarea
+              id="description"
+              label="Descrição"
+              value={formData.description}
+              onChange={(e) => handleFieldChange('description', e.target.value)}
+              onBlur={(e) => handleFieldBlur('description', e.target.value)}
+              rows={3}
+              placeholder="Breve descrição da disciplina"
+              error={getError('description')}
+              helperText="Opcional: descrição breve da disciplina"
+            />
 
             {/* Séries/Anos */}
             <div>
@@ -113,34 +159,35 @@ export default function NewSubjectPage() {
                   </button>
                 ))}
               </div>
+              {formData.gradeYears.length > 0 && (
+                <p className="mt-2 text-sm text-gray-500">
+                  {formData.gradeYears.length} série(s) selecionada(s)
+                </p>
+              )}
             </div>
 
             {/* Cor e Ícone */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cor
-                </label>
-                <input
-                  type="text"
-                  value={formData.color}
-                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                  placeholder="blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ícone
-                </label>
-                <input
-                  type="text"
-                  value={formData.icon}
-                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                  placeholder="book"
-                />
-              </div>
+              <Input
+                id="color"
+                label="Cor"
+                type="text"
+                value={formData.color}
+                onChange={(e) => handleFieldChange('color', e.target.value)}
+                onBlur={(e) => handleFieldBlur('color', e.target.value)}
+                placeholder="blue-500"
+                error={getError('color')}
+                helperText="Formato: nome-numero (ex: blue-500)"
+              />
+              <Input
+                id="icon"
+                label="Ícone"
+                type="text"
+                value={formData.icon}
+                onChange={(e) => handleFieldChange('icon', e.target.value)}
+                placeholder="book"
+                helperText="Nome do ícone (opcional)"
+              />
             </div>
 
             {/* Botões */}
