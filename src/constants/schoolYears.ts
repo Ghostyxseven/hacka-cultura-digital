@@ -1,0 +1,12 @@
+// src/constants/schoolYears.ts
+import { SchoolYear } from '@/core/entities/LessonPlan';
+
+export const SCHOOL_YEARS: SchoolYear[] = [
+  '6º Ano',
+  '7º Ano',
+  '8º Ano',
+  '9º Ano',
+  '1º Ano EM',
+  '2º Ano EM',
+  '3º Ano EM',
+] as const;

@@ -2,82 +2,49 @@
 // Dashboard Principal - Wireframe 1
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getLessonPlanService } from '@/lib/service';
-import { Subject } from '@/core/entities/Subject';
-import { Unit } from '@/core/entities/Unit';
+import { useSubjects } from '@/hooks/useSubjects';
+import { useUnits } from '@/hooks/useUnits';
+import { Header } from '@/components/layout/Header';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { Loading } from '@/components/ui/Loading';
+import { StatCard } from '@/components/ui/StatCard';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [recentUnits, setRecentUnits] = useState<Unit[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const service = getLessonPlanService();
-    
-    try {
-      const allSubjects = service.getSubjects();
-      const allUnits = service.getUnits();
-      
-      setSubjects(allSubjects);
-      setRecentUnits(allUnits.slice(0, 5)); // Últimas 5 unidades
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { subjects, loading: subjectsLoading } = useSubjects();
+  const { units: allUnits, loading: unitsLoading } = useUnits();
+  
+  const loading = subjectsLoading || unitsLoading;
+  const recentUnits = allUnits.slice(0, 5);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-gray-600">Carregando...</div>
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">
-            🎓 Hacka Cultura Digital
-          </h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Sistema Inteligente de Materiais Didáticos
-          </p>
-        </div>
-      </header>
+      <Header
+        title="🎓 Hacka Cultura Digital"
+        subtitle="Sistema Inteligente de Materiais Didáticos"
+      />
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <PageContainer>
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500">Disciplinas</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-2">{subjects.length}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500">Unidades</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-2">{recentUnits.length}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500">Planos de Aula</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-2">
-              {recentUnits.filter(u => u.lessonPlanId).length}
-            </p>
-          </div>
+          <StatCard title="Disciplinas" value={subjects.length} />
+          <StatCard title="Unidades" value={allUnits.length} />
+          <StatCard
+            title="Planos de Aula"
+            value={allUnits.filter(u => u.lessonPlanId).length}
+          />
         </div>
 
         {/* Actions */}
         <div className="mb-8">
-          <Link
-            href="/subjects/new"
-            className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-          >
-            ➕ Nova Disciplina
+          <Link href="/subjects/new">
+            <Button>➕ Nova Disciplina</Button>
           </Link>
         </div>
 
@@ -88,9 +55,14 @@ export default function DashboardPage() {
           </div>
           <div className="p-6">
             {subjects.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">
-                Nenhuma disciplina cadastrada. Crie sua primeira disciplina!
-              </p>
+              <EmptyState
+                title="Nenhuma disciplina cadastrada. Crie sua primeira disciplina!"
+                action={
+                  <Link href="/subjects/new">
+                    <Button>Criar Disciplina</Button>
+                  </Link>
+                }
+              />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {subjects.map((subject) => (
@@ -130,7 +102,7 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
-      </main>
+      </PageContainer>
     </div>
   );
 }
