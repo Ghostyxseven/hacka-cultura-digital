@@ -1,9 +1,33 @@
 // src/app/page.tsx
-// Rota: / (Dashboard)
+// Rota: / (Dashboard - Redireciona baseado no role)
 'use client';
 
-import { DashboardPage } from './pages/DashboardPage';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { Loading } from '@/components/ui/Loading';
 
-export default function Page() {
-  return <DashboardPage />;
+export default function HomePage() {
+  const router = useRouter();
+  const { user, loading, isAuthenticated, isAdmin, isProfessor, isAluno } = useAuth();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else if (isAdmin) {
+        router.push('/admin');
+      } else if (isProfessor) {
+        router.push('/professor');
+      } else if (isAluno) {
+        router.push('/aluno');
+      }
+    }
+  }, [loading, isAuthenticated, isAdmin, isProfessor, isAluno, router]);
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  return null;
 }
