@@ -2,6 +2,7 @@
 // Página para listar todos os planos de aula do professor
 'use client';
 
+import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubjects } from '@/hooks/useSubjects';
 import { useUnits } from '@/hooks/useUnits';
