@@ -3,7 +3,7 @@
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { SubjectCard } from './SubjectCard';
-import type { SubjectViewModel, UnitViewModel } from '@/app/types';
+import type { SubjectViewModel, UnitViewModel } from '@/application/viewmodels';
 import Link from 'next/link';
 
 interface SubjectsListProps {

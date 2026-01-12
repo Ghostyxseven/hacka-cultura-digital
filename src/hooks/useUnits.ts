@@ -1,7 +1,8 @@
 // src/hooks/useUnits.ts
 import { useState, useEffect } from 'react';
 import { getLessonPlanService } from '@/lib/service';
-import type { UnitViewModel } from '@/app/types';
+import { PresentationMapper } from '@/application';
+import type { UnitViewModel } from '@/application/viewmodels';
 
 /**
  * Hook customizado para gerenciar unidades na camada de apresentação
@@ -15,7 +16,8 @@ export function useUnits(subjectId?: string) {
   useEffect(() => {
     try {
       const service = getLessonPlanService();
-      const allUnits = service.getUnitsViewModels(subjectId);
+      const allUnitsEntities = service.getUnits(subjectId);
+      const allUnits = PresentationMapper.toUnitViewModels(allUnitsEntities);
       setUnits(allUnits);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar unidades');
@@ -28,7 +30,8 @@ export function useUnits(subjectId?: string) {
     setLoading(true);
     try {
       const service = getLessonPlanService();
-      const allUnits = service.getUnitsViewModels(subjectId);
+      const allUnitsEntities = service.getUnits(subjectId);
+      const allUnits = PresentationMapper.toUnitViewModels(allUnitsEntities);
       setUnits(allUnits);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao atualizar unidades');

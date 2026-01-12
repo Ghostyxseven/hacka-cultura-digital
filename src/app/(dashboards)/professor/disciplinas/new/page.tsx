@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getLessonPlanService } from '@/lib/service';
-import type { SchoolYearViewModel } from '@/app/types';
+import type { SchoolYearViewModel } from '@/application/viewmodels';
 import { SCHOOL_YEARS } from '@/constants/schoolYears';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
