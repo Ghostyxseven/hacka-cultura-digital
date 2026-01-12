@@ -1,6 +1,8 @@
 // src/repository/implementations/LocalStorageUserRepository.ts
 import { User } from '../../core/entities/User';
 import { IUserRepository } from '../../core/repositories/IUserRepository';
+import { StorageKeys } from '../../core/constants/StorageKeys';
+import { parseJSONWithDates } from '../../utils/dateUtils';
 
 /**
  * Implementação do repositório de usuários usando LocalStorage
@@ -9,9 +11,8 @@ import { IUserRepository } from '../../core/repositories/IUserRepository';
  */
 export class LocalStorageUserRepository implements IUserRepository {
   private static instance: LocalStorageUserRepository;
-  private readonly USERS_KEY = '@hacka-cultura:users';
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): LocalStorageUserRepository {
     if (!LocalStorageUserRepository.instance) {
@@ -28,7 +29,7 @@ export class LocalStorageUserRepository implements IUserRepository {
     } else {
       users.push(user);
     }
-    localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+    localStorage.setItem(StorageKeys.USERS, JSON.stringify(users));
   }
 
   getUserById(id: string): User | undefined {
@@ -41,12 +42,8 @@ export class LocalStorageUserRepository implements IUserRepository {
 
   getAllUsers(): User[] {
     if (typeof window === 'undefined') return [];
-    const data = localStorage.getItem(this.USERS_KEY);
-    return data ? JSON.parse(data).map((u: any) => ({
-      ...u,
-      createdAt: new Date(u.createdAt),
-      updatedAt: u.updatedAt ? new Date(u.updatedAt) : undefined,
-    })) : [];
+    const data = localStorage.getItem(StorageKeys.USERS);
+    return parseJSONWithDates<User>(data);
   }
 
   getUsersByRole(role: User['role']): User[] {
@@ -55,7 +52,7 @@ export class LocalStorageUserRepository implements IUserRepository {
 
   deleteUser(id: string): void {
     const users = this.getAllUsers().filter(u => u.id !== id);
-    localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+    localStorage.setItem(StorageKeys.USERS, JSON.stringify(users));
   }
 
   userExists(email: string): boolean {
