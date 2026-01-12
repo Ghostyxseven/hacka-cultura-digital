@@ -107,13 +107,12 @@ export default function NewSubjectPage() {
   return (
     <ProtectedRoute allowedRoles={['professor', 'admin']}>
       <div className="min-h-screen bg-gray-50">
-        <HeaderWithAuth title="Nova Disciplina" backHref="/professor" />
+        <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Nova Disciplina</h2>
+          <p className="text-gray-600">Crie uma nova disciplina para organizar seus materiais didáticos</p>
+        </div>
 
         <PageContainer maxWidth="md">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Nova Disciplina</h1>
-            <p className="text-gray-600">Crie uma nova disciplina para organizar seus materiais didáticos</p>
-          </div>
 
           <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 hover:shadow-xl transition-all duration-200">
             <div className="space-y-6">

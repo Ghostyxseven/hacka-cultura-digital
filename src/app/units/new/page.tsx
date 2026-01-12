@@ -137,16 +137,12 @@ export default function NewUnitPage() {
   return (
     <ProtectedRoute allowedRoles={['professor', 'admin']}>
       <div className="min-h-screen bg-gray-50">
-        <HeaderWithAuth
-          title={`Nova Unidade - ${subject.name}`}
-          backHref={`/subjects/${subjectId}`}
-        />
+        <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Nova Unidade - {subject.name}</h2>
+          <p className="text-gray-600">Crie uma nova unidade de ensino para esta disciplina</p>
+        </div>
 
         <PageContainer maxWidth="md">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Nova Unidade</h1>
-            <p className="text-gray-600">Crie uma nova unidade de ensino para a disciplina: <span className="font-semibold text-primary-600">{subject.name}</span></p>
-          </div>
 
           <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 hover:shadow-xl transition-all duration-200">
             <div className="space-y-6">

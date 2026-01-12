@@ -77,10 +77,10 @@ export default function LessonPlanPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50">
-        <HeaderWithAuth
-          title={`Plano de Aula: ${unit.topic}`}
-          backHref={backHref}
-        />
+        <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Plano de Aula: {unit.topic}</h2>
+          <p className="text-gray-600">Visualize o plano de aula completo desta unidade</p>
+        </div>
 
         <PageContainer maxWidth="md">
           {!lessonPlan ? (

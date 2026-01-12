@@ -197,17 +197,12 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeaderWithAuth
-        title="🔧 Dashboard Admin"
-        subtitle="Gerenciamento de usuários e sistema"
-      />
+      <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">🔧 Dashboard Admin</h2>
+        <p className="text-gray-600">Gerenciamento de usuários e sistema</p>
+      </div>
 
       <PageContainer>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Admin</h1>
-          <p className="text-gray-600">Gerencie usuários e configure o sistema</p>
-        </div>
-        
         <StatsSection stats={stats} />
 
         {/* Formulário de Edição */}

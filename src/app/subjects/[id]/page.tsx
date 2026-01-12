@@ -100,14 +100,15 @@ export default function SubjectDetailPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50">
-        <HeaderWithAuth
-          title={subject.name}
-          subtitle={subject.description}
-          backHref={backHref}
-        />
+        <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">{subject.name}</h2>
+          {subject.description && (
+            <p className="text-gray-600">{subject.description}</p>
+          )}
+        </div>
 
         <PageContainer>
-          {canEdit && (
+          {canEdit && units.length > 0 && (
             <div className="flex gap-4 mb-6">
               <Link href={`/units/new?subjectId=${subjectId}`}>
                 <Button>➕ Nova Unidade</Button>

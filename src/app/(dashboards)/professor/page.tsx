@@ -80,27 +80,41 @@ export default function ProfessorPage() {
           </Link>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 mb-8 transition-all duration-200">
-          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-            <h2 className="text-xl font-bold text-gray-900">Disciplinas</h2>
-          </div>
-          <div className="p-6">
-            <SubjectsList
-              subjects={subjects}
-              units={allUnits}
-              showUnitCount
-              canDelete={true}
-              onDelete={handleDeleteSubject}
-              emptyStateTitle="Nenhuma disciplina cadastrada"
-              emptyStateDescription="Comece criando uma nova disciplina"
-              emptyStateAction={
+        {subjects.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center">
+            <EmptyState
+              title="Nenhuma disciplina cadastrada"
+              description="Comece criando uma nova disciplina para organizar seus materiais didáticos"
+              action={
                 <Link href="/subjects/new">
                   <Button>➕ Nova Disciplina</Button>
                 </Link>
               }
             />
           </div>
-        </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 mb-8 transition-all duration-200">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <h2 className="text-xl font-bold text-gray-900">Disciplinas</h2>
+            </div>
+            <div className="p-6">
+              <SubjectsList
+                subjects={subjects}
+                units={allUnits}
+                showUnitCount
+                canDelete={true}
+                onDelete={handleDeleteSubject}
+                emptyStateTitle="Nenhuma disciplina cadastrada"
+                emptyStateDescription="Comece criando uma nova disciplina"
+                emptyStateAction={
+                  <Link href="/subjects/new">
+                    <Button>➕ Nova Disciplina</Button>
+                  </Link>
+                }
+              />
+            </div>
+          </div>
+        )}
 
         {recentUnits.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-200">
