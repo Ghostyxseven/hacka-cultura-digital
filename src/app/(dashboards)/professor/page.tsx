@@ -9,15 +9,26 @@ import { Loading } from '@/components/ui/Loading';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { StatsSection, SubjectsList, UnitsList } from '@/app/components';
+import { getLessonPlanService } from '@/lib/service';
+import { showError, showSuccess } from '@/utils/notifications';
 import Link from 'next/link';
 
 export default function ProfessorPage() {
   const { user, isProfessor } = useAuth();
-  const { subjects, loading: subjectsLoading } = useSubjects();
-  const { units: allUnits, loading: unitsLoading } = useUnits();
+  const { subjects, loading: subjectsLoading, refresh: refreshSubjects } = useSubjects();
+  const { units: allUnits, loading: unitsLoading, refresh: refreshUnits } = useUnits();
+  const lessonPlanService = getLessonPlanService();
 
   const loading = subjectsLoading || unitsLoading;
-  const recentUnits = allUnits.slice(0, 5);
+  
+  // Ordena unidades por data de criação (mais recente primeiro) e pega as 5 mais recentes
+  const recentUnits = [...allUnits]
+    .sort((a, b) => {
+      const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime();
+      const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime();
+      return dateB - dateA;
+    })
+    .slice(0, 5);
 
   if (!isProfessor) {
     return (
@@ -34,6 +45,27 @@ export default function ProfessorPage() {
     return <Loading />;
   }
 
+  const handleDeleteSubject = (id: string) => {
+    try {
+      lessonPlanService.deleteSubject(id);
+      showSuccess('Disciplina excluída com sucesso!');
+      refreshSubjects();
+      refreshUnits();
+    } catch (error: any) {
+      showError(error.message || 'Erro ao excluir disciplina');
+    }
+  };
+
+  const handleDeleteUnit = (id: string) => {
+    try {
+      lessonPlanService.deleteUnit(id);
+      showSuccess('Unidade excluída com sucesso!');
+      refreshUnits();
+    } catch (error: any) {
+      showError(error.message || 'Erro ao excluir unidade');
+    }
+  };
+
   const stats = [
     { title: 'Disciplinas', value: subjects.length },
     { title: 'Unidades', value: allUnits.length },
@@ -42,50 +74,68 @@ export default function ProfessorPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm border-b p-4">
-        <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-        <p className="text-sm text-gray-600">Gerencie suas disciplinas e materiais didáticos</p>
+      <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h2>
+        <p className="text-gray-600">Gerencie suas disciplinas e materiais didáticos</p>
       </div>
 
       <PageContainer>
         <StatsSection stats={stats} />
 
         <div className="mb-8">
-          <Link href="/subjects/new">
+          <Link href="/professor/disciplinas/new">
             <Button>➕ Nova Disciplina</Button>
           </Link>
         </div>
 
-        <div className="bg-white rounded-lg shadow mb-8">
-          <div className="px-6 py-4 border-b">
-            <h2 className="text-xl font-semibold text-gray-900">Disciplinas</h2>
-          </div>
-          <div className="p-6">
-            <SubjectsList
-              subjects={subjects}
-              units={allUnits}
-              showUnitCount
-              emptyStateTitle="Nenhuma disciplina cadastrada"
-              emptyStateDescription="Comece criando uma nova disciplina"
-              emptyStateAction={
-                <Link href="/subjects/new">
+        {subjects.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center">
+            <EmptyState
+              title="Nenhuma disciplina cadastrada"
+              description="Comece criando uma nova disciplina para organizar seus materiais didáticos"
+              action={
+                <Link href="/professor/disciplinas/new">
                   <Button>➕ Nova Disciplina</Button>
                 </Link>
               }
             />
           </div>
-        </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 mb-8 transition-all duration-200">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <h2 className="text-xl font-bold text-gray-900">Disciplinas</h2>
+            </div>
+            <div className="p-6">
+              <SubjectsList
+                subjects={subjects}
+                units={allUnits}
+                showUnitCount
+                canDelete={true}
+                onDelete={handleDeleteSubject}
+                emptyStateTitle="Nenhuma disciplina cadastrada"
+                emptyStateDescription="Comece criando uma nova disciplina"
+              emptyStateAction={
+                <Link href="/professor/disciplinas/new">
+                  <Button>➕ Nova Disciplina</Button>
+                </Link>
+              }
+              />
+            </div>
+          </div>
+        )}
 
         {recentUnits.length > 0 && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">Unidades Recentes</h2>
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-200">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <h2 className="text-xl font-bold text-gray-900">Unidades Recentes</h2>
             </div>
             <div className="p-6">
               <UnitsList
                 units={recentUnits}
                 subjects={subjects}
                 showSubject
+                canDelete={true}
+                onDelete={handleDeleteUnit}
               />
             </div>
           </div>

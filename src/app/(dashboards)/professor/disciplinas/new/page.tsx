@@ -1,4 +1,4 @@
-// src/app/subjects/new/page.tsx
+// src/app/(dashboards)/professor/disciplinas/new/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation';
 import { getLessonPlanService } from '@/lib/service';
 import type { SchoolYearViewModel } from '@/app/types';
 import { SCHOOL_YEARS } from '@/constants/schoolYears';
-import { HeaderWithAuth } from '@/components/layout/HeaderWithAuth';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { Button, Input, Textarea } from '@/components/ui';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
 import { useFormValidation } from '@/hooks';
 import { showError, showSuccess } from '@/utils/notifications';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -19,30 +20,26 @@ export default function NewSubjectPage() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    color: 'blue-500',
-    icon: 'book',
+    color: '',
+    icon: '',
     gradeYears: [] as SchoolYearViewModel[],
   });
 
-  const { validateForm, validateAndSetError, getError, clearError } = useFormValidation({
+  const { validateForm, getError, validateAndSetError, clearError } = useFormValidation({
     name: [
       {
-        validator: (value: string) => !!value && value.trim().length > 0,
+        validator: (value: string) => value.trim().length > 0,
         message: 'Nome da disciplina é obrigatório',
       },
       {
-        validator: (value: string) => !value || value.trim().length >= 3,
-        message: 'O nome deve ter pelo menos 3 caracteres',
-      },
-      {
-        validator: (value: string) => !value || value.trim().length <= 100,
-        message: 'O nome não pode ter mais de 100 caracteres',
+        validator: (value: string) => value.trim().length >= 3,
+        message: 'Nome deve ter pelo menos 3 caracteres',
       },
     ],
     description: [
       {
         validator: (value: string) => !value || value.trim().length <= 500,
-        message: 'A descrição não pode ter mais de 500 caracteres',
+        message: 'Descrição deve ter no máximo 500 caracteres',
       },
     ],
     color: [
@@ -105,10 +102,13 @@ export default function NewSubjectPage() {
   return (
     <ProtectedRoute allowedRoles={['professor', 'admin']}>
       <div className="min-h-screen bg-gray-50">
-        <HeaderWithAuth title="Nova Disciplina" backHref="/professor" />
+        <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Nova Disciplina</h2>
+          <p className="text-gray-600">Crie uma nova disciplina para organizar seus materiais didáticos</p>
+        </div>
 
         <PageContainer maxWidth="md">
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 hover:shadow-xl transition-all duration-200">
             <div className="space-y-6">
               <Input
                 id="name"
@@ -140,13 +140,13 @@ export default function NewSubjectPage() {
                   {SCHOOL_YEARS.map((year) => (
                     <label
                       key={year}
-                      className="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50"
+                      className="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-primary-50 hover:border-primary-300 transition-all duration-200 bg-white"
                     >
                       <input
                         type="checkbox"
                         checked={formData.gradeYears.includes(year)}
+                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 mr-2"
                         onChange={() => toggleGradeYear(year)}
-                        className="mr-2"
                       />
                       <span className="text-sm">{year}</span>
                     </label>
@@ -157,6 +157,14 @@ export default function NewSubjectPage() {
               <div className="flex gap-4">
                 <Button type="submit" disabled={loading} className="flex-1">
                   {loading ? 'Criando...' : 'Criar Disciplina'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => router.push('/professor')}
+                  className="flex-1"
+                >
+                  Cancelar
                 </Button>
               </div>
             </div>

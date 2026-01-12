@@ -7,9 +7,18 @@ interface StatCardProps {
 
 export function StatCard({ title, value }: StatCardProps) {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-      <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
+    <div className="group relative bg-white rounded-xl shadow-md hover:shadow-xl border border-gray-200 hover:border-primary-300 p-6 transition-all duration-300 overflow-hidden">
+      {/* Gradiente sutil no hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-50/0 to-primary-100/0 group-hover:from-primary-50/50 group-hover:to-primary-100/30 transition-all duration-300 pointer-events-none" />
+      
+      <div className="relative">
+        <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-2">
+          {title}
+        </h3>
+        <p className="text-4xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors duration-300">
+          {value}
+        </p>
+      </div>
     </div>
   );
 }

@@ -14,6 +14,8 @@ interface SubjectsListProps {
   emptyStateDescription?: string;
   emptyStateAction?: React.ReactNode;
   showUnitCount?: boolean;
+  onDelete?: (id: string) => void;
+  canDelete?: boolean;
 }
 
 export function SubjectsList({
@@ -24,6 +26,8 @@ export function SubjectsList({
   emptyStateDescription,
   emptyStateAction,
   showUnitCount = false,
+  onDelete,
+  canDelete = false,
 }: SubjectsListProps) {
   if (subjects.length === 0 && showEmptyState) {
     return (
@@ -45,6 +49,8 @@ export function SubjectsList({
             subject={subject}
             unitCount={showUnitCount ? unitCount : undefined}
             showUnitCount={showUnitCount}
+            onDelete={onDelete}
+            canDelete={canDelete}
           />
         );
       })}

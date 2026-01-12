@@ -97,20 +97,24 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-primary-50 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 hover:shadow-3xl transition-all duration-300">
           <div className="text-center mb-8">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-4xl shadow-lg">
+              📝
+            </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              📝 Cadastro de Aluno
+              Cadastro de Aluno
             </h1>
             <p className="text-gray-600">Crie sua conta para acessar os materiais</p>
           </div>
 
           {professores.length === 0 && (
-            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                ⚠️ Nenhum professor cadastrado ainda. Peça ao administrador para cadastrar professores primeiro.
+            <div className="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl shadow-sm">
+              <p className="text-sm text-yellow-800 flex items-center gap-2 font-medium">
+                <span className="text-lg">⚠️</span>
+                <span>Nenhum professor cadastrado ainda. Peça ao administrador para cadastrar professores primeiro.</span>
               </p>
             </div>
           )}

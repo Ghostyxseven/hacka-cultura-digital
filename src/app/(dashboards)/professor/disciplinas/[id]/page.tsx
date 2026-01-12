@@ -1,4 +1,4 @@
-// src/app/subjects/[id]/page.tsx
+// src/app/(dashboards)/professor/disciplinas/[id]/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,7 +7,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getLessonPlanService } from '@/lib/service';
 import type { SubjectViewModel } from '@/app/types';
 import { useUnits } from '@/hooks/useUnits';
-import { HeaderWithAuth } from '@/components/layout/HeaderWithAuth';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -27,6 +26,7 @@ export default function SubjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [suggesting, setSuggesting] = useState(false);
   const { units, refresh: refreshUnits } = useUnits(subjectId);
+  const lessonPlanService = getLessonPlanService();
 
   useEffect(() => {
     const service = getLessonPlanService();
@@ -35,7 +35,7 @@ export default function SubjectDetailPage() {
       const foundSubject = service.getSubjectByIdViewModel(subjectId);
       
       if (!foundSubject) {
-        router.push('/');
+        router.push('/professor');
         return;
       }
       
@@ -65,6 +65,16 @@ export default function SubjectDetailPage() {
     }
   };
 
+  const handleDeleteUnit = (id: string) => {
+    try {
+      lessonPlanService.deleteUnit(id);
+      showSuccess('Unidade excluída com sucesso!');
+      refreshUnits();
+    } catch (error: any) {
+      showError(error.message || 'Erro ao excluir unidade');
+    }
+  };
+
   const handleGenerateLessonPlan = async (unitId: string) => {
     try {
       const service = getLessonPlanService();
@@ -84,21 +94,20 @@ export default function SubjectDetailPage() {
     return null;
   }
 
-  const backHref = canEdit ? '/professor' : '/aluno';
-
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50">
-        <HeaderWithAuth
-          title={subject.name}
-          subtitle={subject.description}
-          backHref={backHref}
-        />
+        <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">{subject.name}</h2>
+          {subject.description && (
+            <p className="text-gray-600">{subject.description}</p>
+          )}
+        </div>
 
         <PageContainer>
-          {canEdit && (
+          {canEdit && units.length > 0 && (
             <div className="flex gap-4 mb-6">
-              <Link href={`/units/new?subjectId=${subjectId}`}>
+              <Link href={`/professor/unidades/new?subjectId=${subjectId}`}>
                 <Button>➕ Nova Unidade</Button>
               </Link>
               <Button
@@ -111,21 +120,48 @@ export default function SubjectDetailPage() {
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-200">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <h2 className="text-xl font-bold text-gray-900">
                 Unidades de Ensino ({units.length})
               </h2>
             </div>
-            <div className="p-6">
-              <UnitsList
-                units={units}
-                canGenerate={canEdit}
-                onGenerate={handleGenerateLessonPlan}
-                emptyStateTitle="Nenhuma unidade cadastrada ainda."
-                emptyStateDescription="Crie manualmente ou use a IA para sugerir unidades."
-              />
-            </div>
+            {units.length === 0 ? (
+              <div className="p-12 text-center">
+                <EmptyState
+                  title="Nenhuma unidade cadastrada ainda."
+                  description="Crie manualmente ou use a IA para sugerir unidades."
+                  action={
+                    canEdit && (
+                      <div className="flex gap-4 justify-center mt-6">
+                        <Link href={`/professor/unidades/new?subjectId=${subjectId}`}>
+                          <Button>➕ Nova Unidade</Button>
+                        </Link>
+                        <Button
+                          variant="success"
+                          onClick={handleSuggestUnits}
+                          disabled={suggesting}
+                        >
+                          {suggesting ? 'Sugerindo...' : '🤖 Sugerir Unidades (IA)'}
+                        </Button>
+                      </div>
+                    )
+                  }
+                />
+              </div>
+            ) : (
+              <div className="p-6">
+                <UnitsList
+                  units={units}
+                  canGenerate={canEdit}
+                  onGenerate={handleGenerateLessonPlan}
+                  canDelete={canEdit}
+                  onDelete={handleDeleteUnit}
+                  emptyStateTitle="Nenhuma unidade cadastrada ainda."
+                  emptyStateDescription="Crie manualmente ou use a IA para sugerir unidades."
+                />
+              </div>
+            )}
           </div>
         </PageContainer>
       </div>

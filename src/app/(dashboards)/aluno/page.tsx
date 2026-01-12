@@ -63,48 +63,78 @@ export default function AlunoPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Aluno</h2>
+        <p className="text-gray-600">Visualize os materiais disponíveis do seu professor</p>
+      </div>
+
       <PageContainer>
         {professor && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
-            <h3 className="font-semibold text-blue-900 mb-2">Seu Professor</h3>
-            <p className="text-blue-800">{professor.name}</p>
-            <p className="text-sm text-blue-600">{professor.email}</p>
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6 mb-8 shadow-md">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                {professor.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h3 className="font-bold text-blue-900 mb-1 text-lg">👨‍🏫 Seu Professor</h3>
+                <p className="text-blue-800 font-medium">{professor.name}</p>
+                <p className="text-sm text-blue-600">{professor.email}</p>
+              </div>
+            </div>
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow mb-8">
-          <div className="px-6 py-4 border-b">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Disciplinas Disponíveis ({subjects.length})
-            </h2>
-          </div>
-          <div className="p-6">
-            <SubjectsList
-              subjects={subjects}
-              units={units}
-              showUnitCount
-              emptyStateTitle="Nenhuma disciplina disponível"
-              emptyStateDescription="Aguarde seu professor cadastrar disciplinas"
+        {subjects.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center mb-8">
+            <EmptyState
+              title="Nenhuma disciplina disponível"
+              description="Aguarde seu professor cadastrar disciplinas"
             />
           </div>
-        </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 mb-8 transition-all duration-200">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <h2 className="text-xl font-bold text-gray-900">
+                Disciplinas Disponíveis ({subjects.length})
+              </h2>
+            </div>
+            <div className="p-6">
+              <SubjectsList
+                subjects={subjects}
+                units={units}
+                showUnitCount
+                emptyStateTitle="Nenhuma disciplina disponível"
+                emptyStateDescription="Aguarde seu professor cadastrar disciplinas"
+              />
+            </div>
+          </div>
+        )}
 
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Planos de Aula Disponíveis ({units.length})
-            </h2>
-          </div>
-          <div className="p-6">
-            <UnitsList
-              units={units}
-              subjects={subjects}
-              showSubject
-              emptyStateTitle="Nenhum plano de aula disponível"
-              emptyStateDescription="Aguarde seu professor gerar planos de aula"
+        {units.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center">
+            <EmptyState
+              title="Nenhum plano de aula disponível"
+              description="Aguarde seu professor gerar planos de aula"
             />
           </div>
-        </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-200">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <h2 className="text-xl font-bold text-gray-900">
+                Planos de Aula Disponíveis ({units.length})
+              </h2>
+            </div>
+            <div className="p-6">
+              <UnitsList
+                units={units}
+                subjects={subjects}
+                showSubject
+                emptyStateTitle="Nenhum plano de aula disponível"
+                emptyStateDescription="Aguarde seu professor gerar planos de aula"
+              />
+            </div>
+          </div>
+        )}
       </PageContainer>
     </div>
   );
