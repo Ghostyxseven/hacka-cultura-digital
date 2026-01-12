@@ -1,11 +1,12 @@
 // src/app/(dashboards)/professor/unidades/new/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getLessonPlanService } from '@/lib/service';
+import { PresentationMapper } from '@/application';
 import type { SubjectViewModel, SchoolYearViewModel } from '@/application/viewmodels';
-import { SCHOOL_YEARS } from '@/constants/schoolYears';
+import { SCHOOL_YEARS } from '@/core/constants/SchoolYears';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { Button } from '@/components/ui/Button';
@@ -15,13 +16,12 @@ import { Select } from '@/components/ui/Select';
 import { useFormValidation } from '@/hooks';
 import { showError, showSuccess } from '@/utils/notifications';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import type { SchoolYear } from '@/core/entities/LessonPlan';
 
-export default function NewUnitPage() {
+function NewUnitPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const subjectId = searchParams.get('subjectId') || '';
-  
+
   const [subject, setSubject] = useState<SubjectViewModel | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,15 +66,16 @@ export default function NewUnitPage() {
     }
 
     const service = getLessonPlanService();
-    
+
     try {
-      const foundSubject = service.getSubjectByIdViewModel(subjectId);
-      
+      const foundSubjectEntity = service.getSubjectById(subjectId);
+      const foundSubject = foundSubjectEntity ? PresentationMapper.toSubjectViewModel(foundSubjectEntity) : undefined;
+
       if (!foundSubject) {
         router.push('/professor');
         return;
       }
-      
+
       setSubject(foundSubject);
       if (foundSubject.gradeYears && foundSubject.gradeYears.length > 0) {
         setFormData(prev => ({ ...prev, gradeYear: foundSubject.gradeYears![0] as SchoolYearViewModel }));
@@ -99,13 +100,13 @@ export default function NewUnitPage() {
 
     try {
       const service = getLessonPlanService();
-      service.createUnitViewModel(
+      service.createUnit(
         subjectId,
         formData.gradeYear as any,
         formData.topic.trim(),
         formData.description.trim() || undefined
       );
-      
+
       showSuccess('Unidade criada com sucesso!');
       router.push(`/professor/disciplinas/${subjectId}`);
     } catch (error: any) {
@@ -135,64 +136,72 @@ export default function NewUnitPage() {
   }
 
   return (
-    <ProtectedRoute allowedRoles={['professor', 'admin']}>
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Nova Unidade - {subject.name}</h2>
-          <p className="text-gray-600">Crie uma nova unidade de ensino para esta disciplina</p>
-        </div>
-
-        <PageContainer maxWidth="md">
-          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 hover:shadow-xl transition-all duration-200">
-            <div className="space-y-6">
-              <Input
-                id="topic"
-                label="Tema da Unidade"
-                value={formData.topic}
-                onChange={(e) => handleFieldChange('topic', e.target.value)}
-                onBlur={(e) => handleFieldBlur('topic', e.target.value)}
-                error={getError('topic')}
-                required
-                placeholder="Ex: Introdução à Cultura Digital"
-              />
-
-              <Textarea
-                id="description"
-                label="Descrição (opcional)"
-                value={formData.description}
-                onChange={(e) => handleFieldChange('description', e.target.value)}
-                onBlur={(e) => handleFieldBlur('description', e.target.value)}
-                error={getError('description')}
-                rows={3}
-                placeholder="Breve descrição do que será abordado nesta unidade"
-              />
-
-              <Select
-                id="gradeYear"
-                label="Série/Ano"
-                value={formData.gradeYear}
-                onChange={(e) => handleFieldChange('gradeYear', e.target.value)}
-                required
-                options={gradeYearOptions}
-              />
-
-              <div className="flex gap-4">
-                <Button type="submit" disabled={saving} className="flex-1">
-                  {saving ? 'Criando...' : 'Criar Unidade'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => router.push(`/professor/disciplinas/${subjectId}`)}
-                  className="flex-1"
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          </form>
-        </PageContainer>
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Nova Unidade - {subject.name}</h2>
+        <p className="text-gray-600">Crie uma nova unidade de ensino para esta disciplina</p>
       </div>
+
+      <PageContainer maxWidth="md">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 hover:shadow-xl transition-all duration-200">
+          <div className="space-y-6">
+            <Input
+              id="topic"
+              label="Tema da Unidade"
+              value={formData.topic}
+              onChange={(e) => handleFieldChange('topic', e.target.value)}
+              onBlur={(e) => handleFieldBlur('topic', e.target.value)}
+              error={getError('topic')}
+              required
+              placeholder="Ex: Introdução à Cultura Digital"
+            />
+
+            <Textarea
+              id="description"
+              label="Descrição (opcional)"
+              value={formData.description}
+              onChange={(e) => handleFieldChange('description', e.target.value)}
+              onBlur={(e) => handleFieldBlur('description', e.target.value)}
+              error={getError('description')}
+              rows={3}
+              placeholder="Breve descrição do que será abordado nesta unidade"
+            />
+
+            <Select
+              id="gradeYear"
+              label="Série/Ano"
+              value={formData.gradeYear}
+              onChange={(e) => handleFieldChange('gradeYear', e.target.value)}
+              required
+              options={gradeYearOptions}
+            />
+
+            <div className="flex gap-4">
+              <Button type="submit" disabled={saving} className="flex-1">
+                {saving ? 'Criando...' : 'Criar Unidade'}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => router.push(`/professor/disciplinas/${subjectId}`)}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </form>
+      </PageContainer>
+    </div>
+  );
+}
+
+export default function NewUnitPage() {
+  return (
+    <ProtectedRoute allowedRoles={['professor', 'admin']}>
+      <Suspense fallback={<Loading />}>
+        <NewUnitPageContent />
+      </Suspense>
     </ProtectedRoute>
   );
 }

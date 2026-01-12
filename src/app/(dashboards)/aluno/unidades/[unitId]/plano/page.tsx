@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getLessonPlanService } from '@/lib/service';
+import { PresentationMapper } from '@/application';
 import type { LessonPlanViewModel, UnitViewModel } from '@/application/viewmodels';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
@@ -17,7 +18,7 @@ export default function AlunoLessonPlanPage() {
   const params = useParams();
   const unitId = params.unitId as string;
   const { isAluno } = useAuth();
-  
+
   const [unit, setUnit] = useState<UnitViewModel | null>(null);
   const [lessonPlan, setLessonPlan] = useState<LessonPlanViewModel | null>(null);
   const [loading, setLoading] = useState(true);
@@ -33,17 +34,19 @@ export default function AlunoLessonPlanPage() {
 
   const loadData = () => {
     try {
-      const foundUnit = lessonPlanService.getUnitByIdViewModel(unitId);
+      const foundUnitEntity = lessonPlanService.getUnitById(unitId);
+      const foundUnit = foundUnitEntity ? PresentationMapper.toUnitViewModel(foundUnitEntity) : undefined;
       if (!foundUnit) {
         showError('Unidade não encontrada');
         router.push('/aluno');
         return;
       }
-      
+
       setUnit(foundUnit);
-      
+
       if (foundUnit.lessonPlanId) {
-        const plan = lessonPlanService.getLessonPlanByIdViewModel(foundUnit.lessonPlanId);
+        const planEntity = lessonPlanService.getLessonPlanById(foundUnit.lessonPlanId);
+        const plan = planEntity ? PresentationMapper.toLessonPlanViewModel(planEntity) : undefined;
         setLessonPlan(plan || null);
       }
     } catch (error) {
@@ -157,11 +160,10 @@ export default function AlunoLessonPlanPage() {
                           {question.options.map((option, optIndex) => (
                             <li
                               key={optIndex}
-                              className={`p-2 rounded-lg ${
-                                optIndex === question.correctAnswer
+                              className={`p-2 rounded-lg ${optIndex === question.correctAnswer
                                   ? 'bg-green-50 border border-green-300 text-green-800'
                                   : 'bg-gray-50 border border-gray-200 text-gray-700'
-                              }`}
+                                }`}
                             >
                               {String.fromCharCode(65 + optIndex)}. {option}
                               {optIndex === question.correctAnswer && (

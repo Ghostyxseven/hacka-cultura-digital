@@ -10,6 +10,7 @@ import { Loading } from '@/components/ui/Loading';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SubjectsList, UnitsList } from '@/app/components';
 import Link from 'next/link';
+import { PresentationMapper } from '@/application';
 import type { SubjectViewModel, UnitViewModel } from '@/application/viewmodels';
 import type { User } from '@/core/entities/User';
 
@@ -17,7 +18,7 @@ export default function AlunoPage() {
   const { user, isAluno } = useAuth();
   const authService = getAuthService();
   const lessonPlanService = getLessonPlanService();
-  
+
   const [professor, setProfessor] = useState<User | null>(null);
   const [subjects, setSubjects] = useState<SubjectViewModel[]>([]);
   const [units, setUnits] = useState<UnitViewModel[]>([]);
@@ -34,8 +35,8 @@ export default function AlunoPage() {
       const professorData = authService.getUserById(user!.professorId!);
       setProfessor(professorData || null);
 
-      const allSubjects = lessonPlanService.getSubjectsViewModels();
-      const allUnits = lessonPlanService.getUnitsViewModels();
+      const allSubjects = lessonPlanService.getSubjects().map(s => PresentationMapper.toSubjectViewModel(s));
+      const allUnits = lessonPlanService.getUnits().map(u => PresentationMapper.toUnitViewModel(u));
 
       setSubjects(allSubjects);
       setUnits(allUnits.filter(u => u.lessonPlanId));

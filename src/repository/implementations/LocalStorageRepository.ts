@@ -28,6 +28,7 @@ export class LocalStorageRepository implements ILessonRepository {
   }
 
   getAllSubjects(): Subject[] {
+    if (typeof window === 'undefined') return [];
     const data = localStorage.getItem(StorageKeys.SUBJECTS);
     return parseJSONWithDates<Subject>(data);
   }
@@ -46,6 +47,7 @@ export class LocalStorageRepository implements ILessonRepository {
   }
 
   getAllLessonPlans(): LessonPlan[] {
+    if (typeof window === 'undefined') return [];
     const data = localStorage.getItem(StorageKeys.LESSON_PLANS);
     return parseJSONWithDates<LessonPlan>(data);
   }
@@ -67,6 +69,7 @@ export class LocalStorageRepository implements ILessonRepository {
   }
 
   getAllUnits(): Unit[] {
+    if (typeof window === 'undefined') return [];
     const data = localStorage.getItem(StorageKeys.UNITS);
     return parseJSONWithDates<Unit>(data);
   }
