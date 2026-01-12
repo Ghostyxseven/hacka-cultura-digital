@@ -17,16 +17,18 @@ src/app/
 │   │   │   ├── new/        # Nova Disciplina
 │   │   │   └── [id]/       # Detalhes da Disciplina
 │   │   ├── unidades/
-│   │   │   └── new/        # Nova Unidade
+│   │   │   ├── new/        # Nova Unidade
+│   │   │   └── [unitId]/
+│   │   │       └── plano/  # Visualização do Plano de Aula
 │   │   └── planos/         # Meus Planos
 │   └── aluno/
 │       ├── layout.tsx      # Layout com header
 │       ├── page.tsx        # Dashboard aluno
-│       └── disciplinas/
-│           └── [id]/       # Detalhes da Disciplina (aluno)
-└── units/
-    └── plan/
-        └── [unitId]/        # Visualização do Plano de Aula
+│       ├── disciplinas/
+│       │   └── [id]/       # Detalhes da Disciplina (aluno)
+│       └── unidades/
+│           └── [unitId]/
+│               └── plano/  # Visualização do Plano de Aula
 ```
 
 ## 🚀 Como Executar
@@ -57,7 +59,8 @@ npm run dev
 - ✅ **Detalhes da Disciplina** (`/professor/disciplinas/[id]`) - Ver disciplina (professor)
 - ✅ **Detalhes da Disciplina** (`/aluno/disciplinas/[id]`) - Ver disciplina (aluno)
 - ✅ **Nova Unidade** (`/professor/unidades/new`) - Criar unidade
-- ✅ **Plano de Aula** (`/units/plan/[unitId]`) - Visualizar plano de aula
+- ✅ **Plano de Aula** (`/professor/unidades/[unitId]/plano`) - Visualizar plano de aula (professor)
+- ✅ **Plano de Aula** (`/aluno/unidades/[unitId]/plano`) - Visualizar plano de aula (aluno)
 
 ## 🎨 Tecnologias
 

@@ -138,7 +138,7 @@ export function UnitCard({
             </Button>
           )}
           {unit.lessonPlanId && (
-            <Link href={`/units/plan/${unit.id}`}>
+            <Link href={planHref}>
               <Button variant="success" className="text-sm whitespace-nowrap">
                 Ver Plano
               </Button>
