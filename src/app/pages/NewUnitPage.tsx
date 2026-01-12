@@ -138,7 +138,7 @@ export function NewUnitPage({ subjectId }: NewUnitPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header
+      <HeaderWithAuth
         title={`Nova Unidade - ${subject.name}`}
         backHref={`/subjects/${subjectId}`}
       />
