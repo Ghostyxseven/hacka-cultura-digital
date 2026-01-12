@@ -197,35 +197,57 @@ npm run lint     # Verificação de código
 ```
 hacka-cultura-digital/
 ├── src/
-│   ├── app/                    # Presentation Layer (Next.js)
-│   │   ├── page.tsx            # Dashboard
-│   │   ├── subjects/           # Páginas de disciplinas
-│   │   └── units/              # Páginas de unidades
+│   ├── app/                    # Presentation Layer (Next.js App Router)
+│   │   ├── (dashboards)/       # Rotas protegidas
+│   │   │   ├── aluno/          # Dashboard do aluno
+│   │   │   └── professor/      # Dashboard do professor
+│   │   │       ├── disciplinas/# Gestão de disciplinas
+│   │   │       └── unidades/   # Gestão de unidades e planos
+│   │   ├── api/                # API Routes (se houver)
+│   │   ├── components/         # Componentes locais
+│   │   └── globals.css         # Estilos globais
 │   │
-│   ├── application/            # Application Layer
+│   ├── application/            # Application Layer (Regras de Aplicação)
 │   │   ├── services/           # Serviços de orquestração
-│   │   ├── usecases/           # Casos de uso (RF01-RF05)
+│   │   │   └── LessonPlanService.ts
+│   │   ├── usecases/           # Casos de uso (Regras de Negócio - RFs)
+│   │   │   ├── CreateUnitUseCase.ts
+│   │   │   ├── GenerateLessonPlanUseCase.ts
+│   │   │   └── ...
 │   │   ├── viewmodels/         # ViewModels (DTOs de Saída)
+│   │   │   └── index.ts
 │   │   └── mappers/            # Mappers (Entidade -> ViewModel)
+│   │       └── PresentationMapper.ts
 │   │
-│   ├── core/                   # Core Layer (Domain)
+│   ├── core/                   # Core Layer (Domínio Puro)
+│   │   ├── constants/          # Constantes do domínio
+│   │   │   ├── SchoolYears.ts
+│   │   │   └── StorageKeys.ts
 │   │   ├── entities/           # Entidades de domínio
+│   │   │   ├── LessonPlan.ts
+│   │   │   └── ...
 │   │   └── repositories/       # Interfaces de repositório (Portas)
+│   │       ├── ILessonRepository.ts
+│   │       └── IUserRepository.ts
 │   │
 │   ├── repository/             # Repository Layer (Infrastructure)
 │   │   └── implementations/    # Implementações concretas
-│   │       └── LocalStorageRepository.ts
+│   │       ├── LocalStorageRepository.ts
+│   │       └── LocalStorageUserRepository.ts
 │   │
-│   ├── infrastructure/         # Infrastructure Layer
+│   ├── infrastructure/         # Infrastructure Layer (Serviços Externos)
 │   │   └── ai/
 │   │       ├── IAIService.ts
 │   │       └── GeminiService.ts
 │   │
-│   ├── components/             # Componentes React reutilizáveis
-│   ├── hooks/                  # Custom hooks
-│   ├── constants/              # Constantes do sistema
-│   ├── lib/                    # Utilitários e factories
+│   ├── components/             # Componentes React reutilizáveis (Shared)
+│   ├── hooks/                  # Custom hooks (Adapters de Apresentação)
+│   │   ├── useSubjects.ts
+│   │   └── useUnits.ts
+│   ├── lib/                    # Composition Root e Factories
+│   │   └── service.ts          # Injeção de Dependência
 │   └── utils/                  # Funções auxiliares
+│       └── dateUtils.ts
 │
 ├── package.json
 ├── tsconfig.json
