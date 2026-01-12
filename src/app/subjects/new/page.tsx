@@ -3,7 +3,12 @@
 'use client';
 
 import { NewSubjectPage } from '../../pages/NewSubjectPage';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function Page() {
-  return <NewSubjectPage />;
+  return (
+    <ProtectedRoute allowedRoles={['professor', 'admin']}>
+      <NewSubjectPage />
+    </ProtectedRoute>
+  );
 }

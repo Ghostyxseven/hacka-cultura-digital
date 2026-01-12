@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 import { getLessonPlanService } from '@/lib/service';
 import type { SubjectViewModel, SchoolYearViewModel } from '@/app/types';
 import { SCHOOL_YEARS } from '@/constants/schoolYears';
-import { Header, PageContainer, Loading, Button, Input, Textarea, Select } from '@/components';
+import { PageContainer, Loading, Button, Input, Textarea, Select } from '@/components';
+import { HeaderWithAuth } from '@/components/layout/HeaderWithAuth';
 import { useFormValidation } from '@/hooks';
 import { showError, showSuccess } from '@/utils/notifications';
 import Link from 'next/link';
@@ -137,7 +138,7 @@ export function NewUnitPage({ subjectId }: NewUnitPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header
+      <HeaderWithAuth
         title={`Nova Unidade - ${subject.name}`}
         backHref={`/subjects/${subjectId}`}
       />

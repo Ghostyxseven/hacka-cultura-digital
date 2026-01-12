@@ -19,6 +19,8 @@ interface LessonPlanPageProps {
 
 export function LessonPlanPage({ unitId }: LessonPlanPageProps) {
   const router = useRouter();
+  const { isProfessor, isAdmin } = useAuth();
+  const canGenerate = isProfessor || isAdmin;
   const [unit, setUnit] = useState<UnitViewModel | null>(null);
   const [lessonPlan, setLessonPlan] = useState<LessonPlanViewModel | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,9 +87,13 @@ export function LessonPlanPage({ unitId }: LessonPlanPageProps) {
             <EmptyState
               title="Nenhum plano de aula gerado para esta unidade ainda."
               action={
-                <Button onClick={handleGenerate} disabled={generating}>
-                  {generating ? 'Gerando...' : '🤖 Gerar Plano de Aula com IA'}
-                </Button>
+                canGenerate ? (
+                  <Button onClick={handleGenerate} disabled={generating}>
+                    {generating ? 'Gerando...' : '🤖 Gerar Plano de Aula com IA'}
+                  </Button>
+                ) : (
+                  <p className="text-gray-500">Aguarde o professor gerar o plano de aula.</p>
+                )
               }
             />
           </div>
