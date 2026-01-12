@@ -204,14 +204,16 @@ hacka-cultura-digital/
 │   │
 │   ├── application/            # Application Layer
 │   │   ├── services/           # Serviços de orquestração
-│   │   └── usecases/           # Casos de uso (RF01-RF05)
+│   │   ├── usecases/           # Casos de uso (RF01-RF05)
+│   │   ├── viewmodels/         # ViewModels (DTOs de Saída)
+│   │   └── mappers/            # Mappers (Entidade -> ViewModel)
 │   │
 │   ├── core/                   # Core Layer (Domain)
-│   │   └── entities/           # Entidades de domínio
+│   │   ├── entities/           # Entidades de domínio
+│   │   └── repositories/       # Interfaces de repositório (Portas)
 │   │
-│   ├── repository/             # Repository Layer
-│   │   ├── ILessonRepository.ts
-│   │   └── implementations/
+│   ├── repository/             # Repository Layer (Infrastructure)
+│   │   └── implementations/    # Implementações concretas
 │   │       └── LocalStorageRepository.ts
 │   │
 │   ├── infrastructure/         # Infrastructure Layer
