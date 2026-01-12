@@ -27,8 +27,15 @@ export function UnitCard({
   onDelete,
   canDelete = false
 }: UnitCardProps) {
+  const { isProfessor, isAdmin } = useAuth();
+  const isAluno = !isProfessor && !isAdmin;
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  
+  // Define a rota baseada no tipo de usuário
+  const planHref = isAluno 
+    ? `/aluno/unidades/${unit.id}/plano` 
+    : `/professor/unidades/${unit.id}/plano`;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
