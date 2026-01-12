@@ -14,28 +14,34 @@ import Link from 'next/link';
 
 export default function MeusPlanosPage() {
   const { user, isProfessor } = useAuth();
-  const { subjects, loading: subjectsLoading } = useSubjects();
-  const { units: allUnits, loading: unitsLoading } = useUnits();
+      const { subjects, loading: subjectsLoading } = useSubjects();
+      const { units: allUnits, loading: unitsLoading } = useUnits();
 
-  const loading = subjectsLoading || unitsLoading;
+      const loading = subjectsLoading || unitsLoading;
 
-  if (!isProfessor) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Acesso Negado</h1>
-          <p className="text-gray-600">Você não tem permissão para acessar esta página.</p>
-        </div>
-      </div>
-    );
-  }
+      if (!isProfessor) {
+        return (
+          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Acesso Negado</h1>
+              <p className="text-gray-600">Você não tem permissão para acessar esta página.</p>
+            </div>
+          </div>
+        );
+      }
 
-  if (loading) {
-    return <Loading />;
-  }
+      if (loading) {
+        return <Loading />;
+      }
 
-  // Filtra apenas unidades que têm plano de aula
-  const unitsWithPlans = allUnits.filter(u => u.lessonPlanId);
+      // Filtra apenas unidades que têm plano de aula
+      // Ordena por ID (mais recente primeiro, já que IDs são gerados sequencialmente)
+      const unitsWithPlans = allUnits
+        .filter(u => u.lessonPlanId)
+        .sort((a, b) => {
+          // Ordena por ID em ordem decrescente (mais recente primeiro)
+          return b.id.localeCompare(a.id);
+        });
 
   return (
     <div className="min-h-screen bg-gray-50">
