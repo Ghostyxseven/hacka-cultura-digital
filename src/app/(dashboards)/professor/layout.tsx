@@ -45,7 +45,7 @@ export default function ProfessorLayout({
             </button>
           </Link>
 
-          <Link href="/subjects/new">
+          <Link href="/professor/disciplinas/new">
             <button className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-medium transition-all duration-200 flex items-center gap-2">
               <span>➕</span>
               <span>Nova Disciplina</span>

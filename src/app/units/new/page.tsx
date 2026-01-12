@@ -107,7 +107,7 @@ export default function NewUnitPage() {
       );
       
       showSuccess('Unidade criada com sucesso!');
-      router.push(`/subjects/${subjectId}`);
+      router.push(`/professor/disciplinas/${subjectId}`);
     } catch (error: any) {
       showError(error.message || 'Erro ao criar unidade');
     } finally {

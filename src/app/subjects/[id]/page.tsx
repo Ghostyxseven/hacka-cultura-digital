@@ -110,7 +110,7 @@ export default function SubjectDetailPage() {
         <PageContainer>
           {canEdit && units.length > 0 && (
             <div className="flex gap-4 mb-6">
-              <Link href={`/units/new?subjectId=${subjectId}`}>
+              <Link href={`/professor/unidades/new?subjectId=${subjectId}`}>
                 <Button>➕ Nova Unidade</Button>
               </Link>
               <Button

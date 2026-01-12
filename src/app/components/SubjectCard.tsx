@@ -22,8 +22,13 @@ export function SubjectCard({
   onDelete,
   canDelete = false
 }: SubjectCardProps) {
+  const { isProfessor, isAdmin } = useAuth();
+  const isAluno = !isProfessor && !isAdmin;
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  
+  // Define a rota baseada no tipo de usuário
+  const subjectHref = isAluno ? `/aluno/disciplinas/${subject.id}` : `/professor/disciplinas/${subject.id}`;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -48,7 +53,7 @@ export function SubjectCard({
 
   return (
     <div className="group relative bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:border-primary-300 transition-all duration-200">
-      <Link href={`/professor/disciplinas/${subject.id}`} className="block">
+      <Link href={subjectHref} className="block">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
             <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
