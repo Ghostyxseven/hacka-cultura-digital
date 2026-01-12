@@ -18,7 +18,7 @@ export default function Page() {
   }
 
   return (
-    <ProtectedRoute allowedRoles={['professor', 'admin']}>
+    <ProtectedRoute requiredRole="professor">
       <NewUnitPage subjectId={subjectId} />
     </ProtectedRoute>
   );

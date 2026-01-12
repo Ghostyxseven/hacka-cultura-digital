@@ -11,7 +11,7 @@ export default function Page() {
   const subjectId = params.id as string;
   
   return (
-    <ProtectedRoute allowedRoles={['professor', 'admin', 'aluno']}>
+    <ProtectedRoute>
       <SubjectDetailPage subjectId={subjectId} />
     </ProtectedRoute>
   );

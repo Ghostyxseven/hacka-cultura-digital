@@ -11,7 +11,7 @@ export default function Page() {
   const unitId = params.unitId as string;
   
   return (
-    <ProtectedRoute allowedRoles={['professor', 'admin', 'aluno']}>
+    <ProtectedRoute>
       <LessonPlanPage unitId={unitId} />
     </ProtectedRoute>
   );
