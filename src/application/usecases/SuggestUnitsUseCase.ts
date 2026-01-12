@@ -2,7 +2,7 @@
 import { Unit } from "../../core/entities/Unit";
 import { SchoolYear } from "../../core/entities/LessonPlan";
 import { IAIService } from "../../infrastructure/ai/IAIService";
-import { ILessonRepository } from "../../repository/ILessonRepository";
+import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 
 /**
  * Caso de uso: Sugestão Automática de Unidades via IA

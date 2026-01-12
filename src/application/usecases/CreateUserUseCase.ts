@@ -1,6 +1,6 @@
 // src/application/usecases/CreateUserUseCase.ts
 import { User, UserRole } from "../../core/entities/User";
-import { IUserRepository } from "../../repository/IUserRepository";
+import { IUserRepository } from "../../core/repositories/IUserRepository";
 
 /**
  * Caso de uso: Criação de Usuário

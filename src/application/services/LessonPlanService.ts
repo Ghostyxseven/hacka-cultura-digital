@@ -2,7 +2,7 @@
 import { LessonPlan, SchoolYear } from "../../core/entities/LessonPlan";
 import { Subject } from "../../core/entities/Subject";
 import { Unit } from "../../core/entities/Unit";
-import { ILessonRepository } from "../../repository/ILessonRepository";
+import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 import { IAIService } from "../../infrastructure/ai/IAIService";
 import { GenerateLessonPlanUseCase } from "../usecases/GenerateLessonPlanUseCase";
 import { CreateSubjectUseCase } from "../usecases/CreateSubjectUseCase";

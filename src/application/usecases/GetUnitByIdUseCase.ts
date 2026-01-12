@@ -1,6 +1,6 @@
 // src/application/usecases/GetUnitByIdUseCase.ts
 import { Unit } from "../../core/entities/Unit";
-import { ILessonRepository } from "../../repository/ILessonRepository";
+import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 
 /**
  * Caso de uso: Buscar Unidade por ID

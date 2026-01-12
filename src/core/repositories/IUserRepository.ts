@@ -1,9 +1,9 @@
-// src/repository/IUserRepository.ts
-import { User } from '../core/entities/User';
+// src/core/repositories/IUserRepository.ts
+import { User } from '../entities/User';
 
 /**
  * Interface do repositório de usuários
- * Segue Clean Architecture - Repository layer
+ * Segue Clean Architecture - Core/Domain layer (Port)
  */
 export interface IUserRepository {
   saveUser(user: User): void;
