@@ -37,7 +37,7 @@ export class GeminiService implements IAIService {
     const genAI = new GoogleGenerativeAI(this.API_KEY);
     
     this.model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       // Configurações de segurança para evitar bloqueios bobos no dia do Pitch
       safetySettings: [
         { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
@@ -231,7 +231,7 @@ IMPORTANTE:
       content: data.content || data.methodology, // Fallback para content se não vier
       quiz: validatedQuiz,
       metadata: {
-        aiModel: "gemini-1.5-flash",
+        aiModel: "gemini-2.5-flash",
         promptVersion: "1.0",
         isFavorite: false
       },
