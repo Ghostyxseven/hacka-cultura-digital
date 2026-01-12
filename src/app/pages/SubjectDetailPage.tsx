@@ -21,6 +21,8 @@ interface SubjectDetailPageProps {
 
 export function SubjectDetailPage({ subjectId }: SubjectDetailPageProps) {
   const router = useRouter();
+  const { isProfessor, isAdmin } = useAuth();
+  const canEdit = isProfessor || isAdmin;
   const [subject, setSubject] = useState<SubjectViewModel | null>(null);
   const [loading, setLoading] = useState(true);
   const [suggesting, setSuggesting] = useState(false);
@@ -92,19 +94,21 @@ export function SubjectDetailPage({ subjectId }: SubjectDetailPageProps) {
       />
 
       <PageContainer>
-        {/* Ações */}
-        <div className="flex gap-4 mb-6">
-          <Link href={`/subjects/${subjectId}/units/new`}>
-            <Button>➕ Nova Unidade</Button>
-          </Link>
-          <Button
-            variant="success"
-            onClick={handleSuggestUnits}
-            disabled={suggesting}
-          >
-            {suggesting ? 'Sugerindo...' : '🤖 Sugerir Unidades (IA)'}
-          </Button>
-        </div>
+        {/* Ações - Apenas para professores/admin */}
+        {canEdit && (
+          <div className="flex gap-4 mb-6">
+            <Link href={`/subjects/${subjectId}/units/new`}>
+              <Button>➕ Nova Unidade</Button>
+            </Link>
+            <Button
+              variant="success"
+              onClick={handleSuggestUnits}
+              disabled={suggesting}
+            >
+              {suggesting ? 'Sugerindo...' : '🤖 Sugerir Unidades (IA)'}
+            </Button>
+          </div>
+        )}
 
         {/* Unidades */}
         <div className="bg-white rounded-lg shadow">
