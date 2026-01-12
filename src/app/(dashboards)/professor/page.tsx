@@ -20,7 +20,15 @@ export default function ProfessorPage() {
   const lessonPlanService = getLessonPlanService();
 
   const loading = subjectsLoading || unitsLoading;
-  const recentUnits = allUnits.slice(0, 5);
+  
+  // Ordena unidades por data de criação (mais recente primeiro) e pega as 5 mais recentes
+  const recentUnits = [...allUnits]
+    .sort((a, b) => {
+      const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime();
+      const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime();
+      return dateB - dateA;
+    })
+    .slice(0, 5);
 
   if (!isProfessor) {
     return (

@@ -35,12 +35,14 @@ export default function MeusPlanosPage() {
       }
 
       // Filtra apenas unidades que têm plano de aula
-      // Ordena por ID (mais recente primeiro, já que IDs são gerados sequencialmente)
+      // Ordena por data de criação (mais recente primeiro)
       const unitsWithPlans = allUnits
         .filter(u => u.lessonPlanId)
         .sort((a, b) => {
-          // Ordena por ID em ordem decrescente (mais recente primeiro)
-          return b.id.localeCompare(a.id);
+          // Ordena por data de criação, mais recente primeiro
+          const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime();
+          const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime();
+          return dateB - dateA;
         });
 
   return (
