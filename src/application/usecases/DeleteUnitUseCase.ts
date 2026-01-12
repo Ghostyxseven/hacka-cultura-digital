@@ -1,5 +1,5 @@
 // src/application/usecases/DeleteUnitUseCase.ts
-import { ILessonRepository } from "../../repository/ILessonRepository";
+import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 
 /**
  * Caso de uso: Exclusão de Unidade

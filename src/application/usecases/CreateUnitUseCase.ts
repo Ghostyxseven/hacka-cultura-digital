@@ -1,7 +1,7 @@
 // src/application/usecases/CreateUnitUseCase.ts
 import { Unit } from "../../core/entities/Unit";
 import { SchoolYear } from "../../core/entities/LessonPlan";
-import { ILessonRepository } from "../../repository/ILessonRepository";
+import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 
 /**
  * Caso de uso: Criação Manual de Unidade de Ensino

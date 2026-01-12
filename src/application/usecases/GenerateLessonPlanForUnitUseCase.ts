@@ -1,7 +1,7 @@
 // src/application/usecases/GenerateLessonPlanForUnitUseCase.ts
 import { LessonPlan } from "../../core/entities/LessonPlan";
 import { Unit } from "../../core/entities/Unit";
-import { ILessonRepository } from "../../repository/ILessonRepository";
+import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 import { IAIService } from "../../infrastructure/ai/IAIService";
 import { GenerateLessonPlanUseCase } from "./GenerateLessonPlanUseCase";
 

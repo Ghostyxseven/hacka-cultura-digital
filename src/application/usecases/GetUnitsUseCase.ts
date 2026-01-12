@@ -1,6 +1,6 @@
 // src/application/usecases/GetUnitsUseCase.ts
 import { Unit } from "../../core/entities/Unit";
-import { ILessonRepository } from "../../repository/ILessonRepository";
+import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 
 /**
  * Caso de uso: Listagem de Unidades de Ensino

@@ -1,6 +1,6 @@
 // src/application/usecases/GetSubjectByIdUseCase.ts
 import { Subject } from "../../core/entities/Subject";
-import { ILessonRepository } from "../../repository/ILessonRepository";
+import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 
 /**
  * Caso de uso: Buscar Disciplina por ID

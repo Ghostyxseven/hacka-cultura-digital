@@ -1,6 +1,6 @@
 // src/application/services/AuthService.ts
 import { User, UserRole } from "../../core/entities/User";
-import { IUserRepository } from "../../repository/IUserRepository";
+import { IUserRepository } from "../../core/repositories/IUserRepository";
 import { CreateUserUseCase } from "../usecases/CreateUserUseCase";
 import { LoginUseCase } from "../usecases/LoginUseCase";
 import { UpdateUserUseCase } from "../usecases/UpdateUserUseCase";

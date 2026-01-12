@@ -1,6 +1,6 @@
 // src/application/usecases/GetLessonPlansUseCase.ts
 import { LessonPlan } from "../../core/entities/LessonPlan";
-import { ILessonRepository } from "../../repository/ILessonRepository";
+import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 
 /**
  * Caso de uso: Listagem de Planos de Aula

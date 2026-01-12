@@ -1,6 +1,6 @@
 // src/application/usecases/LoginUseCase.ts
 import { User } from "../../core/entities/User";
-import { IUserRepository } from "../../repository/IUserRepository";
+import { IUserRepository } from "../../core/repositories/IUserRepository";
 
 /**
  * Caso de uso: Login de Usuário
