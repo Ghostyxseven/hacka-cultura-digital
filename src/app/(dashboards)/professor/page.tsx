@@ -86,7 +86,7 @@ export default function ProfessorPage() {
               title="Nenhuma disciplina cadastrada"
               description="Comece criando uma nova disciplina para organizar seus materiais didáticos"
               action={
-                <Link href="/subjects/new">
+                <Link href="/professor/disciplinas/new">
                   <Button>➕ Nova Disciplina</Button>
                 </Link>
               }
