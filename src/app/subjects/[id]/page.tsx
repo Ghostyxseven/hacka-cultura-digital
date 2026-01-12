@@ -14,6 +14,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { UnitsList } from '@/app/components';
 import { showError, showSuccess } from '@/utils/notifications';
+import { getLessonPlanService } from '@/lib/service';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import Link from 'next/link';
 
@@ -27,6 +28,7 @@ export default function SubjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [suggesting, setSuggesting] = useState(false);
   const { units, refresh: refreshUnits } = useUnits(subjectId);
+  const lessonPlanService = getLessonPlanService();
 
   useEffect(() => {
     const service = getLessonPlanService();
@@ -62,6 +64,16 @@ export default function SubjectDetailPage() {
       showError(error.message || 'Erro ao sugerir unidades');
     } finally {
       setSuggesting(false);
+    }
+  };
+
+  const handleDeleteUnit = (id: string) => {
+    try {
+      lessonPlanService.deleteUnit(id);
+      showSuccess('Unidade excluída com sucesso!');
+      refreshUnits();
+    } catch (error: any) {
+      showError(error.message || 'Erro ao excluir unidade');
     }
   };
 

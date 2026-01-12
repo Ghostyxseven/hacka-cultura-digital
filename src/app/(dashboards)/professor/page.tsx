@@ -9,12 +9,15 @@ import { Loading } from '@/components/ui/Loading';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { StatsSection, SubjectsList, UnitsList } from '@/app/components';
+import { getLessonPlanService } from '@/lib/service';
+import { showError, showSuccess } from '@/utils/notifications';
 import Link from 'next/link';
 
 export default function ProfessorPage() {
   const { user, isProfessor } = useAuth();
-  const { subjects, loading: subjectsLoading } = useSubjects();
-  const { units: allUnits, loading: unitsLoading } = useUnits();
+  const { subjects, loading: subjectsLoading, refresh: refreshSubjects } = useSubjects();
+  const { units: allUnits, loading: unitsLoading, refresh: refreshUnits } = useUnits();
+  const lessonPlanService = getLessonPlanService();
 
   const loading = subjectsLoading || unitsLoading;
   const recentUnits = allUnits.slice(0, 5);
@@ -33,6 +36,27 @@ export default function ProfessorPage() {
   if (loading) {
     return <Loading />;
   }
+
+  const handleDeleteSubject = (id: string) => {
+    try {
+      lessonPlanService.deleteSubject(id);
+      showSuccess('Disciplina excluída com sucesso!');
+      refreshSubjects();
+      refreshUnits();
+    } catch (error: any) {
+      showError(error.message || 'Erro ao excluir disciplina');
+    }
+  };
+
+  const handleDeleteUnit = (id: string) => {
+    try {
+      lessonPlanService.deleteUnit(id);
+      showSuccess('Unidade excluída com sucesso!');
+      refreshUnits();
+    } catch (error: any) {
+      showError(error.message || 'Erro ao excluir unidade');
+    }
+  };
 
   const stats = [
     { title: 'Disciplinas', value: subjects.length },
@@ -65,6 +89,8 @@ export default function ProfessorPage() {
               subjects={subjects}
               units={allUnits}
               showUnitCount
+              canDelete={true}
+              onDelete={handleDeleteSubject}
               emptyStateTitle="Nenhuma disciplina cadastrada"
               emptyStateDescription="Comece criando uma nova disciplina"
               emptyStateAction={
@@ -86,6 +112,8 @@ export default function ProfessorPage() {
                 units={recentUnits}
                 subjects={subjects}
                 showSubject
+                canDelete={true}
+                onDelete={handleDeleteUnit}
               />
             </div>
           </div>

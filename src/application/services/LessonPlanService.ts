@@ -9,6 +9,7 @@ import { CreateSubjectUseCase } from "../usecases/CreateSubjectUseCase";
 import { GetSubjectsUseCase } from "../usecases/GetSubjectsUseCase";
 import { GetSubjectByIdUseCase } from "../usecases/GetSubjectByIdUseCase";
 import { DeleteSubjectUseCase } from "../usecases/DeleteSubjectUseCase";
+import { DeleteUnitUseCase } from "../usecases/DeleteUnitUseCase";
 import { SaveLessonPlanUseCase } from "../usecases/SaveLessonPlanUseCase";
 import { GetLessonPlansUseCase } from "../usecases/GetLessonPlansUseCase";
 import { GetLessonPlanByIdUseCase } from "../usecases/GetLessonPlanByIdUseCase";
@@ -51,6 +52,7 @@ export class LessonPlanService {
   private getUnitsUseCase: GetUnitsUseCase;
   private getUnitByIdUseCase: GetUnitByIdUseCase;
   private generateLessonPlanForUnitUseCase: GenerateLessonPlanForUnitUseCase;
+  private deleteUnitUseCase: DeleteUnitUseCase;
 
   constructor(
     private repository: ILessonRepository,
@@ -72,6 +74,7 @@ export class LessonPlanService {
     this.getUnitsUseCase = new GetUnitsUseCase(repository);
     this.getUnitByIdUseCase = new GetUnitByIdUseCase(repository);
     this.generateLessonPlanForUnitUseCase = new GenerateLessonPlanForUnitUseCase(repository, aiService);
+    this.deleteUnitUseCase = new DeleteUnitUseCase(repository);
   }
 
   // ========== MÉTODOS DE PLANOS DE AULA ==========

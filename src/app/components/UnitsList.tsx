@@ -12,6 +12,8 @@ interface UnitsListProps {
   emptyStateTitle?: string;
   emptyStateDescription?: string;
   showSubject?: boolean;
+  onDelete?: (id: string) => void;
+  canDelete?: boolean;
 }
 
 export function UnitsList({
@@ -22,6 +24,8 @@ export function UnitsList({
   emptyStateTitle = 'Nenhuma unidade cadastrada',
   emptyStateDescription,
   showSubject = false,
+  onDelete,
+  canDelete = false,
 }: UnitsListProps) {
   if (units.length === 0) {
     return (
@@ -44,6 +48,8 @@ export function UnitsList({
             canGenerate={canGenerate}
             onGenerate={onGenerate}
             showSubject={showSubject}
+            onDelete={onDelete}
+            canDelete={canDelete}
           />
         );
       })}
