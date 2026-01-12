@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getLessonPlanService } from '@/lib/service';
+import { PresentationMapper } from '@/application';
 import type { SubjectViewModel } from '@/application/viewmodels';
 import { useUnits } from '@/hooks/useUnits';
 import { PageContainer } from '@/components/layout/PageContainer';
@@ -25,15 +26,16 @@ export default function AlunoSubjectDetailPage() {
 
   useEffect(() => {
     const service = getLessonPlanService();
-    
+
     try {
-      const foundSubject = service.getSubjectByIdViewModel(subjectId);
-      
+      const foundSubjectEntity = service.getSubjectById(subjectId);
+      const foundSubject = foundSubjectEntity ? PresentationMapper.toSubjectViewModel(foundSubjectEntity) : undefined;
+
       if (!foundSubject) {
         router.push('/aluno');
         return;
       }
-      
+
       setSubject(foundSubject);
     } catch (error) {
       console.error('Erro ao carregar disciplina:', error);

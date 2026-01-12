@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getLessonPlanService } from '@/lib/service';
+import { PresentationMapper } from '@/application';
 import type { SubjectViewModel } from '@/application/viewmodels';
 import { useUnits } from '@/hooks/useUnits';
 import { PageContainer } from '@/components/layout/PageContainer';
@@ -30,15 +31,16 @@ export default function SubjectDetailPage() {
 
   useEffect(() => {
     const service = getLessonPlanService();
-    
+
     try {
-      const foundSubject = service.getSubjectByIdViewModel(subjectId);
-      
+      const foundSubjectEntity = service.getSubjectById(subjectId);
+      const foundSubject = foundSubjectEntity ? PresentationMapper.toSubjectViewModel(foundSubjectEntity) : undefined;
+
       if (!foundSubject) {
         router.push('/professor');
         return;
       }
-      
+
       setSubject(foundSubject);
     } catch (error) {
       console.error('Erro ao carregar disciplina:', error);
@@ -50,12 +52,12 @@ export default function SubjectDetailPage() {
 
   const handleSuggestUnits = async () => {
     if (!subject) return;
-    
+
     setSuggesting(true);
     try {
       const service = getLessonPlanService();
       const gradeYear = subject.gradeYears?.[0] || '8º Ano';
-      await service.suggestUnitsViewModels(subjectId, gradeYear as any, 5);
+      await service.suggestUnits(subjectId, gradeYear as any, 5);
       refreshUnits();
       showSuccess('Unidades sugeridas com sucesso!');
     } catch (error: any) {
@@ -78,7 +80,7 @@ export default function SubjectDetailPage() {
   const handleGenerateLessonPlan = async (unitId: string) => {
     try {
       const service = getLessonPlanService();
-      await service.generateLessonPlanForUnitViewModel(unitId);
+      await service.generateLessonPlanForUnit(unitId);
       refreshUnits();
       showSuccess('Plano de aula gerado com sucesso!');
     } catch (error: any) {

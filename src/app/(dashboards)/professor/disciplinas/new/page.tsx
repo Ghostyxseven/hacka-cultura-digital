@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getLessonPlanService } from '@/lib/service';
 import type { SchoolYearViewModel } from '@/application/viewmodels';
-import { SCHOOL_YEARS } from '@/constants/schoolYears';
+import { SCHOOL_YEARS } from '@/core/constants/SchoolYears';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -62,14 +62,14 @@ export default function NewSubjectPage() {
 
     try {
       const service = getLessonPlanService();
-      await service.createSubjectViewModel(
+      await service.createSubject(
         formData.name.trim(),
         formData.description.trim() || undefined,
         formData.color.trim() || undefined,
         formData.icon.trim() || undefined,
         formData.gradeYears.length > 0 ? formData.gradeYears : undefined
       );
-      
+
       showSuccess('Disciplina criada com sucesso!');
       router.push('/professor');
     } catch (error: any) {
