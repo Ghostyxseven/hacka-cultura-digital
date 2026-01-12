@@ -1,4 +1,4 @@
-// src/app/pages/DashboardAdminPage.tsx
+// src/app/(dashboards)/admin/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,20 +7,19 @@ import { getAuthService } from '@/lib/authService';
 import { HeaderWithAuth } from '@/components/layout/HeaderWithAuth';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
-import { StatCard } from '@/components/ui/StatCard';
+import { StatsSection } from '@/app/components';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { showError, showSuccess } from '@/utils/notifications';
-import Link from 'next/link';
+import type { User } from '@/core/entities/User';
 
-export function DashboardAdminPage() {
+export default function AdminPage() {
   const { isAdmin } = useAuth();
   const authService = getAuthService();
-  const [professores, setProfessores] = useState<any[]>([]);
-  const [alunos, setAlunos] = useState<any[]>([]);
+  const [professores, setProfessores] = useState<User[]>([]);
+  const [alunos, setAlunos] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Formulário de cadastro de professor
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -35,10 +34,10 @@ export function DashboardAdminPage() {
 
   const loadUsers = () => {
     try {
-      const professoresList = authService.getAllProfessores();
-      const alunosList = authService.getAllAlunos();
-      setProfessores(professoresList);
-      setAlunos(alunosList);
+      const professoresList = authService.getUsersByRole('professor');
+      const alunosList = authService.getUsersByRole('aluno');
+      setProfessores(professoresList as User[]);
+      setAlunos(alunosList as User[]);
     } catch (error) {
       showError('Erro ao carregar usuários');
     } finally {
@@ -53,7 +52,7 @@ export function DashboardAdminPage() {
       newErrors.email = 'Email é obrigatório';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = 'Email inválido';
-    } else if (authService.emailExists(email)) {
+    } else if (authService.userExists(email)) {
       newErrors.email = 'Email já cadastrado';
     }
     if (!password) {
@@ -97,6 +96,12 @@ export function DashboardAdminPage() {
     return <Loading />;
   }
 
+  const stats = [
+    { title: 'Professores', value: professores.length },
+    { title: 'Alunos', value: alunos.length },
+    { title: 'Total de Usuários', value: professores.length + alunos.length },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderWithAuth
@@ -105,14 +110,8 @@ export function DashboardAdminPage() {
       />
 
       <PageContainer>
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <StatCard title="Professores" value={professores.length} />
-          <StatCard title="Alunos" value={alunos.length} />
-          <StatCard title="Total de Usuários" value={professores.length + alunos.length} />
-        </div>
+        <StatsSection stats={stats} />
 
-        {/* Cadastrar Professor */}
         <div className="bg-white rounded-lg shadow mb-8">
           <div className="px-6 py-4 border-b flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-900">Cadastrar Professor</h2>
@@ -164,7 +163,6 @@ export function DashboardAdminPage() {
           )}
         </div>
 
-        {/* Lista de Professores */}
         <div className="bg-white rounded-lg shadow mb-8">
           <div className="px-6 py-4 border-b">
             <h2 className="text-xl font-semibold text-gray-900">
@@ -189,7 +187,6 @@ export function DashboardAdminPage() {
           </div>
         </div>
 
-        {/* Lista de Alunos */}
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b">
             <h2 className="text-xl font-semibold text-gray-900">Alunos ({alunos.length})</h2>
