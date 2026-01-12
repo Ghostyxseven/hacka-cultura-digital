@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 import { getLessonPlanService } from '@/lib/service';
 import type { SchoolYearViewModel } from '@/app/types';
 import { SCHOOL_YEARS } from '@/constants/schoolYears';
-import { Header, PageContainer, Button, Input, Textarea } from '@/components';
+import { PageContainer, Button, Input, Textarea } from '@/components';
+import { HeaderWithAuth } from '@/components/layout/HeaderWithAuth';
 import { useFormValidation } from '@/hooks';
 import { showError, showSuccess } from '@/utils/notifications';
 import Link from 'next/link';
@@ -106,7 +107,7 @@ export function NewSubjectPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Nova Disciplina" backHref="/" />
+      <HeaderWithAuth title="Nova Disciplina" backHref="/professor" />
 
       <PageContainer maxWidth="md">
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
