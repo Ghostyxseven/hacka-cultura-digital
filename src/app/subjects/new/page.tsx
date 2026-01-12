@@ -152,9 +152,8 @@ export default function NewSubjectPage() {
                       <input
                         type="checkbox"
                         checked={formData.gradeYears.includes(year)}
-                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 mr-2"
                         onChange={() => toggleGradeYear(year)}
-                        className="mr-2"
                       />
                       <span className="text-sm">{year}</span>
                     </label>
