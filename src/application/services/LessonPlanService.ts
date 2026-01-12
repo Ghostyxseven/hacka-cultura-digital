@@ -2,8 +2,7 @@
 import { LessonPlan, SchoolYear } from "../../core/entities/LessonPlan";
 import { Subject } from "../../core/entities/Subject";
 import { Unit } from "../../core/entities/Unit";
-import { ILessonRepository } from "../../repository/ILessonRepository";
-import { IAIService } from "../../infrastructure/ai/IAIService";
+
 import { GenerateLessonPlanUseCase } from "../usecases/GenerateLessonPlanUseCase";
 import { CreateSubjectUseCase } from "../usecases/CreateSubjectUseCase";
 import { GetSubjectsUseCase } from "../usecases/GetSubjectsUseCase";
@@ -35,47 +34,27 @@ import type {
  */
 export class LessonPlanService {
   // Casos de uso de Planos de Aula
-  private generateLessonPlanUseCase: GenerateLessonPlanUseCase;
-  private saveLessonPlanUseCase: SaveLessonPlanUseCase;
-  private getLessonPlansUseCase: GetLessonPlansUseCase;
-  private getLessonPlanByIdUseCase: GetLessonPlanByIdUseCase;
-
-  // Casos de uso de Disciplinas
-  private createSubjectUseCase: CreateSubjectUseCase;
-  private getSubjectsUseCase: GetSubjectsUseCase;
-  private getSubjectByIdUseCase: GetSubjectByIdUseCase;
-  private deleteSubjectUseCase: DeleteSubjectUseCase;
-
-  // Casos de uso de Unidades
-  private createUnitUseCase: CreateUnitUseCase;
-  private suggestUnitsUseCase: SuggestUnitsUseCase;
-  private getUnitsUseCase: GetUnitsUseCase;
-  private getUnitByIdUseCase: GetUnitByIdUseCase;
-  private generateLessonPlanForUnitUseCase: GenerateLessonPlanForUnitUseCase;
-  private deleteUnitUseCase: DeleteUnitUseCase;
-
   constructor(
-    private repository: ILessonRepository,
-    private aiService: IAIService
-  ) {
-    // Inicializa os casos de uso
-    this.generateLessonPlanUseCase = new GenerateLessonPlanUseCase(aiService);
-    this.saveLessonPlanUseCase = new SaveLessonPlanUseCase(repository);
-    this.getLessonPlansUseCase = new GetLessonPlansUseCase(repository);
-    this.getLessonPlanByIdUseCase = new GetLessonPlanByIdUseCase(repository);
+    // Casos de uso de Planos de Aula
+    private generateLessonPlanUseCase: GenerateLessonPlanUseCase,
+    private saveLessonPlanUseCase: SaveLessonPlanUseCase,
+    private getLessonPlansUseCase: GetLessonPlansUseCase,
+    private getLessonPlanByIdUseCase: GetLessonPlanByIdUseCase,
 
-    this.createSubjectUseCase = new CreateSubjectUseCase(repository);
-    this.getSubjectsUseCase = new GetSubjectsUseCase(repository);
-    this.getSubjectByIdUseCase = new GetSubjectByIdUseCase(repository);
-    this.deleteSubjectUseCase = new DeleteSubjectUseCase(repository);
+    // Casos de uso de Disciplinas
+    private createSubjectUseCase: CreateSubjectUseCase,
+    private getSubjectsUseCase: GetSubjectsUseCase,
+    private getSubjectByIdUseCase: GetSubjectByIdUseCase,
+    private deleteSubjectUseCase: DeleteSubjectUseCase,
 
-    this.createUnitUseCase = new CreateUnitUseCase(repository);
-    this.suggestUnitsUseCase = new SuggestUnitsUseCase(repository, aiService);
-    this.getUnitsUseCase = new GetUnitsUseCase(repository);
-    this.getUnitByIdUseCase = new GetUnitByIdUseCase(repository);
-    this.generateLessonPlanForUnitUseCase = new GenerateLessonPlanForUnitUseCase(repository, aiService);
-    this.deleteUnitUseCase = new DeleteUnitUseCase(repository);
-  }
+    // Casos de uso de Unidades
+    private createUnitUseCase: CreateUnitUseCase,
+    private suggestUnitsUseCase: SuggestUnitsUseCase,
+    private getUnitsUseCase: GetUnitsUseCase,
+    private getUnitByIdUseCase: GetUnitByIdUseCase,
+    private generateLessonPlanForUnitUseCase: GenerateLessonPlanForUnitUseCase,
+    private deleteUnitUseCase: DeleteUnitUseCase
+  ) { }
 
   // ========== MÉTODOS DE PLANOS DE AULA ==========
 
