@@ -127,16 +127,17 @@ export default function LessonPlanPage() {
                 </div>
               )}
 
-              {lessonPlan.bnccCodes && lessonPlan.bnccCodes.length > 0 && (
+              {lessonPlan.bnccCompetencies && lessonPlan.bnccCompetencies.length > 0 && (
                 <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-200">
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">Competências BNCC</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {lessonPlan.bnccCodes.map((code, index) => (
-                      <span key={index} className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
-                        {code}
-                      </span>
+                  <ul className="space-y-2">
+                    {lessonPlan.bnccCompetencies.map((competency, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span className="text-green-600 font-bold mt-1">✓</span>
+                        <span className="text-gray-700">{competency}</span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
               )}
 
