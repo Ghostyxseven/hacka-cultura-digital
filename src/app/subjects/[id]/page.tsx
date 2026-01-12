@@ -133,6 +133,8 @@ export default function SubjectDetailPage() {
                 units={units}
                 canGenerate={canEdit}
                 onGenerate={handleGenerateLessonPlan}
+                canDelete={canEdit}
+                onDelete={handleDeleteUnit}
                 emptyStateTitle="Nenhuma unidade cadastrada ainda."
                 emptyStateDescription="Crie manualmente ou use a IA para sugerir unidades."
               />
