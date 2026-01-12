@@ -98,7 +98,7 @@ export function SubjectDetailPage({ subjectId }: SubjectDetailPageProps) {
       <PageContainer>
         {canEdit && (
           <div className="flex gap-4 mb-6">
-            <Link href={`/subjects/${subjectId}/units/new`}>
+            <Link href={`/units/new?subjectId=${subjectId}`}>
               <Button>➕ Nova Unidade</Button>
             </Link>
             <Button
