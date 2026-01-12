@@ -3,7 +3,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { LessonPlanPage } from '../../../pages/LessonPlanPage';
+import { LessonPlanPage } from '../../../pages/units/LessonPlanPage';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function Page() {

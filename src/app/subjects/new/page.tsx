@@ -2,7 +2,7 @@
 // Rota: /subjects/new (Nova Disciplina)
 'use client';
 
-import { NewSubjectPage } from '../../pages/NewSubjectPage';
+import { NewSubjectPage } from '../../pages/subjects/NewSubjectPage';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function Page() {

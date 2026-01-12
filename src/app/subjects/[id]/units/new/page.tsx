@@ -3,7 +3,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { NewUnitPage } from '../../../../pages/NewUnitPage';
+import { NewUnitPage } from '../../../../pages/units/NewUnitPage';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function Page() {

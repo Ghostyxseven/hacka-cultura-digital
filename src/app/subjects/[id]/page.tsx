@@ -3,7 +3,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { SubjectDetailPage } from '../../pages/SubjectDetailPage';
+import { SubjectDetailPage } from '../../pages/subjects/SubjectDetailPage';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function Page() {

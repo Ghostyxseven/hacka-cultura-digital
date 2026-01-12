@@ -1,7 +1,7 @@
 // src/app/aluno/page.tsx
 'use client';
 
-import { DashboardAlunoPage } from '@/app/pages/DashboardAlunoPage';
+import { DashboardAlunoPage } from '@/app/pages/dashboard/DashboardAlunoPage';
 
 export default function AlunoPage() {
   return <DashboardAlunoPage />;
