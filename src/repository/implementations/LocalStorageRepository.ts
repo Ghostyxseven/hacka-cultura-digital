@@ -30,7 +30,14 @@ export class LocalStorageRepository implements ILessonRepository {
 
   getAllSubjects(): Subject[] {
     const data = localStorage.getItem(this.SUBJECTS_KEY);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    
+    const subjects = JSON.parse(data);
+    // Converte strings de data de volta para objetos Date
+    return subjects.map((subject: any) => ({
+      ...subject,
+      createdAt: subject.createdAt ? new Date(subject.createdAt) : new Date(),
+    }));
   }
 
   deleteSubject(id: string): void {

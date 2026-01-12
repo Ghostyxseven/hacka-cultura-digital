@@ -14,10 +14,27 @@ import Link from 'next/link';
 
 export default function MeusPlanosPage() {
   const { user, isProfessor } = useAuth();
-      const { subjects, loading: subjectsLoading } = useSubjects();
-      const { units: allUnits, loading: unitsLoading } = useUnits();
+  const { subjects, loading: subjectsLoading, refresh: refreshSubjects } = useSubjects();
+  const { units: allUnits, loading: unitsLoading, refresh: refreshUnits } = useUnits();
 
-      const loading = subjectsLoading || unitsLoading;
+  const loading = subjectsLoading || unitsLoading;
+  
+  // Recarrega os dados quando a página recebe foco (quando o usuário volta para ela)
+  useEffect(() => {
+    const handleFocus = () => {
+      refreshUnits();
+      refreshSubjects();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [refreshUnits, refreshSubjects]);
+  
+  // Também recarrega quando a página é montada
+  useEffect(() => {
+    refreshUnits();
+    refreshSubjects();
+  }, [refreshUnits, refreshSubjects]);
 
       if (!isProfessor) {
         return (
