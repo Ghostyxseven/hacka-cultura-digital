@@ -64,11 +64,6 @@ export default function AlunoPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeaderWithAuth
-        title={`👨‍🎓 Bem-vindo, ${user?.name}`}
-        subtitle={professor ? `Professor: ${professor.name}` : 'Visualize os materiais disponíveis'}
-      />
-
       <PageContainer>
         {professor && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">

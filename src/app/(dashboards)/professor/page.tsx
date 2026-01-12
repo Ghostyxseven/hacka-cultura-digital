@@ -43,10 +43,10 @@ export default function ProfessorPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeaderWithAuth
-        title={`👨‍🏫 Bem-vindo, ${user?.name}`}
-        subtitle="Gerencie suas disciplinas e materiais didáticos"
-      />
+      <div className="bg-white shadow-sm border-b p-4">
+        <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
+        <p className="text-sm text-gray-600">Gerencie suas disciplinas e materiais didáticos</p>
+      </div>
 
       <PageContainer>
         <StatsSection stats={stats} />
