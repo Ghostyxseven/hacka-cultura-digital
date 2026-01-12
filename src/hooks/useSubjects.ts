@@ -1,7 +1,7 @@
 // src/hooks/useSubjects.ts
 import { useState, useEffect } from 'react';
 import { getLessonPlanService } from '@/lib/service';
-import type { SubjectViewModel } from '@/app/types';
+import type { SubjectViewModel } from '@/application/viewmodels';
 
 /**
  * Hook customizado para gerenciar disciplinas na camada de apresentação

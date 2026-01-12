@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getLessonPlanService } from '@/lib/service';
-import type { LessonPlanViewModel, UnitViewModel } from '@/app/types';
+import type { LessonPlanViewModel, UnitViewModel } from '@/application/viewmodels';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { EmptyState } from '@/components/ui/EmptyState';

@@ -2,7 +2,7 @@
 // Componente reutilizável para lista de unidades
 import { EmptyState } from '@/components/ui/EmptyState';
 import { UnitCard } from './UnitCard';
-import type { UnitViewModel, SubjectViewModel } from '@/app/types';
+import type { UnitViewModel, SubjectViewModel } from '@/application/viewmodels';
 
 interface UnitsListProps {
   units: UnitViewModel[];

@@ -10,7 +10,7 @@ import { Loading } from '@/components/ui/Loading';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SubjectsList, UnitsList } from '@/app/components';
 import Link from 'next/link';
-import type { SubjectViewModel, UnitViewModel } from '@/app/types';
+import type { SubjectViewModel, UnitViewModel } from '@/application/viewmodels';
 import type { User } from '@/core/entities/User';
 
 export default function AlunoPage() {

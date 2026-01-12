@@ -1,7 +1,7 @@
 // src/hooks/useUnits.ts
 import { useState, useEffect } from 'react';
 import { getLessonPlanService } from '@/lib/service';
-import type { UnitViewModel } from '@/app/types';
+import type { UnitViewModel } from '@/application/viewmodels';
 
 /**
  * Hook customizado para gerenciar unidades na camada de apresentação

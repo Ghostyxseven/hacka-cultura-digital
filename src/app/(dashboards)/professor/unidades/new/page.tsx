@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getLessonPlanService } from '@/lib/service';
-import type { SubjectViewModel, SchoolYearViewModel } from '@/app/types';
+import type { SubjectViewModel, SchoolYearViewModel } from '@/application/viewmodels';
 import { SCHOOL_YEARS } from '@/constants/schoolYears';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';

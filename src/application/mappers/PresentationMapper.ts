@@ -10,7 +10,7 @@ import {
   UnitViewModel,
   LessonPlanViewModel,
   QuizQuestionViewModel,
-} from '../../app/types';
+} from '../viewmodels';
 
 /**
  * Mapper para converter entidades do Core em ViewModels da Presentation

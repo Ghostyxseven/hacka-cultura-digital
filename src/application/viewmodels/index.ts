@@ -1,4 +1,5 @@
-// src/app/types/index.ts
+// src/application/viewmodels/index.ts
+// ViewModels agora vivem na camada de Aplicação (são DTOs de saída)
 // DTOs (Data Transfer Objects) e ViewModels para a camada de apresentação
 // A camada Presentation não deve conhecer as entidades do Core diretamente
 
@@ -65,6 +66,6 @@ export interface LessonPlanViewModel {
 /**
  * Tipo para SchoolYear na camada de apresentação
  */
-export type SchoolYearViewModel = 
-  | '6º Ano' | '7º Ano' | '8º Ano' | '9º Ano' 
+export type SchoolYearViewModel =
+  | '6º Ano' | '7º Ano' | '8º Ano' | '9º Ano'
   | '1º Ano EM' | '2º Ano EM' | '3º Ano EM';

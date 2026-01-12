@@ -24,7 +24,7 @@ import type {
   UnitViewModel,
   LessonPlanViewModel,
   SchoolYearViewModel,
-} from "../../app/types";
+} from "../viewmodels";
 
 /**
  * Serviço principal de Planos de Aula
