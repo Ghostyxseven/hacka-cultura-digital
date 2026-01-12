@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getAuthService } from '@/lib/authService';
 import { getLessonPlanService } from '@/lib/service';
-import { HeaderWithAuth } from '@/components/layout/HeaderWithAuth';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { EmptyState } from '@/components/ui/EmptyState';

@@ -4,7 +4,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubjects } from '@/hooks/useSubjects';
 import { useUnits } from '@/hooks/useUnits';
-import { HeaderWithAuth } from '@/components/layout/HeaderWithAuth';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { Button } from '@/components/ui/Button';
