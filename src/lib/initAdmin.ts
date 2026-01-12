@@ -2,31 +2,34 @@
 // Script para inicializar usuário admin padrão
 
 import { LocalStorageUserRepository } from '@/repository/implementations/LocalStorageUserRepository';
-import { AuthService } from '@/application/services/AuthService';
-import { User } from '@/core/entities/User';
+import { CreateUserUseCase } from '@/application/usecases/CreateUserUseCase';
 
 /**
  * Inicializa o usuário admin padrão se não existir
+ * Email: micael@admin.com
+ * Senha: 123456
  */
 export function initAdmin(): void {
   if (typeof window === 'undefined') {
     return; // Não executa no servidor
   }
 
-  const userRepository = LocalStorageUserRepository.getInstance();
-  const authService = new AuthService(userRepository);
-
-  const adminEmail = 'micael@admin.com';
-
-  // Verifica se o admin já existe
-  if (authService.userExists(adminEmail)) {
-    console.log('✅ Usuário admin já existe');
-    return;
-  }
-
   try {
+    const userRepository = LocalStorageUserRepository.getInstance();
+    const createUserUseCase = new CreateUserUseCase(userRepository);
+
+    const adminEmail = 'micael@admin.com';
+
+    // Verifica se o admin já existe
+    const existingUser = userRepository.getUserByEmail(adminEmail);
+    if (existingUser) {
+      console.log('✅ Usuário admin já existe');
+      return;
+    }
+
     // Cria o usuário admin
-    authService.registerAdmin('Micael', adminEmail, '123456');
+    createUserUseCase.execute('Micael', adminEmail, '123456', 'admin');
+    
     console.log('✅ Usuário admin criado com sucesso!');
     console.log('📧 Email: micael@admin.com');
     console.log('🔑 Senha: 123456');
