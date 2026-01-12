@@ -16,3 +16,6 @@ export { GenerateLessonPlanForUnitUseCase } from "./usecases/GenerateLessonPlanF
 
 // Serviços
 export { LessonPlanService } from "./services/LessonPlanService";
+
+// Mappers
+export { PresentationMapper } from "./mappers/PresentationMapper";

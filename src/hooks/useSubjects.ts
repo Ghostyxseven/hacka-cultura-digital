@@ -1,6 +1,7 @@
 // src/hooks/useSubjects.ts
 import { useState, useEffect } from 'react';
 import { getLessonPlanService } from '@/lib/service';
+import { PresentationMapper } from '@/application';
 import type { SubjectViewModel } from '@/application/viewmodels';
 
 /**
@@ -15,7 +16,8 @@ export function useSubjects() {
   useEffect(() => {
     try {
       const service = getLessonPlanService();
-      const allSubjects = service.getSubjectsViewModels();
+      const allSubjectsEntities = service.getSubjects();
+      const allSubjects = PresentationMapper.toSubjectViewModels(allSubjectsEntities);
       setSubjects(allSubjects);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar disciplinas');
@@ -28,7 +30,8 @@ export function useSubjects() {
     setLoading(true);
     try {
       const service = getLessonPlanService();
-      const allSubjects = service.getSubjectsViewModels();
+      const allSubjectsEntities = service.getSubjects();
+      const allSubjects = PresentationMapper.toSubjectViewModels(allSubjectsEntities);
       setSubjects(allSubjects);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao atualizar disciplinas');
