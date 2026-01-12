@@ -52,7 +52,7 @@ export default function MeusPlanosPage() {
               description="Comece criando disciplinas e unidades, depois gere planos de aula usando a IA"
               action={
                 <div className="flex gap-4 justify-center mt-6">
-                  <Link href="/subjects/new">
+                  <Link href="/professor/disciplinas/new">
                     <Button>➕ Nova Disciplina</Button>
                   </Link>
                   <Link href="/professor">

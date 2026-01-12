@@ -75,7 +75,7 @@ export default function ProfessorPage() {
         <StatsSection stats={stats} />
 
         <div className="mb-8">
-          <Link href="/subjects/new">
+          <Link href="/professor/disciplinas/new">
             <Button>➕ Nova Disciplina</Button>
           </Link>
         </div>
@@ -106,11 +106,11 @@ export default function ProfessorPage() {
                 onDelete={handleDeleteSubject}
                 emptyStateTitle="Nenhuma disciplina cadastrada"
                 emptyStateDescription="Comece criando uma nova disciplina"
-                emptyStateAction={
-                  <Link href="/subjects/new">
-                    <Button>➕ Nova Disciplina</Button>
-                  </Link>
-                }
+              emptyStateAction={
+                <Link href="/professor/disciplinas/new">
+                  <Button>➕ Nova Disciplina</Button>
+                </Link>
+              }
               />
             </div>
           </div>

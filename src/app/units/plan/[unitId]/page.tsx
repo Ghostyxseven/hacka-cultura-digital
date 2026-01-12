@@ -72,7 +72,7 @@ export default function LessonPlanPage() {
     return null;
   }
 
-  const backHref = canGenerate ? `/subjects/${unit.subjectId}` : '/aluno';
+  const backHref = canGenerate ? `/professor/disciplinas/${unit.subjectId}` : '/aluno';
 
   return (
     <ProtectedRoute>
