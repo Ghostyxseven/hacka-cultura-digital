@@ -4,6 +4,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import type { SubjectViewModel } from '@/app/types';
 import { Button } from '@/components/ui/Button';
 
