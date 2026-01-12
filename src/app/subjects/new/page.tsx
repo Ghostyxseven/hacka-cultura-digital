@@ -7,7 +7,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function Page() {
   return (
-    <ProtectedRoute requiredRole="professor">
+    <ProtectedRoute allowedRoles={['professor', 'admin']}>
       <NewSubjectPage />
     </ProtectedRoute>
   );
