@@ -55,12 +55,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-blue-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 hover:shadow-3xl transition-all duration-300">
           <div className="text-center mb-8">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-4xl shadow-lg">
+              🎓
+            </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              🎓 Hacka Cultura Digital
+              Hacka Cultura Digital
             </h1>
             <p className="text-gray-600">Faça login para continuar</p>
           </div>

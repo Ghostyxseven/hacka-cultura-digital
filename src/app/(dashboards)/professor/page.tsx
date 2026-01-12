@@ -66,9 +66,9 @@ export default function ProfessorPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm border-b p-4">
-        <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-        <p className="text-sm text-gray-600">Gerencie suas disciplinas e materiais didáticos</p>
+      <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h2>
+        <p className="text-gray-600">Gerencie suas disciplinas e materiais didáticos</p>
       </div>
 
       <PageContainer>
@@ -80,9 +80,9 @@ export default function ProfessorPage() {
           </Link>
         </div>
 
-        <div className="bg-white rounded-lg shadow mb-8">
-          <div className="px-6 py-4 border-b">
-            <h2 className="text-xl font-semibold text-gray-900">Disciplinas</h2>
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 mb-8 transition-all duration-200">
+          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+            <h2 className="text-xl font-bold text-gray-900">Disciplinas</h2>
           </div>
           <div className="p-6">
             <SubjectsList
@@ -103,9 +103,9 @@ export default function ProfessorPage() {
         </div>
 
         {recentUnits.length > 0 && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">Unidades Recentes</h2>
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-200">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <h2 className="text-xl font-bold text-gray-900">Unidades Recentes</h2>
             </div>
             <div className="p-6">
               <UnitsList

@@ -143,7 +143,12 @@ export default function NewUnitPage() {
         />
 
         <PageContainer maxWidth="md">
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Nova Unidade</h1>
+            <p className="text-gray-600">Crie uma nova unidade de ensino para a disciplina: <span className="font-semibold text-primary-600">{subject.name}</span></p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 hover:shadow-xl transition-all duration-200">
             <div className="space-y-6">
               <Input
                 id="topic"

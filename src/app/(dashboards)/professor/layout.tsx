@@ -24,39 +24,49 @@ export default function ProfessorLayout({
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-lg border-r fixed h-full">
-        <div className="p-6 border-b">
-          <h1 className="text-xl font-bold text-gray-900">👨‍🏫 Professor</h1>
-          <p className="text-sm text-gray-600 mt-1">{user?.name}</p>
+      <aside className="w-64 bg-white shadow-xl border-r border-gray-200 fixed h-full">
+        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-white">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-lg">
+              {user?.name.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-gray-900">👨‍🏫 Professor</h1>
+              <p className="text-xs text-gray-600">{user?.name}</p>
+            </div>
+          </div>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav className="p-4 space-y-1">
           <Link href="/professor">
-            <button className="w-full text-left px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
-              📊 Dashboard
+            <button className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-medium transition-all duration-200 flex items-center gap-2">
+              <span>📊</span>
+              <span>Dashboard</span>
             </button>
           </Link>
 
           <Link href="/subjects/new">
-            <button className="w-full text-left px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
-              ➕ Nova Disciplina
+            <button className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-medium transition-all duration-200 flex items-center gap-2">
+              <span>➕</span>
+              <span>Nova Disciplina</span>
             </button>
           </Link>
 
           <Link href="/professor">
-            <button className="w-full text-left px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
-              📚 Meus Planos
+            <button className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-medium transition-all duration-200 flex items-center gap-2">
+              <span>📚</span>
+              <span>Meus Planos</span>
             </button>
           </Link>
         </nav>
 
-        <div className="absolute bottom-0 w-full p-4 border-t">
+        <div className="absolute bottom-0 w-full p-4 border-t border-gray-200 bg-gray-50">
           <Button
             variant="secondary"
             onClick={handleLogout}
-            className="w-full"
+            className="w-full hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all duration-200"
           >
-            Sair
+            🚪 Sair
           </Button>
         </div>
       </aside>

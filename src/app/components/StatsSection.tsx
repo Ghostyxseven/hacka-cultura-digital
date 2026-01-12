@@ -1,4 +1,4 @@
-// src/app/pages/components/StatsSection.tsx
+// src/app/components/StatsSection.tsx
 // Componente reutilizável para seção de estatísticas
 import { StatCard } from '@/components/ui/StatCard';
 

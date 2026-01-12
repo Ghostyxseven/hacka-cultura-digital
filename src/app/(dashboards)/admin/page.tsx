@@ -110,18 +110,23 @@ export default function AdminPage() {
       />
 
       <PageContainer>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Admin</h1>
+          <p className="text-gray-600">Gerencie usuários e configure o sistema</p>
+        </div>
+        
         <StatsSection stats={stats} />
 
-        <div className="bg-white rounded-lg shadow mb-8">
-          <div className="px-6 py-4 border-b flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-900">Cadastrar Professor</h2>
-            <Button onClick={() => setShowForm(!showForm)}>
-              {showForm ? 'Cancelar' : '+ Novo Professor'}
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 mb-8 transition-all duration-200">
+          <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white">
+            <h2 className="text-xl font-bold text-gray-900">Cadastrar Professor</h2>
+            <Button onClick={() => setShowForm(!showForm)} variant={showForm ? 'secondary' : 'primary'}>
+              {showForm ? '✕ Cancelar' : '➕ Novo Professor'}
             </Button>
           </div>
           {showForm && (
-            <div className="p-6 border-t">
-              <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+            <div className="p-6 border-t bg-gray-50/50">
+              <form onSubmit={handleSubmit} className="space-y-5 max-w-md">
                 <Input
                   id="name"
                   label="Nome"
@@ -163,22 +168,29 @@ export default function AdminPage() {
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow mb-8">
-          <div className="px-6 py-4 border-b">
-            <h2 className="text-xl font-semibold text-gray-900">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 mb-8 transition-all duration-200">
+          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+            <h2 className="text-xl font-bold text-gray-900">
               Professores ({professores.length})
             </h2>
           </div>
           <div className="p-6">
             {professores.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">Nenhum professor cadastrado</p>
+              <div className="text-center py-8">
+                <p className="text-gray-500">Nenhum professor cadastrado</p>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {professores.map((prof) => (
-                  <div key={prof.id} className="flex justify-between items-center p-4 border rounded-lg">
-                    <div>
-                      <p className="font-medium text-gray-900">{prof.name}</p>
-                      <p className="text-sm text-gray-500">{prof.email}</p>
+                  <div key={prof.id} className="group flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:shadow-md hover:border-primary-300 bg-white transition-all duration-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-sm">
+                        {prof.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">{prof.name}</p>
+                        <p className="text-sm text-gray-500">{prof.email}</p>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -187,25 +199,35 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b">
-            <h2 className="text-xl font-semibold text-gray-900">Alunos ({alunos.length})</h2>
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-200">
+          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+            <h2 className="text-xl font-bold text-gray-900">Alunos ({alunos.length})</h2>
           </div>
           <div className="p-6">
             {alunos.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">Nenhum aluno cadastrado</p>
+              <div className="text-center py-8">
+                <p className="text-gray-500">Nenhum aluno cadastrado</p>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {alunos.map((aluno) => {
                   const professor = professores.find(p => p.id === aluno.professorId);
                   return (
-                    <div key={aluno.id} className="flex justify-between items-center p-4 border rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900">{aluno.name}</p>
-                        <p className="text-sm text-gray-500">{aluno.email}</p>
-                        {professor && (
-                          <p className="text-xs text-gray-400">Professor: {professor.name}</p>
-                        )}
+                    <div key={aluno.id} className="group flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:shadow-md hover:border-primary-300 bg-white transition-all duration-200">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                          {aluno.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900 group-hover:text-primary-600 transition-colors truncate">{aluno.name}</p>
+                          <p className="text-sm text-gray-500 truncate">{aluno.email}</p>
+                          {professor && (
+                            <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                              <span>👨‍🏫</span>
+                              <span className="truncate">Professor: {professor.name}</span>
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );

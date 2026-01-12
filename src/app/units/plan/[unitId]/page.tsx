@@ -84,91 +84,136 @@ export default function LessonPlanPage() {
 
         <PageContainer maxWidth="md">
           {!lessonPlan ? (
-            <div className="bg-white rounded-lg shadow p-8 text-center">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center hover:shadow-xl transition-all duration-200">
               <EmptyState
                 title="Nenhum plano de aula gerado para esta unidade ainda."
                 action={
                   canGenerate ? (
-                    <Button onClick={handleGenerate} disabled={generating}>
-                      {generating ? 'Gerando...' : '🤖 Gerar Plano de Aula com IA'}
+                    <Button onClick={handleGenerate} disabled={generating} className="mt-4">
+                      {generating ? '⏳ Gerando...' : '🤖 Gerar Plano de Aula com IA'}
                     </Button>
                   ) : (
-                    <p className="text-gray-500">Aguarde o professor gerar o plano de aula.</p>
+                    <p className="text-gray-500 mt-4">Aguarde o professor gerar o plano de aula.</p>
                   )
                 }
               />
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">{lessonPlan.title}</h2>
-                <div className="flex gap-4 text-sm text-gray-600">
-                  <span>Disciplina: {lessonPlan.subject}</span>
-                  <span>•</span>
-                  <span>{lessonPlan.gradeYear}</span>
-                  <span>•</span>
-                  <span>{lessonPlan.duration}</span>
+              <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-xl shadow-lg border border-primary-200 p-6 hover:shadow-xl transition-all duration-200">
+                <h2 className="text-3xl font-bold text-gray-900 mb-3">{lessonPlan.title}</h2>
+                <div className="flex flex-wrap items-center gap-3 text-sm">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/80 text-gray-700 font-medium border border-primary-200">
+                    📚 {lessonPlan.subject}
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/80 text-gray-700 font-medium border border-primary-200">
+                    🎓 {lessonPlan.gradeYear}
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/80 text-gray-700 font-medium border border-primary-200">
+                    ⏱️ {lessonPlan.duration}
+                  </span>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Objetivos de Aprendizagem</h3>
-                <ul className="list-disc list-inside space-y-2 text-gray-700">
+              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="text-primary-600">🎯</span>
+                  Objetivos de Aprendizagem
+                </h3>
+                <ul className="space-y-3">
                   {lessonPlan.objectives.map((obj, index) => (
-                    <li key={index}>{obj}</li>
+                    <li key={index} className="flex items-start gap-3 text-gray-700">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold mt-0.5">
+                        {index + 1}
+                      </span>
+                      <span className="flex-1">{obj}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Competências BNCC</h3>
-                <ul className="list-disc list-inside space-y-2 text-gray-700">
+              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="text-green-600">📋</span>
+                  Competências BNCC
+                </h3>
+                <ul className="space-y-3">
                   {lessonPlan.bnccCompetencies.map((comp, index) => (
-                    <li key={index}>{comp}</li>
+                    <li key={index} className="flex items-start gap-3 text-gray-700">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-sm font-bold mt-0.5">
+                        ✓
+                      </span>
+                      <span className="flex-1">{comp}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Metodologia</h3>
-                <div className="text-gray-700 whitespace-pre-line">{lessonPlan.methodology}</div>
+              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="text-blue-600">📖</span>
+                  Metodologia
+                </h3>
+                <div className="text-gray-700 whitespace-pre-line leading-relaxed bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  {lessonPlan.methodology}
+                </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Conteúdo</h3>
-                <div className="text-gray-700 whitespace-pre-line">{lessonPlan.content}</div>
+              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="text-purple-600">📚</span>
+                  Conteúdo
+                </h3>
+                <div className="text-gray-700 whitespace-pre-line leading-relaxed bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  {lessonPlan.content}
+                </div>
               </div>
 
               {lessonPlan.quiz && lessonPlan.quiz.length > 0 && (
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+                  <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <span className="text-yellow-600">✏️</span>
                     Atividade Avaliativa
                   </h3>
                   <div className="space-y-6">
                     {lessonPlan.quiz.map((question, index) => (
-                      <div key={question.id} className="border-l-4 border-primary-500 pl-4">
-                        <p className="font-medium text-gray-900 mb-3">
-                          {index + 1}. {question.question}
-                        </p>
-                        <ul className="space-y-2 mb-3">
+                      <div key={question.id} className="border-l-4 border-primary-500 bg-gray-50 rounded-r-xl p-5 hover:shadow-md transition-all duration-200">
+                        <div className="flex items-start gap-3 mb-4">
+                          <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center text-sm font-bold">
+                            {index + 1}
+                          </span>
+                          <p className="font-semibold text-gray-900 text-lg flex-1">
+                            {question.question}
+                          </p>
+                        </div>
+                        <ul className="space-y-2 mb-4 ml-11">
                           {question.options.map((option, optIndex) => (
                             <li
                               key={optIndex}
-                              className={`p-2 rounded ${
+                              className={`p-3 rounded-lg transition-all duration-200 ${
                                 optIndex === question.correctAnswer
-                                  ? 'bg-green-100 border border-green-300'
-                                  : 'bg-gray-50'
+                                  ? 'bg-green-100 border-2 border-green-400 shadow-sm'
+                                  : 'bg-white border border-gray-200 hover:border-primary-300'
                               }`}
                             >
-                              {String.fromCharCode(65 + optIndex)}. {option}
-                              {optIndex === question.correctAnswer && (
-                                <span className="ml-2 text-green-700 font-semibold">✓ Correta</span>
-                              )}
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium text-gray-900">
+                                  <span className="font-bold text-primary-600 mr-2">{String.fromCharCode(65 + optIndex)}.</span>
+                                  {option}
+                                </span>
+                                {optIndex === question.correctAnswer && (
+                                  <span className="flex items-center gap-1 text-green-700 font-bold text-sm bg-green-200 px-2 py-1 rounded-full">
+                                    <span>✓</span>
+                                    <span>Correta</span>
+                                  </span>
+                                )}
+                              </div>
                             </li>
                           ))}
                         </ul>
-                        <div className="bg-blue-50 p-3 rounded text-sm text-gray-700">
-                          <strong>Justificativa:</strong> {question.justification}
+                        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg ml-11">
+                          <strong className="text-blue-900 block mb-1">💡 Justificativa:</strong>
+                          <p className="text-sm text-gray-700">{question.justification}</p>
                         </div>
                       </div>
                     ))}
@@ -176,9 +221,12 @@ export default function LessonPlanPage() {
                 </div>
               )}
 
-              <div className="bg-gray-100 rounded-lg p-4 text-sm text-gray-600">
-                <p>Gerado por: {lessonPlan.metadata.aiModel}</p>
-                <p>Versão do prompt: {lessonPlan.metadata.promptVersion}</p>
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 p-5 text-sm text-gray-600">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-primary-600">🤖</span>
+                  <p className="font-semibold text-gray-700">Gerado por: {lessonPlan.metadata.aiModel}</p>
+                </div>
+                <p className="text-gray-600">Versão do prompt: {lessonPlan.metadata.promptVersion}</p>
               </div>
             </div>
           )}

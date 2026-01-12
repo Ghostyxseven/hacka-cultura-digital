@@ -110,7 +110,12 @@ export default function NewSubjectPage() {
         <HeaderWithAuth title="Nova Disciplina" backHref="/professor" />
 
         <PageContainer maxWidth="md">
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Nova Disciplina</h1>
+            <p className="text-gray-600">Crie uma nova disciplina para organizar seus materiais didáticos</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 hover:shadow-xl transition-all duration-200">
             <div className="space-y-6">
               <Input
                 id="name"
@@ -142,11 +147,12 @@ export default function NewSubjectPage() {
                   {SCHOOL_YEARS.map((year) => (
                     <label
                       key={year}
-                      className="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50"
+                      className="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-primary-50 hover:border-primary-300 transition-all duration-200 bg-white"
                     >
                       <input
                         type="checkbox"
                         checked={formData.gradeYears.includes(year)}
+                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                         onChange={() => toggleGradeYear(year)}
                         className="mr-2"
                       />

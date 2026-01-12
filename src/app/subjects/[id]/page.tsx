@@ -122,9 +122,9 @@ export default function SubjectDetailPage() {
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-200">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <h2 className="text-xl font-bold text-gray-900">
                 Unidades de Ensino ({units.length})
               </h2>
             </div>
