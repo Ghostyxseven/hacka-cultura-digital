@@ -52,7 +52,7 @@ export default function AdminPage() {
       newErrors.email = 'Email é obrigatório';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = 'Email inválido';
-    } else if (authService.userExists(email)) {
+    } else if (authService.emailExists(email)) {
       newErrors.email = 'Email já cadastrado';
     }
     if (!password) {
