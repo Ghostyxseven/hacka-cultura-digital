@@ -14,7 +14,6 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { UnitsList } from '@/app/components';
 import { showError, showSuccess } from '@/utils/notifications';
-import { getLessonPlanService } from '@/lib/service';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import Link from 'next/link';
 

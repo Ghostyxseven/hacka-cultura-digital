@@ -238,6 +238,14 @@ export class LessonPlanService {
   }
 
   /**
+   * Remove uma unidade pelo ID
+   * RF02 - Criação manual de unidades
+   */
+  deleteUnit(id: string): void {
+    this.deleteUnitUseCase.execute(id);
+  }
+
+  /**
    * Gera plano de aula e atividade para uma unidade específica
    * RF04/05 - Geração automática por unidade
    */
