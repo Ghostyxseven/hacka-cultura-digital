@@ -7,17 +7,26 @@ Interface do usuário desenvolvida com Next.js 14 (App Router), React e Tailwind
 ```
 src/app/
 ├── layout.tsx              # Layout raiz
-├── page.tsx                # Dashboard (Wireframe 1)
+├── page.tsx                # Redireciona baseado no role
 ├── globals.css             # Estilos globais Tailwind
-└── subjects/
-    ├── new/                # Nova Disciplina (Wireframe 3)
-    └── [id]/               # Detalhes da Disciplina (Wireframe 2)
-        ├── page.tsx
-        └── units/
-            └── new/        # Nova Unidade (Wireframe 4)
+├── (dashboards)/
+│   ├── professor/
+│   │   ├── layout.tsx      # Layout com sidebar
+│   │   ├── page.tsx        # Dashboard professor
+│   │   ├── disciplinas/
+│   │   │   ├── new/        # Nova Disciplina
+│   │   │   └── [id]/       # Detalhes da Disciplina
+│   │   ├── unidades/
+│   │   │   └── new/        # Nova Unidade
+│   │   └── planos/         # Meus Planos
+│   └── aluno/
+│       ├── layout.tsx      # Layout com header
+│       ├── page.tsx        # Dashboard aluno
+│       └── disciplinas/
+│           └── [id]/       # Detalhes da Disciplina (aluno)
 └── units/
-    └── [id]/
-        └── lesson-plan/    # Visualização do Plano de Aula
+    └── plan/
+        └── [unitId]/        # Visualização do Plano de Aula
 ```
 
 ## 🚀 Como Executar
@@ -42,11 +51,13 @@ npm run dev
 
 ## 📄 Páginas Implementadas
 
-- ✅ **Dashboard** (`/`) - Wireframe 1
-- ✅ **Nova Disciplina** (`/subjects/new`) - Wireframe 3
-- ✅ **Detalhes da Disciplina** (`/subjects/[id]`) - Wireframe 2
-- ✅ **Nova Unidade** (`/subjects/[id]/units/new`) - Wireframe 4
-- ✅ **Plano de Aula** (`/units/[id]/lesson-plan`)
+- ✅ **Dashboard Professor** (`/professor`) - Dashboard do professor
+- ✅ **Dashboard Aluno** (`/aluno`) - Dashboard do aluno
+- ✅ **Nova Disciplina** (`/professor/disciplinas/new`) - Criar disciplina
+- ✅ **Detalhes da Disciplina** (`/professor/disciplinas/[id]`) - Ver disciplina (professor)
+- ✅ **Detalhes da Disciplina** (`/aluno/disciplinas/[id]`) - Ver disciplina (aluno)
+- ✅ **Nova Unidade** (`/professor/unidades/new`) - Criar unidade
+- ✅ **Plano de Aula** (`/units/plan/[unitId]`) - Visualizar plano de aula
 
 ## 🎨 Tecnologias
 
