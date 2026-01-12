@@ -1,6 +1,6 @@
 // src/repository/implementations/LocalStorageUserRepository.ts
 import { User } from '../../core/entities/User';
-import { IUserRepository } from '../IUserRepository';
+import { IUserRepository } from '../../core/repositories/IUserRepository';
 
 /**
  * Implementação do repositório de usuários usando LocalStorage

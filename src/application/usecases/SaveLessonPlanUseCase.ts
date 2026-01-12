@@ -1,6 +1,6 @@
 // src/application/usecases/SaveLessonPlanUseCase.ts
 import { LessonPlan } from "../../core/entities/LessonPlan";
-import { ILessonRepository } from "../../repository/ILessonRepository";
+import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 
 /**
  * Caso de uso: Salvamento de Plano de Aula

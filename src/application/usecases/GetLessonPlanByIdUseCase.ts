@@ -1,6 +1,6 @@
 // src/application/usecases/GetLessonPlanByIdUseCase.ts
 import { LessonPlan } from "../../core/entities/LessonPlan";
-import { ILessonRepository } from "../../repository/ILessonRepository";
+import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 
 /**
  * Caso de uso: Busca de Plano de Aula por ID

@@ -2,7 +2,7 @@
 import { LessonPlan } from '../../core/entities/LessonPlan';
 import { Subject } from '../../core/entities/Subject';
 import { Unit } from '../../core/entities/Unit';
-import { ILessonRepository } from '../ILessonRepository';
+import { ILessonRepository } from '../../core/repositories/ILessonRepository';
 
 export class LocalStorageRepository implements ILessonRepository {
   private static instance: LocalStorageRepository;
