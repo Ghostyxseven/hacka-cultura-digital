@@ -55,7 +55,14 @@ export class LocalStorageRepository implements ILessonRepository {
 
   getAllLessonPlans(): LessonPlan[] {
     const data = localStorage.getItem(this.LESSON_PLANS_KEY);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    
+    const plans = JSON.parse(data);
+    // Converte strings de data de volta para objetos Date
+    return plans.map((plan: any) => ({
+      ...plan,
+      createdAt: plan.createdAt ? new Date(plan.createdAt) : new Date(),
+    }));
   }
 
   getLessonPlanById(id: string): LessonPlan | undefined {
@@ -76,7 +83,15 @@ export class LocalStorageRepository implements ILessonRepository {
 
   getAllUnits(): Unit[] {
     const data = localStorage.getItem(this.UNITS_KEY);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    
+    const units = JSON.parse(data);
+    // Converte strings de data de volta para objetos Date
+    return units.map((unit: any) => ({
+      ...unit,
+      createdAt: unit.createdAt ? new Date(unit.createdAt) : new Date(),
+      updatedAt: unit.updatedAt ? new Date(unit.updatedAt) : undefined,
+    }));
   }
 
   getUnitById(id: string): Unit | undefined {
