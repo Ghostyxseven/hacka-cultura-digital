@@ -65,18 +65,12 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
                     return (
                       <View
                         key={optIndex}
-                        style={[
-                          styles.option,
-                          showAnswer && styles.correctOption
-                        ]}
+                        style={showAnswer ? [styles.option, styles.correctOption] : styles.option}
                       >
                         <Text style={styles.optionLetter}>
                           {String.fromCharCode(65 + optIndex)})
                         </Text>
-                        <Text style={[
-                          styles.optionText,
-                          showAnswer && styles.correctOptionText
-                        ]}>
+                        <Text style={showAnswer ? [styles.optionText, styles.correctOptionText] : styles.optionText}>
                           {option}
                           {showAnswer && ' ✓'}
                         </Text>
