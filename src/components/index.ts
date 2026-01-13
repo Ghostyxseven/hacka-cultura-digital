@@ -9,6 +9,8 @@ export { Select } from './ui/Select';
 export { Loading } from './ui/Loading';
 export { EmptyState } from './ui/EmptyState';
 export { StatCard } from './ui/StatCard';
+export { ConfirmDeleteButton } from './ui/ConfirmDeleteButton';
+export { BackButton } from './ui/BackButton';
 
 // Layout Components
 export { Header } from './layout/Header';

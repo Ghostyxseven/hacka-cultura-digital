@@ -9,7 +9,7 @@ import type { SubjectViewModel, SchoolYearViewModel } from '@/application/viewmo
 import { SCHOOL_YEARS } from '@/core/constants/SchoolYears';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
@@ -136,14 +136,30 @@ function NewUnitPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Nova Unidade - {subject.name}</h2>
-        <p className="text-gray-600">Crie uma nova unidade de ensino para esta disciplina</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-50">
+      {/* Header Moderno */}
+      <div className="bg-gradient-to-r from-primary-600 via-primary-500 to-indigo-600 shadow-xl border-b border-primary-700/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-4 mb-3">
+                <BackButton 
+                  href={`/professor/disciplinas/${subjectId}`} 
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30" 
+                />
+              </div>
+              <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+                <span className="text-5xl">➕</span>
+                <span>Nova Unidade - {subject.name}</span>
+              </h1>
+              <p className="text-primary-100 text-lg">Crie uma nova unidade de ensino para esta disciplina</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <PageContainer maxWidth="md">
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 hover:shadow-xl transition-all duration-200">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 hover:shadow-2xl transition-all duration-300">
           <div className="space-y-6">
             <Input
               id="topic"
@@ -176,15 +192,25 @@ function NewUnitPageContent() {
               options={gradeYearOptions}
             />
 
-            <div className="flex gap-4">
-              <Button type="submit" disabled={saving} className="flex-1">
-                {saving ? 'Criando...' : 'Criar Unidade'}
+            <div className="flex gap-4 pt-4">
+              <Button type="submit" disabled={saving} className="flex-1 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+                {saving ? (
+                  <>
+                    <span className="mr-2">⏳</span>
+                    Criando...
+                  </>
+                ) : (
+                  <>
+                    <span className="mr-2">✅</span>
+                    Criar Unidade
+                  </>
+                )}
               </Button>
               <Button
                 type="button"
                 variant="secondary"
                 onClick={() => router.push(`/professor/disciplinas/${subjectId}`)}
-                className="flex-1"
+                className="flex-1 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
               >
                 Cancelar
               </Button>

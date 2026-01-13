@@ -10,7 +10,7 @@ import type { SubjectViewModel } from '@/application/viewmodels';
 import { useUnits } from '@/hooks/useUnits';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { EmptyState, BackButton } from '@/components';
 import { UnitsList } from '@/app/components';
 import { showError } from '@/utils/notifications';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -69,28 +69,54 @@ export default function AlunoSubjectDetailPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">{subject.name}</h2>
-          {subject.description && (
-            <p className="text-gray-600">{subject.description}</p>
-          )}
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50">
+        {/* Header Moderno */}
+        <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 shadow-xl border-b border-blue-700/20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-4 mb-3">
+                  <BackButton href="/aluno" className="bg-white/20 hover:bg-white/30 text-white border-white/30" />
+                </div>
+                <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+                  <span className="text-5xl">📚</span>
+                  <span>{subject.name}</span>
+                </h1>
+                {subject.description && (
+                  <p className="text-blue-100 text-lg">{subject.description}</p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         <PageContainer>
           {unitsWithPlans.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center">
-              <EmptyState
-                title="Nenhum plano de aula disponível para esta disciplina"
-                description="Aguarde seu professor gerar planos de aula para as unidades desta disciplina"
-              />
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-12 text-center">
+              <div className="max-w-md mx-auto">
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                  <span className="text-5xl">📖</span>
+                </div>
+                <EmptyState
+                  title="Nenhum plano de aula disponível para esta disciplina"
+                  description="Aguarde seu professor gerar planos de aula para as unidades desta disciplina"
+                />
+              </div>
             </div>
           ) : (
-            <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-200">
-              <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Planos de Aula Disponíveis ({unitsWithPlans.length})
-                </h2>
+            <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl border border-gray-200 transition-all duration-300 overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 px-6 py-5 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">📖</span>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Planos de Aula Disponíveis
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {unitsWithPlans.length} {unitsWithPlans.length === 1 ? 'plano de aula disponível' : 'planos de aula disponíveis'}
+                    </p>
+                  </div>
+                </div>
               </div>
               <div className="p-6">
                 <UnitsList

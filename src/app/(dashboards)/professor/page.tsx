@@ -2,8 +2,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { useSubjects } from '@/hooks/useSubjects';
-import { useUnits } from '@/hooks/useUnits';
+import { useSubjects, useUnits, useRecentUnits } from '@/hooks';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { Button } from '@/components/ui/Button';
@@ -17,18 +16,10 @@ export default function ProfessorPage() {
   const { user, isProfessor } = useAuth();
   const { subjects, loading: subjectsLoading, refresh: refreshSubjects } = useSubjects();
   const { units: allUnits, loading: unitsLoading, refresh: refreshUnits } = useUnits();
+  const recentUnits = useRecentUnits(allUnits, 5);
   const lessonPlanService = getLessonPlanService();
 
   const loading = subjectsLoading || unitsLoading;
-  
-  // Ordena unidades por data de criação (mais recente primeiro) e pega as 5 mais recentes
-  const recentUnits = [...allUnits]
-    .sort((a, b) => {
-      const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime();
-      const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime();
-      return dateB - dateA;
-    })
-    .slice(0, 5);
 
   if (!isProfessor) {
     return (
@@ -73,37 +64,69 @@ export default function ProfessorPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h2>
-        <p className="text-gray-600">Gerencie suas disciplinas e materiais didáticos</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-50">
+      {/* Header Moderno */}
+      <div className="bg-gradient-to-r from-primary-600 via-primary-500 to-indigo-600 shadow-xl border-b border-primary-700/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+              <span className="text-5xl">👨‍🏫</span>
+              <span>Dashboard Professor</span>
+            </h1>
+            <p className="text-primary-100 text-lg">Gerencie suas disciplinas e materiais didáticos</p>
+          </div>
+        </div>
       </div>
 
       <PageContainer>
-        <StatsSection stats={stats} />
+        {/* Estatísticas */}
+        <div className="mb-8">
+          <StatsSection stats={stats} />
+        </div>
 
+        {/* Botão Nova Disciplina */}
         <div className="mb-8">
           <Link href="/professor/disciplinas/new">
-            <Button>➕ Nova Disciplina</Button>
+            <Button className="shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+              <span className="mr-2">➕</span>
+              Nova Disciplina
+            </Button>
           </Link>
         </div>
 
+        {/* Seção de Disciplinas */}
         {subjects.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center">
-            <EmptyState
-              title="Nenhuma disciplina cadastrada"
-              description="Comece criando uma nova disciplina para organizar seus materiais didáticos"
-              action={
-                <Link href="/professor/disciplinas/new">
-                  <Button>➕ Nova Disciplina</Button>
-                </Link>
-              }
-            />
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-12 text-center mb-8">
+            <div className="max-w-md mx-auto">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary-100 to-indigo-100 flex items-center justify-center">
+                <span className="text-5xl">📚</span>
+              </div>
+              <EmptyState
+                title="Nenhuma disciplina cadastrada ainda"
+                description="Comece criando uma nova disciplina para organizar seus materiais didáticos"
+                action={
+                  <Link href="/professor/disciplinas/new">
+                    <Button className="mt-6">
+                      <span className="mr-2">➕</span>
+                      Nova Disciplina
+                    </Button>
+                  </Link>
+                }
+              />
+            </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 mb-8 transition-all duration-200">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-              <h2 className="text-xl font-bold text-gray-900">Disciplinas</h2>
+          <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl border border-gray-200 mb-8 transition-all duration-300 overflow-hidden">
+            <div className="bg-gradient-to-r from-primary-50 via-indigo-50 to-primary-50 px-6 py-5 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">📚</span>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Disciplinas</h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {subjects.length} {subjects.length === 1 ? 'disciplina cadastrada' : 'disciplinas cadastradas'}
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="p-6">
               <SubjectsList
@@ -114,20 +137,29 @@ export default function ProfessorPage() {
                 onDelete={handleDeleteSubject}
                 emptyStateTitle="Nenhuma disciplina cadastrada"
                 emptyStateDescription="Comece criando uma nova disciplina"
-              emptyStateAction={
-                <Link href="/professor/disciplinas/new">
-                  <Button>➕ Nova Disciplina</Button>
-                </Link>
-              }
+                emptyStateAction={
+                  <Link href="/professor/disciplinas/new">
+                    <Button>➕ Nova Disciplina</Button>
+                  </Link>
+                }
               />
             </div>
           </div>
         )}
 
+        {/* Seção de Unidades Recentes */}
         {recentUnits.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-200">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-              <h2 className="text-xl font-bold text-gray-900">Unidades Recentes</h2>
+          <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl border border-gray-200 transition-all duration-300 overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-purple-50 px-6 py-5 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⚡</span>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Unidades Recentes</h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {recentUnits.length} {recentUnits.length === 1 ? 'unidade recente' : 'unidades recentes'}
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="p-6">
               <UnitsList
