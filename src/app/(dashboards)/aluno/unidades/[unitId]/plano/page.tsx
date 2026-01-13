@@ -9,7 +9,7 @@ import { PresentationMapper } from '@/application';
 import type { LessonPlanViewModel, UnitViewModel } from '@/application/viewmodels';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
-import { EmptyState, BackButton } from '@/components';
+import { EmptyState, BackButton, Button } from '@/components';
 import { showError } from '@/utils/notifications';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
