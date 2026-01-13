@@ -36,9 +36,9 @@ export function SubjectCard({
 
   return (
     <div className="group relative bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:border-primary-300 transition-all duration-200">
-      <Link href={subjectHref} className="block">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1">
+      <div className="flex items-start justify-between mb-3">
+        <Link href={subjectHref} className="flex-1 block">
+          <div>
             <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
               {subject.name}
             </h3>
@@ -53,16 +53,16 @@ export function SubjectCard({
               </div>
             )}
           </div>
-          {canDelete && onDelete && (
-            <div className="ml-3 flex-shrink-0" onClick={(e) => e.preventDefault()}>
-              <ConfirmDeleteButton
-                onConfirm={handleDelete}
-                itemName={subject.name}
-              />
-            </div>
-          )}
-        </div>
-      </Link>
+        </Link>
+        {canDelete && onDelete && (
+          <div className="ml-3 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+            <ConfirmDeleteButton
+              onConfirm={handleDelete}
+              itemName={subject.name}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

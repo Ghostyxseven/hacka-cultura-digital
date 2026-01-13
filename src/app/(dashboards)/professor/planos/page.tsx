@@ -20,22 +20,12 @@ export default function MeusPlanosPage() {
 
   const loading = subjectsLoading || unitsLoading;
   
-  // Recarrega os dados quando a página recebe foco (quando o usuário volta para ela)
-  useEffect(() => {
-    const handleFocus = () => {
-      refreshUnits();
-      refreshSubjects();
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [refreshUnits, refreshSubjects]);
-  
-  // Também recarrega quando a página é montada
+  // Recarrega os dados quando a página é montada
   useEffect(() => {
     refreshUnits();
     refreshSubjects();
-  }, [refreshUnits, refreshSubjects]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
       if (!isProfessor) {
         return (
