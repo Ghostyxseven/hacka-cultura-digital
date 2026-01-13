@@ -1,21 +1,22 @@
 // src/app/api/pdf/slides/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getGenerateSlidesPDFUseCase } from '@/lib/pdfService';
+import { ReactPDFGenerator } from '@/infrastructure/pdf/ReactPDFGenerator';
+import type { LessonPlan } from '@/core/entities/LessonPlan';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { lessonPlanId, options } = body;
+    const { lessonPlan, options } = body;
 
-    if (!lessonPlanId) {
+    if (!lessonPlan) {
       return NextResponse.json(
-        { error: 'lessonPlanId é obrigatório' },
+        { error: 'lessonPlan é obrigatório' },
         { status: 400 }
       );
     }
 
-    const useCase = getGenerateSlidesPDFUseCase();
-    const pdfBuffer = await useCase.execute(lessonPlanId, options || {});
+    const pdfGenerator = new ReactPDFGenerator();
+    const pdfBuffer = await pdfGenerator.generateSlidesPDF(lessonPlan as LessonPlan, options || {});
 
     // Retorna o PDF como resposta
     return new NextResponse(pdfBuffer as any, {

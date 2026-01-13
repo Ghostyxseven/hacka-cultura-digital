@@ -78,13 +78,19 @@ export default function LessonPlanPage() {
 
     setGeneratingPDF(true);
     try {
+      // Busca a entidade completa do plano de aula
+      const planEntity = lessonPlanService.getLessonPlanById(lessonPlan.id);
+      if (!planEntity) {
+        throw new Error('Plano de aula não encontrado');
+      }
+
       const response = await fetch('/api/pdf/prova', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          lessonPlanId: lessonPlan.id,
+          lessonPlan: planEntity,
           options: {
             schoolName: 'INSTITUTO FEDERAL DO PIAUÍ - IFPI',
             includeAnswers: false, // Prova sem gabarito
@@ -119,13 +125,19 @@ export default function LessonPlanPage() {
 
     setGeneratingSlides(true);
     try {
+      // Busca a entidade completa do plano de aula
+      const planEntity = lessonPlanService.getLessonPlanById(lessonPlan.id);
+      if (!planEntity) {
+        throw new Error('Plano de aula não encontrado');
+      }
+
       const response = await fetch('/api/pdf/slides', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          lessonPlanId: lessonPlan.id,
+          lessonPlan: planEntity,
           options: {
             schoolName: 'INSTITUTO FEDERAL DO PIAUÍ - IFPI',
             includeQuiz: true,

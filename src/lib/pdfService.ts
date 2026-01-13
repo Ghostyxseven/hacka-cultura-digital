@@ -3,7 +3,7 @@
 import { GenerateProvaPDFUseCase } from '@/application/usecases/GenerateProvaPDFUseCase';
 import { GenerateSlidesPDFUseCase } from '@/application/usecases/GenerateSlidesPDFUseCase';
 import { LocalStorageRepository } from '@/repository/implementations/LocalStorageRepository';
-import { ReactPDFGenerator } from '@/infrastructure/pdf/ReactPDFGenerator.tsx';
+import { ReactPDFGenerator } from '@/infrastructure/pdf/ReactPDFGenerator';
 
 let provaPDFUseCaseInstance: GenerateProvaPDFUseCase | null = null;
 let slidesPDFUseCaseInstance: GenerateSlidesPDFUseCase | null = null;
