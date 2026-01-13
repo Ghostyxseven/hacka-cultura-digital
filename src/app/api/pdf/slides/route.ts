@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const pdfBuffer = await useCase.execute(lessonPlanId, options || {});
 
     // Retorna o PDF como resposta
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as any, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="slides-${lessonPlanId}.pdf"`,
