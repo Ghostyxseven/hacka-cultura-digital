@@ -83,10 +83,18 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">🔧 Dashboard Admin</h2>
-        <p className="text-gray-600">Gerenciamento de usuários e sistema</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/30 to-gray-50">
+      {/* Header Moderno */}
+      <div className="bg-gradient-to-r from-red-600 via-orange-500 to-red-600 shadow-xl border-b border-red-700/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+              <span className="text-5xl">🔧</span>
+              <span>Dashboard Admin</span>
+            </h1>
+            <p className="text-red-100 text-lg">Gerenciamento de usuários e sistema</p>
+          </div>
+        </div>
       </div>
 
       <PageContainer>
@@ -94,11 +102,14 @@ export default function AdminPage() {
 
         {/* Formulário de Edição */}
         {editingUser && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 mb-8">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">
-                Editar {editingUser.role === 'professor' ? 'Professor' : 'Aluno'}
-              </h2>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 mb-8 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">✏️</span>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Editar {editingUser.role === 'professor' ? 'Professor' : 'Aluno'}
+                </h2>
+              </div>
             </div>
             <div className="p-6 border-t bg-gray-50/50">
               <UserEditForm
@@ -117,9 +128,12 @@ export default function AdminPage() {
 
         {/* Formulário de Cadastro */}
         {!editingUser && (
-          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 mb-8 transition-all duration-200">
-            <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white">
-              <h2 className="text-xl font-bold text-gray-900">Cadastrar Professor</h2>
+          <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl border border-gray-200 mb-8 transition-all duration-300 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-primary-50 via-indigo-50 to-primary-50">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">➕</span>
+                <h2 className="text-2xl font-bold text-gray-900">Cadastrar Professor</h2>
+              </div>
               <Button 
                 onClick={() => {
                   setShowForm(!showForm);
@@ -145,11 +159,19 @@ export default function AdminPage() {
         )}
 
         {/* Lista de Professores */}
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 mb-8 transition-all duration-200">
-          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-            <h2 className="text-xl font-bold text-gray-900">
-              Professores ({professores.length})
-            </h2>
+        <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl border border-gray-200 mb-8 transition-all duration-300 overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-primary-50 via-indigo-50 to-primary-50">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">👨‍🏫</span>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Professores
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {professores.length} {professores.length === 1 ? 'professor cadastrado' : 'professores cadastrados'}
+                </p>
+              </div>
+            </div>
           </div>
           <div className="p-6">
             {professores.length === 0 ? (
@@ -159,7 +181,7 @@ export default function AdminPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {professores.map((prof) => (
-                  <div key={prof.id} className="group relative flex items-center justify-between p-5 border border-gray-200 rounded-xl hover:shadow-md hover:border-primary-300 bg-white transition-all duration-200">
+                  <div key={prof.id} className="group relative flex items-center justify-between p-6 border border-gray-200 rounded-2xl hover:shadow-lg hover:border-primary-300 bg-white transition-all duration-300 hover:-translate-y-1">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                         {prof.name.charAt(0).toUpperCase()}
@@ -200,9 +222,17 @@ export default function AdminPage() {
         </div>
 
         {/* Lista de Alunos */}
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-200">
-          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-            <h2 className="text-xl font-bold text-gray-900">Alunos ({alunos.length})</h2>
+        <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl border border-gray-200 transition-all duration-300 overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">👨‍🎓</span>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Alunos</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {alunos.length} {alunos.length === 1 ? 'aluno cadastrado' : 'alunos cadastrados'}
+                </p>
+              </div>
+            </div>
           </div>
           <div className="p-6">
             {alunos.length === 0 ? (
@@ -214,7 +244,7 @@ export default function AdminPage() {
                 {alunos.map((aluno) => {
                   const professor = professores.find(p => p.id === aluno.professorId);
                   return (
-                    <div key={aluno.id} className="group relative flex items-center justify-between p-5 border border-gray-200 rounded-xl hover:shadow-md hover:border-primary-300 bg-white transition-all duration-200">
+                    <div key={aluno.id} className="group relative flex items-center justify-between p-6 border border-gray-200 rounded-2xl hover:shadow-lg hover:border-primary-300 bg-white transition-all duration-300 hover:-translate-y-1">
                       <div className="flex items-center gap-4 flex-1 min-w-0">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                           {aluno.name.charAt(0).toUpperCase()}
