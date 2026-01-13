@@ -2,8 +2,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { useSubjects } from '@/hooks/useSubjects';
-import { useUnits } from '@/hooks/useUnits';
+import { useSubjects, useUnits, useRecentUnits } from '@/hooks';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { Button } from '@/components/ui/Button';
@@ -17,18 +16,10 @@ export default function ProfessorPage() {
   const { user, isProfessor } = useAuth();
   const { subjects, loading: subjectsLoading, refresh: refreshSubjects } = useSubjects();
   const { units: allUnits, loading: unitsLoading, refresh: refreshUnits } = useUnits();
+  const recentUnits = useRecentUnits(allUnits, 5);
   const lessonPlanService = getLessonPlanService();
 
   const loading = subjectsLoading || unitsLoading;
-  
-  // Ordena unidades por data de criação (mais recente primeiro) e pega as 5 mais recentes
-  const recentUnits = [...allUnits]
-    .sort((a, b) => {
-      const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime();
-      const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime();
-      return dateB - dateA;
-    })
-    .slice(0, 5);
 
   if (!isProfessor) {
     return (

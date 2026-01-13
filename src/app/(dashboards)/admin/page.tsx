@@ -1,178 +1,31 @@
 // src/app/(dashboards)/admin/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAuthService } from '@/lib/authService';
-import { HeaderWithAuth } from '@/components/layout/HeaderWithAuth';
+import { useUserManagement } from '@/hooks';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { StatsSection } from '@/app/components';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { showError, showSuccess } from '@/utils/notifications';
+import { UserCreateForm } from './components/UserCreateForm';
+import { UserEditForm } from './components/UserEditForm';
 import type { User } from '@/core/entities/User';
 
 export default function AdminPage() {
   const { isAdmin } = useAuth();
-  const authService = getAuthService();
-  const [professores, setProfessores] = useState<User[]>([]);
-  const [alunos, setAlunos] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  
+  const {
+    professores,
+    alunos,
+    loading,
+    createProfessor,
+    updateUser,
+    deleteUser,
+    getAlunosByProfessorId,
+  } = useUserManagement();
+
   const [showForm, setShowForm] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
-
-  // Estado para edição
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [editName, setEditName] = useState('');
-  const [editEmail, setEditEmail] = useState('');
-  const [editPassword, setEditPassword] = useState('');
-  const [editProfessorId, setEditProfessorId] = useState('');
-  const [editErrors, setEditErrors] = useState<{ name?: string; email?: string; password?: string; professorId?: string }>({});
-
-  useEffect(() => {
-    if (isAdmin) {
-      loadUsers();
-    }
-  }, [isAdmin]);
-
-  const loadUsers = () => {
-    try {
-      const professoresList = authService.getUsersByRole('professor');
-      const alunosList = authService.getUsersByRole('aluno');
-      setProfessores(professoresList as User[]);
-      setAlunos(alunosList as User[]);
-    } catch (error) {
-      showError('Erro ao carregar usuários');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors: typeof errors = {};
-    if (!name.trim()) newErrors.name = 'Nome é obrigatório';
-    if (!email.trim()) {
-      newErrors.email = 'Email é obrigatório';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'Email inválido';
-    } else if (authService.emailExists(email)) {
-      newErrors.email = 'Email já cadastrado';
-    }
-    if (!password) {
-      newErrors.password = 'Senha é obrigatória';
-    } else if (password.length < 4) {
-      newErrors.password = 'Senha deve ter pelo menos 4 caracteres';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateEditForm = () => {
-    const newErrors: typeof editErrors = {};
-    if (!editName.trim()) newErrors.name = 'Nome é obrigatório';
-    if (!editEmail.trim()) {
-      newErrors.email = 'Email é obrigatório';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail)) {
-      newErrors.email = 'Email inválido';
-    } else {
-      const existingUser = authService.getUserByEmail(editEmail);
-      if (existingUser && existingUser.id !== editingUser?.id) {
-        newErrors.email = 'Email já cadastrado';
-      }
-    }
-    if (editPassword && editPassword.length < 4) {
-      newErrors.password = 'Senha deve ter pelo menos 4 caracteres';
-    }
-    if (editingUser?.role === 'aluno' && !editProfessorId) {
-      newErrors.professorId = 'Selecione um professor';
-    }
-    setEditErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    try {
-      authService.registerProfessor(name.trim(), email.trim(), password);
-      showSuccess('Professor cadastrado com sucesso!');
-      setName('');
-      setEmail('');
-      setPassword('');
-      setShowForm(false);
-      setErrors({});
-      loadUsers();
-    } catch (error) {
-      showError(error instanceof Error ? error.message : 'Erro ao cadastrar professor');
-    }
-  };
-
-  const handleEdit = (user: User) => {
-    setEditingUser(user);
-    setEditName(user.name);
-    setEditEmail(user.email);
-    setEditPassword('');
-    setEditProfessorId(user.professorId || '');
-    setEditErrors({});
-    setShowForm(false);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingUser(null);
-    setEditName('');
-    setEditEmail('');
-    setEditPassword('');
-    setEditProfessorId('');
-    setEditErrors({});
-  };
-
-  const handleUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingUser || !validateEditForm()) return;
-
-    try {
-      const updates: any = {
-        name: editName.trim(),
-        email: editEmail.trim(),
-      };
-
-      if (editPassword) {
-        updates.password = editPassword;
-      }
-
-      if (editingUser.role === 'aluno') {
-        updates.professorId = editProfessorId;
-      }
-
-      authService.updateUser(editingUser.id, updates);
-      showSuccess('Usuário atualizado com sucesso!');
-      handleCancelEdit();
-      loadUsers();
-    } catch (error) {
-      showError(error instanceof Error ? error.message : 'Erro ao atualizar usuário');
-    }
-  };
-
-  const handleDelete = (user: User) => {
-    if (!confirm(`Tem certeza que deseja excluir o usuário "${user.name}"?`)) {
-      return;
-    }
-
-    try {
-      authService.deleteUser(user.id);
-      showSuccess('Usuário excluído com sucesso!');
-      loadUsers();
-    } catch (error) {
-      showError(error instanceof Error ? error.message : 'Erro ao excluir usuário');
-    }
-  };
 
   if (!isAdmin) {
     return (
@@ -195,6 +48,40 @@ export default function AdminPage() {
     { title: 'Total de Usuários', value: professores.length + alunos.length },
   ];
 
+  const handleCreateProfessor = (data: { name: string; email: string; password: string }) => {
+    const success = createProfessor(data);
+    if (success) {
+      setShowForm(false);
+    }
+    return success;
+  };
+
+  const handleUpdateUser = (id: string, updates: {
+    name?: string;
+    email?: string;
+    password?: string;
+    professorId?: string;
+  }) => {
+    const success = updateUser(id, updates);
+    if (success) {
+      setEditingUser(null);
+    }
+    return success;
+  };
+
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setShowForm(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUser(null);
+  };
+
+  const handleDelete = (user: User) => {
+    deleteUser(user);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-gradient-to-r from-primary-50 to-white shadow-md border-b border-gray-200 p-6">
@@ -212,69 +99,18 @@ export default function AdminPage() {
               <h2 className="text-xl font-bold text-gray-900">
                 Editar {editingUser.role === 'professor' ? 'Professor' : 'Aluno'}
               </h2>
-              <Button onClick={handleCancelEdit} variant="secondary">
-                ✕ Cancelar
-              </Button>
             </div>
             <div className="p-6 border-t bg-gray-50/50">
-              <form onSubmit={handleUpdate} className="space-y-5 max-w-md">
-                <Input
-                  id="editName"
-                  label="Nome"
-                  value={editName}
-                  onChange={(e) => {
-                    setEditName(e.target.value);
-                    if (editErrors.name) setEditErrors({ ...editErrors, name: undefined });
-                  }}
-                  error={editErrors.name}
-                  required
-                />
-                <Input
-                  id="editEmail"
-                  type="email"
-                  label="Email"
-                  value={editEmail}
-                  onChange={(e) => {
-                    setEditEmail(e.target.value);
-                    if (editErrors.email) setEditErrors({ ...editErrors, email: undefined });
-                  }}
-                  error={editErrors.email}
-                  required
-                />
-                <Input
-                  id="editPassword"
-                  type="password"
-                  label="Nova Senha (deixe em branco para manter a atual)"
-                  value={editPassword}
-                  onChange={(e) => {
-                    setEditPassword(e.target.value);
-                    if (editErrors.password) setEditErrors({ ...editErrors, password: undefined });
-                  }}
-                  error={editErrors.password}
-                  helperText="Mínimo de 4 caracteres. Deixe em branco para não alterar."
-                />
-                {editingUser.role === 'aluno' && (
-                  <Select
-                    id="editProfessorId"
-                    label="Professor"
-                    value={editProfessorId}
-                    onChange={(e) => {
-                      setEditProfessorId(e.target.value);
-                      if (editErrors.professorId) setEditErrors({ ...editErrors, professorId: undefined });
-                    }}
-                    error={editErrors.professorId}
-                    required
-                    placeholder="Selecione um professor"
-                    options={professores.map((p) => ({
-                      value: p.id,
-                      label: `${p.name} (${p.email})`,
-                    }))}
-                  />
-                )}
-                <Button type="submit" variant="success">
-                  💾 Salvar Alterações
-                </Button>
-              </form>
+              <UserEditForm
+                user={editingUser}
+                professores={professores}
+                checkEmailExists={(email) => {
+                  const allUsers = [...professores, ...alunos];
+                  return allUsers.find(u => u.email === email);
+                }}
+                onSubmit={handleUpdateUser}
+                onCancel={handleCancelEdit}
+              />
             </div>
           </div>
         )}
@@ -287,7 +123,6 @@ export default function AdminPage() {
               <Button 
                 onClick={() => {
                   setShowForm(!showForm);
-                  setErrors({});
                 }} 
                 variant={showForm ? 'secondary' : 'primary'}
               >
@@ -296,44 +131,14 @@ export default function AdminPage() {
             </div>
             {showForm && (
               <div className="p-6 border-t bg-gray-50/50">
-                <form onSubmit={handleSubmit} className="space-y-5 max-w-md">
-                  <Input
-                    id="name"
-                    label="Nome"
-                    value={name}
-                    onChange={(e) => {
-                      setName(e.target.value);
-                      if (errors.name) setErrors({ ...errors, name: undefined });
-                    }}
-                    error={errors.name}
-                    required
-                  />
-                  <Input
-                    id="email"
-                    type="email"
-                    label="Email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      if (errors.email) setErrors({ ...errors, email: undefined });
-                    }}
-                    error={errors.email}
-                    required
-                  />
-                  <Input
-                    id="password"
-                    type="password"
-                    label="Senha"
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      if (errors.password) setErrors({ ...errors, password: undefined });
-                    }}
-                    error={errors.password}
-                    required
-                  />
-                  <Button type="submit">Cadastrar</Button>
-                </form>
+                <UserCreateForm
+                  checkEmailExists={(email) => {
+                    const allUsers = [...professores, ...alunos];
+                    return allUsers.some(u => u.email === email);
+                  }}
+                  onSubmit={handleCreateProfessor}
+                  onCancel={() => setShowForm(false)}
+                />
               </div>
             )}
           </div>
@@ -363,7 +168,7 @@ export default function AdminPage() {
                         <p className="font-semibold text-gray-900 group-hover:text-primary-600 transition-colors truncate">{prof.name}</p>
                         <p className="text-sm text-gray-500 truncate">{prof.email}</p>
                         <p className="text-xs text-gray-400 mt-1">
-                          {authService.getAlunosByProfessorId(prof.id).length} aluno(s)
+                          {getAlunosByProfessorId(prof.id).length} aluno(s)
                         </p>
                       </div>
                     </div>
