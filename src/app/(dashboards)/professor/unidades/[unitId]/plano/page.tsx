@@ -25,6 +25,8 @@ export default function LessonPlanPage() {
   const [lessonPlan, setLessonPlan] = useState<LessonPlanViewModel | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [generatingSlides, setGeneratingSlides] = useState(false);
   const lessonPlanService = getLessonPlanService();
 
   useEffect(() => {
@@ -68,6 +70,88 @@ export default function LessonPlanPage() {
       showError(error.message || 'Erro ao gerar plano de aula');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleGenerateProvaPDF = async () => {
+    if (!lessonPlan) return;
+
+    setGeneratingPDF(true);
+    try {
+      const response = await fetch('/api/pdf/prova', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lessonPlanId: lessonPlan.id,
+          options: {
+            schoolName: 'INSTITUTO FEDERAL DO PIAUÍ - IFPI',
+            includeAnswers: false, // Prova sem gabarito
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao gerar PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `prova-${lessonPlan.title.replace(/\s+/g, '-')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      showSuccess('PDF de prova gerado com sucesso!');
+    } catch (error: any) {
+      showError(error.message || 'Erro ao gerar PDF de prova');
+    } finally {
+      setGeneratingPDF(false);
+    }
+  };
+
+  const handleGenerateSlidesPDF = async () => {
+    if (!lessonPlan) return;
+
+    setGeneratingSlides(true);
+    try {
+      const response = await fetch('/api/pdf/slides', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lessonPlanId: lessonPlan.id,
+          options: {
+            schoolName: 'INSTITUTO FEDERAL DO PIAUÍ - IFPI',
+            includeQuiz: true,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao gerar PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `slides-${lessonPlan.title.replace(/\s+/g, '-')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      showSuccess('PDF de slides gerado com sucesso!');
+    } catch (error: any) {
+      showError(error.message || 'Erro ao gerar PDF de slides');
+    } finally {
+      setGeneratingSlides(false);
     }
   };
 
@@ -141,7 +225,7 @@ export default function LessonPlanPage() {
               {/* Card Principal do Plano */}
               <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600 rounded-2xl shadow-2xl p-6 text-white">
                 <h2 className="text-3xl font-bold mb-4">{lessonPlan.title}</h2>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 mb-4">
                   <span className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full font-semibold border border-white/30">
                     📚 {lessonPlan.subject}
                   </span>
@@ -152,6 +236,48 @@ export default function LessonPlanPage() {
                     ⏱️ {lessonPlan.duration}
                   </span>
                 </div>
+                
+                {/* Botões de Exportação */}
+                {canGenerate && (
+                  <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-white/20">
+                    <Button
+                      onClick={handleGenerateProvaPDF}
+                      disabled={generatingPDF}
+                      variant="secondary"
+                      className="bg-white/20 hover:bg-white/30 text-white border-white/30 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                    >
+                      {generatingPDF ? (
+                        <>
+                          <span className="mr-2">⏳</span>
+                          Gerando...
+                        </>
+                      ) : (
+                        <>
+                          <span className="mr-2">📄</span>
+                          Gerar Prova PDF
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handleGenerateSlidesPDF}
+                      disabled={generatingSlides}
+                      variant="secondary"
+                      className="bg-white/20 hover:bg-white/30 text-white border-white/30 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                    >
+                      {generatingSlides ? (
+                        <>
+                          <span className="mr-2">⏳</span>
+                          Gerando...
+                        </>
+                      ) : (
+                        <>
+                          <span className="mr-2">📊</span>
+                          Gerar Slides PDF
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Objetivos */}

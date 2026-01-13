@@ -7,4 +7,5 @@ export const StorageKeys = {
     LESSON_PLANS: '@hacka-cultura:lesson-plans',
     UNITS: '@hacka-cultura:units',
     USERS: '@hacka-cultura:users',
+    QUIZ_RESULTS: '@hacka-cultura:quiz-results',
 } as const;

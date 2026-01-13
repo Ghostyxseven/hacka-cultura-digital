@@ -115,7 +115,7 @@ export default function AlunoLessonPlanPage() {
               {/* Card Principal do Plano */}
               <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600 rounded-2xl shadow-2xl p-6 text-white">
                 <h2 className="text-3xl font-bold mb-4">{lessonPlan.title}</h2>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 mb-4">
                   <span className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full font-semibold border border-white/30">
                     📚 {lessonPlan.subject}
                   </span>
@@ -126,6 +126,20 @@ export default function AlunoLessonPlanPage() {
                     ⏱️ {lessonPlan.duration}
                   </span>
                 </div>
+                
+                {/* Botão para fazer Quiz */}
+                {lessonPlan.quiz && lessonPlan.quiz.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-white/20">
+                    <Button
+                      onClick={() => router.push(`/aluno/quiz/${lessonPlan.id}`)}
+                      variant="secondary"
+                      className="w-full bg-white/20 hover:bg-white/30 text-white border-white/30 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                    >
+                      <span className="mr-2">✏️</span>
+                      Fazer Quiz
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Objetivos */}
