@@ -7,7 +7,7 @@ import { getLessonPlanService } from '@/lib/service';
 import type { SchoolYearViewModel } from '@/application/viewmodels';
 import { SCHOOL_YEARS } from '@/core/constants/SchoolYears';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { Button, BackButton } from '@/components';
+import { Button } from '@/components';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { useFormValidation } from '@/hooks';
@@ -185,10 +185,14 @@ export default function NewSubjectPage() {
                     </>
                   )}
                 </Button>
-                <BackButton 
-                  href="/professor" 
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => router.push('/professor')}
                   className="flex-1 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-                />
+                >
+                  Cancelar
+                </Button>
               </div>
             </div>
           </form>

@@ -9,7 +9,7 @@ import type { SubjectViewModel, SchoolYearViewModel } from '@/application/viewmo
 import { SCHOOL_YEARS } from '@/core/constants/SchoolYears';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
-import { Button, BackButton } from '@/components';
+import { Button } from '@/components';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
@@ -206,10 +206,14 @@ function NewUnitPageContent() {
                   </>
                 )}
               </Button>
-              <BackButton 
-                href={`/professor/disciplinas/${subjectId}`}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => router.push(`/professor/disciplinas/${subjectId}`)}
                 className="flex-1 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-              />
+              >
+                Cancelar
+              </Button>
             </div>
           </div>
         </form>
