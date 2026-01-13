@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     return new NextResponse(pdfBuffer as any, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="slides-${lessonPlanId}.pdf"`,
+        'Content-Disposition': `attachment; filename="slides-${lessonPlan.id || 'slides'}.pdf"`,
       },
     });
   } catch (error: any) {

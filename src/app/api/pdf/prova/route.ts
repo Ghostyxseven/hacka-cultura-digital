@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     return new NextResponse(pdfBuffer as any, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="prova-${lessonPlanId}.pdf"`,
+        'Content-Disposition': `attachment; filename="prova-${lessonPlan.id || 'prova'}.pdf"`,
       },
     });
   } catch (error: any) {
