@@ -41,42 +41,59 @@ export function UnitCard({
   };
 
   return (
-    <div className="group bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:border-primary-300 transition-all duration-200">
-      <div className="flex justify-between items-start gap-4">
+    <div className="group relative bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl hover:border-purple-300 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+      {/* Gradiente sutil no hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/0 to-pink-50/0 group-hover:from-purple-50/50 group-hover:to-pink-50/50 transition-all duration-300 pointer-events-none" />
+      
+      <div className="relative flex justify-between items-start gap-4">
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
-            {unit.topic}
-          </h3>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-800 font-medium">
-              {unit.gradeYear}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              {unit.isSuggestedByAI ? (
-                <>
-                  <span className="text-purple-500">🤖</span>
-                  <span className="text-purple-600 font-medium">Sugerida por IA</span>
-                </>
-              ) : (
-                <>
-                  <span className="text-blue-500">✍️</span>
-                  <span className="text-blue-600 font-medium">Criada manualmente</span>
-                </>
+          <div className="flex items-start gap-4 mb-3">
+            {/* Ícone do plano */}
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-md group-hover:scale-110 transition-transform duration-300">
+              📖
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">
+                {unit.topic}
+              </h3>
+              
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 text-gray-800 font-semibold text-sm border border-gray-200 shadow-sm">
+                  {unit.gradeYear}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-sm shadow-sm">
+                  {unit.isSuggestedByAI ? (
+                    <>
+                      <span className="text-lg">🤖</span>
+                      <span className="text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full">Sugerida por IA</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg">✍️</span>
+                      <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">Criada manualmente</span>
+                    </>
+                  )}
+                </span>
+              </div>
+              
+              {unit.description && (
+                <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                  {unit.description}
+                </p>
               )}
-            </span>
+              
+              {showSubject && subjectName && (
+                <div className="flex items-center gap-2 text-xs text-gray-500 mt-3">
+                  <span className="font-semibold">Disciplina:</span>
+                  <span className="px-2 py-1 rounded-md bg-gray-100 font-medium text-gray-700">{subjectName}</span>
+                </div>
+              )}
+            </div>
           </div>
-          {unit.description && (
-            <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-              {unit.description}
-            </p>
-          )}
-          {showSubject && subjectName && (
-            <p className="text-xs text-gray-400 mt-2">
-              Disciplina: <span className="font-medium text-gray-600">{subjectName}</span>
-            </p>
-          )}
         </div>
-        <div className="flex gap-2 flex-shrink-0">
+        
+        <div className="flex gap-2 flex-shrink-0 items-start">
           {canDelete && onDelete && (
             <div onClick={(e) => e.stopPropagation()}>
               <ConfirmDeleteButton
@@ -92,14 +109,18 @@ export function UnitCard({
                 e.stopPropagation();
                 onGenerate(unit.id);
               }}
-              className="text-sm whitespace-nowrap"
+              className="text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
             >
-              Gerar Plano
+              🤖 Gerar Plano
             </Button>
           )}
           {unit.lessonPlanId && (
             <Link href={planHref}>
-              <Button variant="success" className="text-sm whitespace-nowrap">
+              <Button 
+                variant="success" 
+                className="text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
+              >
+                <span className="mr-2">📖</span>
                 Ver Plano
               </Button>
             </Link>
