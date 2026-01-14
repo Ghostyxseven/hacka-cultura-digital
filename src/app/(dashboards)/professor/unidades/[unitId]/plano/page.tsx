@@ -11,8 +11,11 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { Button, BackButton } from '@/components';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
 import { showError, showSuccess } from '@/utils/notifications';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import type { QuizQuestionViewModel } from '@/application/viewmodels';
 
 export default function LessonPlanPage() {
   const router = useRouter();
@@ -27,6 +30,9 @@ export default function LessonPlanPage() {
   const [generating, setGenerating] = useState(false);
   const [generatingPDF, setGeneratingPDF] = useState(false);
   const [generatingSlides, setGeneratingSlides] = useState(false);
+  const [editingQuiz, setEditingQuiz] = useState(false);
+  const [editedQuiz, setEditedQuiz] = useState<QuizQuestionViewModel[]>([]);
+  const [savingQuiz, setSavingQuiz] = useState(false);
   const lessonPlanService = getLessonPlanService();
 
   useEffect(() => {
@@ -49,6 +55,9 @@ export default function LessonPlanPage() {
         const planEntity = lessonPlanService.getLessonPlanById(foundUnit.lessonPlanId);
         const plan = planEntity ? PresentationMapper.toLessonPlanViewModel(planEntity) : undefined;
         setLessonPlan(plan || null);
+        if (plan?.quiz) {
+          setEditedQuiz([...plan.quiz]);
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -164,6 +173,68 @@ export default function LessonPlanPage() {
       showError(error.message || 'Erro ao gerar PDF de slides');
     } finally {
       setGeneratingSlides(false);
+    }
+  };
+
+  const handleStartEditQuiz = () => {
+    if (lessonPlan?.quiz) {
+      setEditedQuiz([...lessonPlan.quiz]);
+      setEditingQuiz(true);
+    }
+  };
+
+  const handleCancelEditQuiz = () => {
+    if (lessonPlan?.quiz) {
+      setEditedQuiz([...lessonPlan.quiz]);
+    }
+    setEditingQuiz(false);
+  };
+
+  const handleUpdateQuizQuestion = (questionId: string, field: keyof QuizQuestionViewModel, value: string | number | string[]) => {
+    setEditedQuiz(prev => prev.map(q => 
+      q.id === questionId ? { ...q, [field]: value } : q
+    ));
+  };
+
+  const handleUpdateQuizOption = (questionId: string, optionIndex: number, value: string) => {
+    setEditedQuiz(prev => prev.map(q => {
+      if (q.id === questionId) {
+        const newOptions = [...q.options];
+        newOptions[optionIndex] = value;
+        return { ...q, options: newOptions };
+      }
+      return q;
+    }));
+  };
+
+  const handleSaveQuiz = async () => {
+    if (!lessonPlan) return;
+
+    setSavingQuiz(true);
+    try {
+      // Busca a entidade completa do plano de aula
+      const planEntity = lessonPlanService.getLessonPlanById(lessonPlan.id);
+      if (!planEntity) {
+        throw new Error('Plano de aula não encontrado');
+      }
+
+      // Atualiza o quiz na entidade
+      const updatedPlan = {
+        ...planEntity,
+        quiz: editedQuiz,
+      };
+
+      // Salva o plano de aula atualizado
+      lessonPlanService.saveLessonPlan(updatedPlan);
+
+      // Recarrega os dados
+      loadData();
+      setEditingQuiz(false);
+      showSuccess('Quiz atualizado com sucesso!');
+    } catch (error: any) {
+      showError(error.message || 'Erro ao salvar quiz');
+    } finally {
+      setSavingQuiz(false);
     }
   };
 
@@ -357,44 +428,116 @@ export default function LessonPlanPage() {
               {/* Atividade Avaliativa */}
               {lessonPlan.quiz && lessonPlan.quiz.length > 0 && (
                 <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 border border-gray-200">
-                  <div className="flex items-center gap-3 mb-6">
-                    <span className="text-3xl">✏️</span>
-                    <h3 className="text-2xl font-bold text-gray-900">Atividade Avaliativa</h3>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">✏️</span>
+                      <h3 className="text-2xl font-bold text-gray-900">Atividade Avaliativa</h3>
+                    </div>
+                    {canGenerate && !editingQuiz && (
+                      <Button
+                        onClick={handleStartEditQuiz}
+                        variant="secondary"
+                        className="bg-primary-600 hover:bg-primary-700 text-white"
+                      >
+                        ✏️ Editar Quiz
+                      </Button>
+                    )}
+                    {canGenerate && editingQuiz && (
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={handleCancelEditQuiz}
+                          variant="secondary"
+                          className="bg-gray-500 hover:bg-gray-600 text-white"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          onClick={handleSaveQuiz}
+                          disabled={savingQuiz}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          {savingQuiz ? 'Salvando...' : '💾 Salvar'}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-6">
-                    {lessonPlan.quiz.map((question, index) => (
+                    {(editingQuiz ? editedQuiz : lessonPlan.quiz).map((question, index) => (
                       <div key={question.id} className="border-l-4 border-primary-500 pl-6 py-4 bg-gradient-to-r from-primary-50/50 to-transparent rounded-r-xl">
                         <div className="flex items-start gap-3 mb-4">
                           <span className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold flex-shrink-0">
                             {index + 1}
                           </span>
-                          <p className="font-semibold text-gray-900 text-lg leading-relaxed">{question.question}</p>
+                          {editingQuiz ? (
+                            <div className="flex-1">
+                              <Textarea
+                                value={question.question}
+                                onChange={(e) => handleUpdateQuizQuestion(question.id, 'question', e.target.value)}
+                                placeholder="Digite a pergunta..."
+                                rows={3}
+                                className="w-full"
+                              />
+                            </div>
+                          ) : (
+                            <p className="font-semibold text-gray-900 text-lg leading-relaxed">{question.question}</p>
+                          )}
                         </div>
                         <ul className="space-y-2 mb-4 ml-11">
                           {question.options.map((option, optIndex) => (
                             <li
                               key={optIndex}
                               className={`p-3 rounded-xl transition-all ${
-                                optIndex === question.correctAnswer
+                                !editingQuiz && optIndex === question.correctAnswer
                                   ? 'bg-green-50 border-2 border-green-300 text-green-800 shadow-md'
-                                  : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
+                                  : 'bg-gray-50 border border-gray-200'
                               }`}
                             >
-                              <div className="flex items-center justify-between">
-                                <span>
-                                  <span className="font-bold mr-2">{String.fromCharCode(65 + optIndex)}.</span>
-                                  {option}
-                                </span>
-                                {optIndex === question.correctAnswer && (
+                              <div className="flex items-center gap-3">
+                                <span className="font-bold text-gray-700">{String.fromCharCode(65 + optIndex)}.</span>
+                                {editingQuiz ? (
+                                  <Input
+                                    value={option}
+                                    onChange={(e) => handleUpdateQuizOption(question.id, optIndex, e.target.value)}
+                                    placeholder={`Alternativa ${String.fromCharCode(65 + optIndex)}...`}
+                                    className="flex-1"
+                                  />
+                                ) : (
+                                  <span className="text-gray-700 flex-1">{option}</span>
+                                )}
+                                {editingQuiz && (
+                                  <input
+                                    type="radio"
+                                    name={`correct-${question.id}`}
+                                    checked={optIndex === question.correctAnswer}
+                                    onChange={() => handleUpdateQuizQuestion(question.id, 'correctAnswer', optIndex)}
+                                    className="w-5 h-5 text-primary-600"
+                                  />
+                                )}
+                                {!editingQuiz && optIndex === question.correctAnswer && (
                                   <span className="text-green-700 font-bold text-lg">✓</span>
                                 )}
                               </div>
                             </li>
                           ))}
                         </ul>
-                        <div className="ml-11 bg-blue-50 p-4 rounded-xl text-sm text-blue-800 border border-blue-200">
-                          <strong className="text-blue-900">💡 Justificativa:</strong>
-                          <p className="mt-1 text-blue-700 leading-relaxed">{question.justification}</p>
+                        <div className="ml-11">
+                          {editingQuiz ? (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">💡 Justificativa:</label>
+                              <Textarea
+                                value={question.justification}
+                                onChange={(e) => handleUpdateQuizQuestion(question.id, 'justification', e.target.value)}
+                                placeholder="Digite a justificativa..."
+                                rows={3}
+                                className="w-full"
+                              />
+                            </div>
+                          ) : (
+                            <div className="bg-blue-50 p-4 rounded-xl text-sm text-blue-800 border border-blue-200">
+                              <strong className="text-blue-900">💡 Justificativa:</strong>
+                              <p className="mt-1 text-blue-700 leading-relaxed">{question.justification}</p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
