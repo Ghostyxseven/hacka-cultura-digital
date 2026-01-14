@@ -4,6 +4,37 @@ import { LessonPlan } from '@/core/entities/LessonPlan';
 import { IPDFGeneratorService, ProvaPDFOptions, SlidesPDFOptions } from './IPDFGeneratorService';
 
 /**
+ * Divide texto em pedaços menores para evitar transbordamento
+ */
+const splitTextIntoChunks = (text: string, maxLength: number = 700): string[] => {
+  if (text.length <= maxLength) return [text];
+  
+  const chunks: string[] = [];
+  let currentText = text;
+
+  while (currentText.length > 0) {
+    if (currentText.length <= maxLength) {
+      chunks.push(currentText);
+      break;
+    }
+    // Encontra o último espaço antes do limite para não cortar palavras
+    let splitIndex = currentText.lastIndexOf(' ', maxLength);
+    if (splitIndex === -1) splitIndex = maxLength;
+    
+    chunks.push(currentText.substring(0, splitIndex).trim());
+    currentText = currentText.substring(splitIndex).trim();
+  }
+  return chunks;
+};
+
+/**
+ * Remove caracteres problemáticos do texto
+ */
+const clean = (txt: string): string => {
+  return txt.replace(/[^\x20-\x7EáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ]/g, '');
+};
+
+/**
  * Implementação do gerador de PDF usando @react-pdf/renderer
  */
 export class ReactPDFGenerator implements IPDFGeneratorService {
@@ -108,37 +139,37 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
   ): Promise<Buffer> {
     const pages: any[] = [];
 
-    // Slide 1: Título
+    // Slide de Título (Landscape)
     pages.push(
-      <Page key="title" size="A4" style={styles.slidePage}>
+      <Page key="title" size="A4" orientation="landscape" style={styles.slidePage}>
         <View style={styles.slideTitleContainer}>
           <View style={styles.slideTitleBox}>
-            <Text style={styles.slideTitle}>{lessonPlan.title}</Text>
+            <Text style={styles.slideTitle}>{clean(lessonPlan.title)}</Text>
             <View style={styles.slideTitleDivider} />
-            <Text style={styles.slideSubtitle}>{lessonPlan.subject}</Text>
-            <Text style={styles.slideInfo}>{lessonPlan.gradeYear}</Text>
+            <Text style={styles.slideSubtitle}>{clean(lessonPlan.subject)}</Text>
+            <Text style={styles.slideInfo}>{clean(lessonPlan.gradeYear)}</Text>
           </View>
           {options.schoolName && (
             <View style={styles.slideFooterBox}>
-              <Text style={styles.slideSchool}>{options.schoolName}</Text>
+              <Text style={styles.slideSchool}>{clean(options.schoolName)}</Text>
             </View>
           )}
         </View>
       </Page>
     );
 
-    // Slide 2: Objetivos
+    // Slide: Objetivos
     pages.push(
-      <Page key="objectives" size="A4" style={styles.slidePage}>
+      <Page key="objectives" size="A4" orientation="landscape" style={styles.slidePage}>
         <View style={styles.slideContentContainer}>
           <View style={styles.slideHeaderBox}>
-            <Text style={styles.slideSectionTitle}>🎯 Objetivos de Aprendizagem</Text>
+            <Text style={styles.slideSectionTitle}>OBJETIVOS DE APRENDIZAGEM</Text>
           </View>
           <View style={styles.slideBodyBox}>
             {lessonPlan.objectives.map((objective, index) => (
               <View key={index} style={styles.slideBulletItem}>
                 <Text style={styles.slideBulletDot}>•</Text>
-                <Text style={styles.slideBulletText}>{objective}</Text>
+                <Text style={styles.slideBulletText}>{clean(objective)}</Text>
               </View>
             ))}
           </View>
@@ -146,55 +177,49 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
       </Page>
     );
 
-    // Slides de Conteúdo (dividido em parágrafos)
-    const contentParagraphs = lessonPlan.content.split('\n\n').filter(p => p.trim());
-    contentParagraphs.forEach((paragraph, index) => {
-      pages.push(
-        <Page key={`content-${index}`} size="A4" style={styles.slidePage}>
-          <View style={styles.slideContentContainer}>
-            <View style={styles.slideHeaderBox}>
-              <Text style={styles.slideSectionTitle}>📚 Conteúdo</Text>
-            </View>
-            <View style={styles.slideBodyBox}>
-              <Text style={styles.slideText}>{paragraph.trim()}</Text>
-            </View>
-          </View>
-        </Page>
-      );
-    });
+    // Processamento de Conteúdo com Divisão Automática
+    const sections = [
+      { title: 'CONTEÚDO', content: lessonPlan.content },
+      { title: 'METODOLOGIA', content: lessonPlan.methodology }
+    ];
 
-    // Slide: Metodologia
-    if (lessonPlan.methodology) {
-      const methodologyParagraphs = lessonPlan.methodology.split('\n\n').filter(p => p.trim());
-      methodologyParagraphs.forEach((paragraph, index) => {
-        pages.push(
-          <Page key={`methodology-${index}`} size="A4" style={styles.slidePage}>
-            <View style={styles.slideContentContainer}>
-              <View style={styles.slideHeaderBox}>
-                <Text style={styles.slideSectionTitle}>📝 Metodologia</Text>
+    sections.forEach(section => {
+      if (!section.content) return;
+      
+      const paragraphs = section.content.split('\n\n').filter(p => p.trim());
+      
+      paragraphs.forEach((para) => {
+        const chunks = splitTextIntoChunks(clean(para), 800);
+        chunks.forEach((chunk, chunkIdx) => {
+          pages.push(
+            <Page key={`${section.title}-${chunkIdx}`} size="A4" orientation="landscape" style={styles.slidePage}>
+              <View style={styles.slideContentContainer}>
+                <View style={styles.slideHeaderBox}>
+                  <Text style={styles.slideSectionTitle}>{section.title}</Text>
+                </View>
+                <View style={styles.slideBodyBox}>
+                  <Text style={styles.slideText}>{chunk}</Text>
+                </View>
               </View>
-              <View style={styles.slideBodyBox}>
-                <Text style={styles.slideText}>{paragraph.trim()}</Text>
-              </View>
-            </View>
-          </Page>
-        );
+            </Page>
+          );
+        });
       });
-    }
+    });
 
     // Slide: Competências BNCC
     if (lessonPlan.bnccCompetencies.length > 0) {
       pages.push(
-        <Page key="bncc" size="A4" style={styles.slidePage}>
+        <Page key="bncc" size="A4" orientation="landscape" style={styles.slidePage}>
           <View style={styles.slideContentContainer}>
             <View style={styles.slideHeaderBox}>
-              <Text style={styles.slideSectionTitle}>✅ Competências BNCC</Text>
+              <Text style={styles.slideSectionTitle}>COMPETÊNCIAS BNCC</Text>
             </View>
             <View style={styles.slideBodyBox}>
               {lessonPlan.bnccCompetencies.map((competency, index) => (
                 <View key={index} style={styles.slideBulletItem}>
                   <Text style={styles.slideBulletDot}>✓</Text>
-                  <Text style={styles.slideBulletText}>{competency}</Text>
+                  <Text style={styles.slideBulletText}>{clean(competency)}</Text>
                 </View>
               ))}
             </View>
@@ -207,20 +232,20 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
     if (options.includeQuiz && lessonPlan.quiz.length > 0) {
       lessonPlan.quiz.forEach((question, index) => {
         pages.push(
-          <Page key={`quiz-${index}`} size="A4" style={styles.slidePage}>
+          <Page key={`quiz-${index}`} size="A4" orientation="landscape" style={styles.slidePage}>
             <View style={styles.slideContentContainer}>
               <View style={styles.slideHeaderBox}>
-                <Text style={styles.slideSectionTitle}>✏️ Questão {index + 1}</Text>
+                <Text style={styles.slideSectionTitle}>QUESTÃO {index + 1}</Text>
               </View>
               <View style={styles.slideBodyBox}>
-                <Text style={styles.slideQuizQuestion}>{question.question}</Text>
+                <Text style={styles.slideQuizQuestion}>{clean(question.question)}</Text>
                 <View style={styles.slideQuizOptions}>
                   {question.options.map((option, optIndex) => (
                     <View key={optIndex} style={styles.slideQuizOptionItem}>
                       <Text style={styles.slideQuizOptionLetter}>
                         {String.fromCharCode(65 + optIndex)})
                       </Text>
-                      <Text style={styles.slideQuizOptionText}>{option}</Text>
+                      <Text style={styles.slideQuizOptionText}>{clean(option)}</Text>
                     </View>
                   ))}
                 </View>
@@ -426,8 +451,8 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   slideText: {
-    fontSize: 15,
-    lineHeight: 1.5,
+    fontSize: 18,
+    lineHeight: 1.6,
     color: '#1e293b',
     textAlign: 'left',
     maxWidth: '100%',
