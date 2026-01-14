@@ -44,9 +44,12 @@ const cleanText = (text: string): string => {
 };
 
 /**
- * Divide parágrafos em chunks evitando cortes no meio de palavras
+ * Divide parágrafos em chunks evitando cortes no meio de palavras e frases
+ * Prioriza quebras em pontos finais, vírgulas e outros sinais de pontuação
  */
 const getParagraphChunks = (text: string, limit: number = 700): string[] => {
+  if (!text || typeof text !== 'string') return [];
+  
   const sanitized = cleanText(text);
   const chunks: string[] = [];
   let currentPos = 0;
@@ -54,23 +57,89 @@ const getParagraphChunks = (text: string, limit: number = 700): string[] => {
   while (currentPos < sanitized.length) {
     let endPos = currentPos + limit;
     
-    if (endPos < sanitized.length) {
-      // Garante que não corte no meio de uma palavra
-      endPos = sanitized.lastIndexOf(' ', endPos);
-      if (endPos === -1 || endPos <= currentPos) {
-        // Se não encontrou espaço, corta no limite mesmo
-        endPos = currentPos + limit;
+    if (endPos >= sanitized.length) {
+      // Último chunk - pega o restante
+      const remaining = sanitized.substring(currentPos).trim();
+      if (remaining) {
+        chunks.push(remaining);
+      }
+      break;
+    }
+    
+    // Busca por pontos de quebra ideais (em ordem de preferência)
+    // 1. Ponto final seguido de espaço (quebra ideal)
+    let breakPoint = sanitized.lastIndexOf('. ', endPos);
+    
+    // 2. Dois pontos seguidos de espaço
+    if (breakPoint === -1 || breakPoint <= currentPos) {
+      breakPoint = sanitized.lastIndexOf(': ', endPos);
+    }
+    
+    // 3. Ponto e vírgula seguido de espaço
+    if (breakPoint === -1 || breakPoint <= currentPos) {
+      breakPoint = sanitized.lastIndexOf('; ', endPos);
+    }
+    
+    // 4. Vírgula seguida de espaço (mas só se não ficar muito curto)
+    if (breakPoint === -1 || breakPoint <= currentPos) {
+      const commaPos = sanitized.lastIndexOf(', ', endPos);
+      // Só usa vírgula se o chunk não ficar muito curto (menos de 60% do limite)
+      if (commaPos > currentPos && (commaPos - currentPos) >= limit * 0.6) {
+        breakPoint = commaPos;
       }
     }
     
-    chunks.push(sanitized.substring(currentPos, endPos).trim());
-    currentPos = endPos;
+    // 5. Espaço (garante que não corte no meio de palavra)
+    if (breakPoint === -1 || breakPoint <= currentPos) {
+      breakPoint = sanitized.lastIndexOf(' ', endPos);
+    }
     
-    // Pula espaços iniciais do próximo chunk
-    while (sanitized[currentPos] === ' ' && currentPos < sanitized.length) {
+    // 6. Se ainda não encontrou, tenta reduzir o limite em 20% e procurar novamente
+    if (breakPoint === -1 || breakPoint <= currentPos) {
+      const reducedLimit = Math.floor(limit * 0.8);
+      endPos = currentPos + reducedLimit;
+      breakPoint = sanitized.lastIndexOf(' ', endPos);
+    }
+    
+    // 7. Último recurso: corta no limite mesmo (mas só se realmente necessário)
+    if (breakPoint === -1 || breakPoint <= currentPos) {
+      breakPoint = currentPos + limit;
+    }
+    
+    // Evita deixar palavras muito curtas sozinhas no final (mínimo 3 caracteres)
+    const chunk = sanitized.substring(currentPos, breakPoint).trim();
+    const remainingAfterBreak = sanitized.substring(breakPoint).trim();
+    
+    // Se o próximo chunk começa com uma palavra muito curta, inclui no chunk atual
+    if (remainingAfterBreak && remainingAfterBreak.length > 0) {
+      const nextWordMatch = remainingAfterBreak.match(/^(\S{1,3})\s/);
+      if (nextWordMatch && breakPoint < sanitized.length - 1) {
+        // Estende o chunk para incluir a palavra curta
+        const nextSpace = sanitized.indexOf(' ', breakPoint + 1);
+        if (nextSpace !== -1) {
+          breakPoint = nextSpace;
+        }
+      }
+    }
+    
+    const finalChunk = sanitized.substring(currentPos, breakPoint).trim();
+    if (finalChunk) {
+      chunks.push(finalChunk);
+    }
+    
+    currentPos = breakPoint;
+    
+    // Pula espaços, pontos, vírgulas e outros caracteres de pontuação iniciais
+    while (currentPos < sanitized.length && 
+           (sanitized[currentPos] === ' ' || 
+            sanitized[currentPos] === '.' ||
+            sanitized[currentPos] === ',' ||
+            sanitized[currentPos] === ';' ||
+            sanitized[currentPos] === ':')) {
       currentPos++;
     }
   }
+  
   return chunks.length > 0 ? chunks : [sanitized];
 };
 
