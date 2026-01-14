@@ -4,34 +4,41 @@ import { LessonPlan } from '@/core/entities/LessonPlan';
 import { IPDFGeneratorService, ProvaPDFOptions, SlidesPDFOptions } from './IPDFGeneratorService';
 
 /**
- * Divide texto em pedaços menores para evitar transbordamento
+ * Limpeza completa de texto: remove hífens de quebra, normaliza espaços e caracteres especiais
  */
-const splitTextIntoChunks = (text: string, maxLength: number = 700): string[] => {
-  if (text.length <= maxLength) return [text];
-  
-  const chunks: string[] = [];
-  let currentText = text;
-
-  while (currentText.length > 0) {
-    if (currentText.length <= maxLength) {
-      chunks.push(currentText);
-      break;
-    }
-    // Encontra o último espaço antes do limite para não cortar palavras
-    let splitIndex = currentText.lastIndexOf(' ', maxLength);
-    if (splitIndex === -1) splitIndex = maxLength;
-    
-    chunks.push(currentText.substring(0, splitIndex).trim());
-    currentText = currentText.substring(splitIndex).trim();
-  }
-  return chunks;
+const sanitizeText = (text: string): string => {
+  return text
+    .replace(/- \n/g, '') // Remove hífens de quebra de linha artificial
+    .replace(/\n/g, ' ')  // Normaliza quebras de linha em espaços
+    .replace(/\s+/g, ' ') // Remove espaços múltiplos
+    .replace(/[^\x20-\x7EáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ]/g, '') // Remove caracteres não suportados
+    .trim();
 };
 
 /**
- * Remove caracteres problemáticos do texto
+ * Divide texto em pedaços por palavras para evitar transbordamento
  */
-const clean = (txt: string): string => {
-  return txt.replace(/[^\x20-\x7EáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ]/g, '');
+const splitText = (text: string, limit: number = 700): string[] => {
+  const words = text.split(' ');
+  const chunks: string[] = [];
+  let currentChunk = '';
+
+  words.forEach(word => {
+    if ((currentChunk + word).length > limit) {
+      if (currentChunk) {
+        chunks.push(currentChunk.trim());
+        currentChunk = word + ' ';
+      } else {
+        // Se a palavra isolada é maior que o limite, adiciona mesmo assim
+        chunks.push(word);
+        currentChunk = '';
+      }
+    } else {
+      currentChunk += word + ' ';
+    }
+  });
+  if (currentChunk) chunks.push(currentChunk.trim());
+  return chunks.length > 0 ? chunks : [text];
 };
 
 /**
@@ -144,14 +151,14 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
       <Page key="title" size="A4" orientation="landscape" style={styles.slidePage}>
         <View style={styles.slideTitleContainer}>
           <View style={styles.slideTitleBox}>
-            <Text style={styles.slideTitle}>{clean(lessonPlan.title)}</Text>
+            <Text style={styles.slideTitle}>{sanitizeText(lessonPlan.title)}</Text>
             <View style={styles.slideTitleDivider} />
-            <Text style={styles.slideSubtitle}>{clean(lessonPlan.subject)}</Text>
-            <Text style={styles.slideInfo}>{clean(lessonPlan.gradeYear)}</Text>
+            <Text style={styles.slideSubtitle}>{sanitizeText(lessonPlan.subject)}</Text>
+            <Text style={styles.slideInfo}>{sanitizeText(lessonPlan.gradeYear)}</Text>
           </View>
           {options.schoolName && (
             <View style={styles.slideFooterBox}>
-              <Text style={styles.slideSchool}>{clean(options.schoolName)}</Text>
+              <Text style={styles.slideSchool}>{sanitizeText(options.schoolName)}</Text>
             </View>
           )}
         </View>
@@ -169,41 +176,41 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
             {lessonPlan.objectives.map((objective, index) => (
               <View key={index} style={styles.slideBulletItem}>
                 <Text style={styles.slideBulletDot}>•</Text>
-                <Text style={styles.slideBulletText}>{clean(objective)}</Text>
+                <Text style={styles.slideBulletText}>{sanitizeText(objective)}</Text>
               </View>
             ))}
           </View>
+          <Text style={styles.slidePageNumber}>Página {pages.length + 1}</Text>
         </View>
       </Page>
     );
 
     // Processamento de Conteúdo com Divisão Automática
-    const sections = [
-      { title: 'CONTEÚDO', content: lessonPlan.content },
-      { title: 'METODOLOGIA', content: lessonPlan.methodology }
+    const contentSections = [
+      { title: 'CONTEÚDO', data: lessonPlan.content },
+      { title: 'METODOLOGIA', data: lessonPlan.methodology }
     ];
 
-    sections.forEach(section => {
-      if (!section.content) return;
+    contentSections.forEach(section => {
+      if (!section.data) return;
       
-      const paragraphs = section.content.split('\n\n').filter(p => p.trim());
-      
-      paragraphs.forEach((para) => {
-        const chunks = splitTextIntoChunks(clean(para), 800);
-        chunks.forEach((chunk, chunkIdx) => {
-          pages.push(
-            <Page key={`${section.title}-${chunkIdx}`} size="A4" orientation="landscape" style={styles.slidePage}>
-              <View style={styles.slideContentContainer}>
-                <View style={styles.slideHeaderBox}>
-                  <Text style={styles.slideSectionTitle}>{section.title}</Text>
-                </View>
-                <View style={styles.slideBodyBox}>
-                  <Text style={styles.slideText}>{chunk}</Text>
-                </View>
+      const sanitizedContent = sanitizeText(section.data);
+      const textChunks = splitText(sanitizedContent, 800);
+
+      textChunks.forEach((chunk, index) => {
+        pages.push(
+          <Page key={`${section.title}-${index}`} size="A4" orientation="landscape" style={styles.slidePage}>
+            <View style={styles.slideContentContainer}>
+              <View style={styles.slideHeaderBox}>
+                <Text style={styles.slideSectionTitle}>{section.title}</Text>
               </View>
-            </Page>
-          );
-        });
+              <View style={styles.slideBodyBox}>
+                <Text style={styles.slideText}>{chunk}</Text>
+              </View>
+              <Text style={styles.slidePageNumber}>Página {pages.length + 1}</Text>
+            </View>
+          </Page>
+        );
       });
     });
 
@@ -219,10 +226,11 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
               {lessonPlan.bnccCompetencies.map((competency, index) => (
                 <View key={index} style={styles.slideBulletItem}>
                   <Text style={styles.slideBulletDot}>✓</Text>
-                  <Text style={styles.slideBulletText}>{clean(competency)}</Text>
+                  <Text style={styles.slideBulletText}>{sanitizeText(competency)}</Text>
                 </View>
               ))}
             </View>
+            <Text style={styles.slidePageNumber}>Página {pages.length + 1}</Text>
           </View>
         </Page>
       );
@@ -238,18 +246,23 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
                 <Text style={styles.slideSectionTitle}>QUESTÃO {index + 1}</Text>
               </View>
               <View style={styles.slideBodyBox}>
-                <Text style={styles.slideQuizQuestion}>{clean(question.question)}</Text>
+                <Text style={styles.slideQuizQuestion}>{sanitizeText(question.question)}</Text>
                 <View style={styles.slideQuizOptions}>
-                  {question.options.map((option, optIndex) => (
-                    <View key={optIndex} style={styles.slideQuizOptionItem}>
-                      <Text style={styles.slideQuizOptionLetter}>
-                        {String.fromCharCode(65 + optIndex)})
-                      </Text>
-                      <Text style={styles.slideQuizOptionText}>{clean(option)}</Text>
-                    </View>
-                  ))}
+                  {question.options.map((option, optIndex) => {
+                    // Remove duplicação "A) A)" se existir
+                    const cleanOption = sanitizeText(option).replace(/^[A-E]\)\s*/i, '');
+                    return (
+                      <View key={optIndex} style={styles.slideQuizOptionItem}>
+                        <Text style={styles.slideQuizOptionLetter}>
+                          {String.fromCharCode(65 + optIndex)})
+                        </Text>
+                        <Text style={styles.slideQuizOptionText}>{cleanOption}</Text>
+                      </View>
+                    );
+                  })}
                 </View>
               </View>
+              <Text style={styles.slidePageNumber}>Página {pages.length + 1}</Text>
             </View>
           </Page>
         );
@@ -435,9 +448,9 @@ const styles = StyleSheet.create({
   },
   slideHeaderBox: {
     width: '100%',
-    marginBottom: 30,
+    marginBottom: 20,
     paddingBottom: 15,
-    borderBottom: '3 solid #3b82f6',
+    borderBottom: '4 solid #3b82f6',
   },
   slideBodyBox: {
     width: '100%',
@@ -445,7 +458,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   slideSectionTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#1e3a8a',
     textAlign: 'left',
