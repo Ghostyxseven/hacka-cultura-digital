@@ -771,10 +771,11 @@ export default function LessonPlanPage() {
                     {(editingQuiz ? editedQuiz : lessonPlan.quiz).map((question, index) => (
                       <div key={question.id} className="border-l-4 border-primary-500 pl-6 py-4 bg-gradient-to-r from-primary-50/50 to-transparent rounded-r-xl relative">
                         {editingQuiz && (
-                          <div className="absolute top-2 right-2">
+                          <div className="absolute top-2 right-2 z-10">
                             <ConfirmDeleteButton
                               onConfirm={() => handleRemoveQuizQuestion(question.id)}
                               itemName="questão"
+                              className="opacity-100"
                             />
                           </div>
                         )}
