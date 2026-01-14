@@ -160,14 +160,14 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
       <Page key="title" size="A4" orientation="landscape" style={styles.slidePage}>
         <View style={styles.slideTitleContainer}>
           <View style={styles.slideTitleBox}>
-            <Text style={styles.slideTitle}>{sanitizeText(lessonPlan.title)}</Text>
+            <Text style={styles.slideTitle}>{cleanText(lessonPlan.title)}</Text>
             <View style={styles.slideTitleDivider} />
-            <Text style={styles.slideSubtitle}>{sanitizeText(lessonPlan.subject)}</Text>
-            <Text style={styles.slideInfo}>{sanitizeText(lessonPlan.gradeYear)}</Text>
+            <Text style={styles.slideSubtitle}>{cleanText(lessonPlan.subject)}</Text>
+            <Text style={styles.slideInfo}>{cleanText(lessonPlan.gradeYear)}</Text>
           </View>
           {options.schoolName && (
             <View style={styles.slideFooterBox}>
-              <Text style={styles.slideSchool}>{sanitizeText(options.schoolName)}</Text>
+              <Text style={styles.slideSchool}>{cleanText(options.schoolName)}</Text>
             </View>
           )}
         </View>
@@ -185,7 +185,7 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
             {lessonPlan.objectives.map((objective, index) => (
               <View key={index} style={styles.slideBulletItem}>
                 <Text style={styles.slideBulletDot}>•</Text>
-                <Text style={styles.slideBulletText}>{sanitizeText(objective)}</Text>
+                <Text style={styles.slideBulletText}>{cleanText(objective)}</Text>
               </View>
             ))}
           </View>
@@ -203,10 +203,9 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
     contentSections.forEach(section => {
       if (!section.data) return;
       
-      const sanitizedContent = sanitizeText(section.data);
-      const textChunks = splitText(sanitizedContent, 800);
+      const textChunks = getParagraphChunks(section.data, 800);
 
-      textChunks.forEach((chunk, chunkIndex) => {
+      textChunks.forEach((chunk: string, chunkIndex: number) => {
         const pageNumber = pages.length + 1;
         pages.push(
           <Page key={`${section.title}-${chunkIndex}`} size="A4" orientation="landscape" style={styles.slidePage}>
@@ -236,7 +235,7 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
               {lessonPlan.bnccCompetencies.map((competency, index) => (
                 <View key={index} style={styles.slideBulletItem}>
                   <Text style={styles.slideBulletDot}>✓</Text>
-                  <Text style={styles.slideBulletText}>{sanitizeText(competency)}</Text>
+                  <Text style={styles.slideBulletText}>{cleanText(competency)}</Text>
                 </View>
               ))}
             </View>
@@ -246,7 +245,7 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
       );
     }
 
-    // Slide: Quiz (opcional)
+    // Slide: Quiz (opcional) - Layout em Duas Colunas
     if (options.includeQuiz && lessonPlan.quiz.length > 0) {
       lessonPlan.quiz.forEach((question, index) => {
         pages.push(
@@ -256,20 +255,19 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
                 <Text style={styles.slideSectionTitle}>QUESTÃO {index + 1}</Text>
               </View>
               <View style={styles.slideBodyBox}>
-                <Text style={styles.slideQuizQuestion}>{sanitizeText(question.question)}</Text>
-                <View style={styles.slideQuizOptions}>
-                  {question.options.map((option, optIndex) => {
-                    // Remove duplicação "A) A)" se existir
-                    const cleanOption = sanitizeText(option).replace(/^[A-E]\)\s*/i, '');
-                    return (
-                      <View key={optIndex} style={styles.slideQuizOptionItem}>
-                        <Text style={styles.slideQuizOptionLetter}>
-                          {String.fromCharCode(65 + optIndex)})
+                <Text style={styles.slideQuizQuestion}>{cleanText(question.question)}</Text>
+                {/* Grid de Alternativas em Duas Colunas */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 20 }}>
+                  {question.options.map((option, optIndex) => (
+                    <View key={optIndex} style={{ width: '48%', marginBottom: 12 }}>
+                      <Text style={styles.slideQuizOptionText}>
+                        <Text style={{ fontWeight: 'bold', color: '#3b82f6' }}>
+                          {String.fromCharCode(65 + optIndex)}){' '}
                         </Text>
-                        <Text style={styles.slideQuizOptionText}>{cleanOption}</Text>
-                      </View>
-                    );
-                  })}
+                        {cleanText(option).replace(/^[A-E]\)\s*/i, '')}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
               </View>
               <Text style={styles.slidePageNumber}>Página {pages.length + 1}</Text>
