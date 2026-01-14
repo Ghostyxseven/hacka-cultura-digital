@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   // Estilos para Slides
   slidePage: {
-    padding: 50,
+    padding: 40,
     backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
@@ -362,12 +362,13 @@ const styles = StyleSheet.create({
     marginBottom: 60,
   },
   slideTitle: {
-    fontSize: 40,
+    fontSize: 36,
     fontWeight: 'bold',
     marginBottom: 15,
     textAlign: 'center',
     color: '#1e3a8a',
-    lineHeight: 1.2,
+    lineHeight: 1.3,
+    maxWidth: '100%',
   },
   slideTitleDivider: {
     width: 120,
@@ -425,10 +426,11 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   slideText: {
-    fontSize: 18,
-    lineHeight: 1.8,
+    fontSize: 16,
+    lineHeight: 1.6,
     color: '#1e293b',
-    textAlign: 'justify',
+    textAlign: 'left',
+    maxWidth: '100%',
   },
   slideBulletItem: {
     flexDirection: 'row',
@@ -444,19 +446,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   slideBulletText: {
-    fontSize: 18,
-    lineHeight: 1.7,
+    fontSize: 16,
+    lineHeight: 1.6,
     color: '#1e293b',
     flex: 1,
     textAlign: 'left',
+    maxWidth: '100%',
   },
   slideQuizQuestion: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 25,
     color: '#1e3a8a',
-    lineHeight: 1.6,
+    lineHeight: 1.5,
     textAlign: 'left',
+    maxWidth: '100%',
   },
   slideQuizOptions: {
     marginTop: 20,
@@ -480,10 +484,11 @@ const styles = StyleSheet.create({
     minWidth: 25,
   },
   slideQuizOptionText: {
-    fontSize: 17,
-    lineHeight: 1.6,
+    fontSize: 15,
+    lineHeight: 1.5,
     color: '#1e293b',
     flex: 1,
     textAlign: 'left',
+    maxWidth: '100%',
   },
 });
