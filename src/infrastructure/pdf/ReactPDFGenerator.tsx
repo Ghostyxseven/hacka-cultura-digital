@@ -197,9 +197,10 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
       const sanitizedContent = sanitizeText(section.data);
       const textChunks = splitText(sanitizedContent, 800);
 
-      textChunks.forEach((chunk, index) => {
+      textChunks.forEach((chunk, chunkIndex) => {
+        const pageNumber = pages.length + 1;
         pages.push(
-          <Page key={`${section.title}-${index}`} size="A4" orientation="landscape" style={styles.slidePage}>
+          <Page key={`${section.title}-${chunkIndex}`} size="A4" orientation="landscape" style={styles.slidePage}>
             <View style={styles.slideContentContainer}>
               <View style={styles.slideHeaderBox}>
                 <Text style={styles.slideSectionTitle}>{section.title}</Text>
@@ -207,7 +208,7 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
               <View style={styles.slideBodyBox}>
                 <Text style={styles.slideText}>{chunk}</Text>
               </View>
-              <Text style={styles.slidePageNumber}>Página {pages.length + 1}</Text>
+              <Text style={styles.slidePageNumber}>Página {pageNumber}</Text>
             </View>
           </Page>
         );
