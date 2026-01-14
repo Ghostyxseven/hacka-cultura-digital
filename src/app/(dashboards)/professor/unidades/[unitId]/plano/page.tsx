@@ -775,7 +775,7 @@ export default function LessonPlanPage() {
                             <ConfirmDeleteButton
                               onConfirm={() => handleRemoveQuizQuestion(question.id)}
                               itemName="questão"
-                              className="opacity-100"
+                              className="!opacity-100"
                             />
                           </div>
                         )}
