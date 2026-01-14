@@ -529,4 +529,12 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     maxWidth: '100%',
   },
+  slidePageNumber: {
+    position: 'absolute',
+    bottom: 20,
+    right: 50,
+    fontSize: 12,
+    color: '#94a3b8',
+    textAlign: 'right',
+  },
 });
