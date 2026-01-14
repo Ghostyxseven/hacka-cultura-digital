@@ -112,11 +112,16 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
     pages.push(
       <Page key="title" size="A4" style={styles.slidePage}>
         <View style={styles.slideTitleContainer}>
-          <Text style={styles.slideTitle}>{lessonPlan.title}</Text>
-          <Text style={styles.slideSubtitle}>{lessonPlan.subject}</Text>
-          <Text style={styles.slideInfo}>{lessonPlan.gradeYear}</Text>
+          <View style={styles.slideTitleBox}>
+            <Text style={styles.slideTitle}>{lessonPlan.title}</Text>
+            <View style={styles.slideTitleDivider} />
+            <Text style={styles.slideSubtitle}>{lessonPlan.subject}</Text>
+            <Text style={styles.slideInfo}>{lessonPlan.gradeYear}</Text>
+          </View>
           {options.schoolName && (
-            <Text style={styles.slideSchool}>{options.schoolName}</Text>
+            <View style={styles.slideFooterBox}>
+              <Text style={styles.slideSchool}>{options.schoolName}</Text>
+            </View>
           )}
         </View>
       </Page>
@@ -125,13 +130,18 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
     // Slide 2: Objetivos
     pages.push(
       <Page key="objectives" size="A4" style={styles.slidePage}>
-        <View style={styles.slideContent}>
-          <Text style={styles.slideSectionTitle}>Objetivos de Aprendizagem</Text>
-          {lessonPlan.objectives.map((objective, index) => (
-            <Text key={index} style={styles.slideBullet}>
-              • {objective}
-            </Text>
-          ))}
+        <View style={styles.slideContentContainer}>
+          <View style={styles.slideHeaderBox}>
+            <Text style={styles.slideSectionTitle}>🎯 Objetivos de Aprendizagem</Text>
+          </View>
+          <View style={styles.slideBodyBox}>
+            {lessonPlan.objectives.map((objective, index) => (
+              <View key={index} style={styles.slideBulletItem}>
+                <Text style={styles.slideBulletDot}>•</Text>
+                <Text style={styles.slideBulletText}>{objective}</Text>
+              </View>
+            ))}
+          </View>
         </View>
       </Page>
     );
@@ -141,9 +151,13 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
     contentParagraphs.forEach((paragraph, index) => {
       pages.push(
         <Page key={`content-${index}`} size="A4" style={styles.slidePage}>
-          <View style={styles.slideContent}>
-            <Text style={styles.slideSectionTitle}>Conteúdo</Text>
-            <Text style={styles.slideText}>{paragraph.trim()}</Text>
+          <View style={styles.slideContentContainer}>
+            <View style={styles.slideHeaderBox}>
+              <Text style={styles.slideSectionTitle}>📚 Conteúdo</Text>
+            </View>
+            <View style={styles.slideBodyBox}>
+              <Text style={styles.slideText}>{paragraph.trim()}</Text>
+            </View>
           </View>
         </Page>
       );
@@ -155,9 +169,13 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
       methodologyParagraphs.forEach((paragraph, index) => {
         pages.push(
           <Page key={`methodology-${index}`} size="A4" style={styles.slidePage}>
-            <View style={styles.slideContent}>
-              <Text style={styles.slideSectionTitle}>Metodologia</Text>
-              <Text style={styles.slideText}>{paragraph.trim()}</Text>
+            <View style={styles.slideContentContainer}>
+              <View style={styles.slideHeaderBox}>
+                <Text style={styles.slideSectionTitle}>📝 Metodologia</Text>
+              </View>
+              <View style={styles.slideBodyBox}>
+                <Text style={styles.slideText}>{paragraph.trim()}</Text>
+              </View>
             </View>
           </Page>
         );
@@ -168,13 +186,18 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
     if (lessonPlan.bnccCompetencies.length > 0) {
       pages.push(
         <Page key="bncc" size="A4" style={styles.slidePage}>
-          <View style={styles.slideContent}>
-            <Text style={styles.slideSectionTitle}>Competências BNCC</Text>
-            {lessonPlan.bnccCompetencies.map((competency, index) => (
-              <Text key={index} style={styles.slideBullet}>
-                • {competency}
-              </Text>
-            ))}
+          <View style={styles.slideContentContainer}>
+            <View style={styles.slideHeaderBox}>
+              <Text style={styles.slideSectionTitle}>✅ Competências BNCC</Text>
+            </View>
+            <View style={styles.slideBodyBox}>
+              {lessonPlan.bnccCompetencies.map((competency, index) => (
+                <View key={index} style={styles.slideBulletItem}>
+                  <Text style={styles.slideBulletDot}>✓</Text>
+                  <Text style={styles.slideBulletText}>{competency}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         </Page>
       );
@@ -185,17 +208,22 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
       lessonPlan.quiz.forEach((question, index) => {
         pages.push(
           <Page key={`quiz-${index}`} size="A4" style={styles.slidePage}>
-            <View style={styles.slideContent}>
-              <Text style={styles.slideSectionTitle}>
-                Questão {index + 1}
-              </Text>
-              <Text style={styles.slideText}>{question.question}</Text>
-              <View style={styles.slideQuizOptions}>
-                {question.options.map((option, optIndex) => (
-                  <Text key={optIndex} style={styles.slideQuizOption}>
-                    {String.fromCharCode(65 + optIndex)}) {option}
-                  </Text>
-                ))}
+            <View style={styles.slideContentContainer}>
+              <View style={styles.slideHeaderBox}>
+                <Text style={styles.slideSectionTitle}>✏️ Questão {index + 1}</Text>
+              </View>
+              <View style={styles.slideBodyBox}>
+                <Text style={styles.slideQuizQuestion}>{question.question}</Text>
+                <View style={styles.slideQuizOptions}>
+                  {question.options.map((option, optIndex) => (
+                    <View key={optIndex} style={styles.slideQuizOptionItem}>
+                      <Text style={styles.slideQuizOptionLetter}>
+                        {String.fromCharCode(65 + optIndex)})
+                      </Text>
+                      <Text style={styles.slideQuizOptionText}>{option}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
             </View>
           </Page>
