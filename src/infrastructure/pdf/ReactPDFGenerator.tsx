@@ -4,41 +4,50 @@ import { LessonPlan } from '@/core/entities/LessonPlan';
 import { IPDFGeneratorService, ProvaPDFOptions, SlidesPDFOptions } from './IPDFGeneratorService';
 
 /**
- * Limpeza completa de texto: remove hífens de quebra, normaliza espaços e caracteres especiais
+ * Limpeza completa de texto: remove hífens órfãos, quebras e caracteres não suportados
  */
-const sanitizeText = (text: string): string => {
+const cleanText = (text: string): string => {
   return text
-    .replace(/- \n/g, '') // Remove hífens de quebra de linha artificial
-    .replace(/\n/g, ' ')  // Normaliza quebras de linha em espaços
-    .replace(/\s+/g, ' ') // Remove espaços múltiplos
-    .replace(/[^\x20-\x7EáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ]/g, '') // Remove caracteres não suportados
+    // 1. Remove hifens seguidos de quebra de linha ou espaço (hifenização artificial)
+    .replace(/(\w+)-\s*\n/g, '$1')
+    // 2. Transforma quebras de linha simples em espaços
+    .replace(/\n/g, ' ')
+    // 3. Remove caracteres não-suportados (como os emojis corrompidos)
+    .replace(/[^\x20-\x7EáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ]/g, '')
+    // 4. Limpa espaços duplos
+    .replace(/\s+/g, ' ')
     .trim();
 };
 
 /**
- * Divide texto em pedaços por palavras para evitar transbordamento
+ * Divide parágrafos em chunks evitando cortes no meio de palavras
  */
-const splitText = (text: string, limit: number = 700): string[] => {
-  const words = text.split(' ');
+const getParagraphChunks = (text: string, limit: number = 700): string[] => {
+  const sanitized = cleanText(text);
   const chunks: string[] = [];
-  let currentChunk = '';
+  let currentPos = 0;
 
-  words.forEach(word => {
-    if ((currentChunk + word).length > limit) {
-      if (currentChunk) {
-        chunks.push(currentChunk.trim());
-        currentChunk = word + ' ';
-      } else {
-        // Se a palavra isolada é maior que o limite, adiciona mesmo assim
-        chunks.push(word);
-        currentChunk = '';
+  while (currentPos < sanitized.length) {
+    let endPos = currentPos + limit;
+    
+    if (endPos < sanitized.length) {
+      // Garante que não corte no meio de uma palavra
+      endPos = sanitized.lastIndexOf(' ', endPos);
+      if (endPos === -1 || endPos <= currentPos) {
+        // Se não encontrou espaço, corta no limite mesmo
+        endPos = currentPos + limit;
       }
-    } else {
-      currentChunk += word + ' ';
     }
-  });
-  if (currentChunk) chunks.push(currentChunk.trim());
-  return chunks.length > 0 ? chunks : [text];
+    
+    chunks.push(sanitized.substring(currentPos, endPos).trim());
+    currentPos = endPos;
+    
+    // Pula espaços iniciais do próximo chunk
+    while (sanitized[currentPos] === ' ' && currentPos < sanitized.length) {
+      currentPos++;
+    }
+  }
+  return chunks.length > 0 ? chunks : [sanitized];
 };
 
 /**
