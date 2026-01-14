@@ -54,7 +54,12 @@ export default function QuizPage() {
         return;
       }
 
-      setLessonPlan(plan);
+      // Embaralha as questões para evitar repetitividade
+      const shuffledQuiz = [...plan.quiz].sort(() => Math.random() - 0.5);
+      setLessonPlan({
+        ...plan,
+        quiz: shuffledQuiz,
+      });
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       showError('Erro ao carregar dados');

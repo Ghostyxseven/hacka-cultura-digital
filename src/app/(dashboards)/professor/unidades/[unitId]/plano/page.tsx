@@ -10,6 +10,7 @@ import type { LessonPlanViewModel, UnitViewModel } from '@/application/viewmodel
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { Button, BackButton } from '@/components';
+import { ConfirmDeleteButton } from '@/components/ui/ConfirmDeleteButton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
@@ -205,6 +206,21 @@ export default function LessonPlanPage() {
       }
       return q;
     }));
+  };
+
+  const handleAddQuizQuestion = () => {
+    const newQuestion: QuizQuestionViewModel = {
+      id: `quiz-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      question: '',
+      options: ['', '', '', ''],
+      correctAnswer: 0,
+      justification: '',
+    };
+    setEditedQuiz(prev => [...prev, newQuestion]);
+  };
+
+  const handleRemoveQuizQuestion = (questionId: string) => {
+    setEditedQuiz(prev => prev.filter(q => q.id !== questionId));
   };
 
   const handleSaveQuiz = async () => {
@@ -445,6 +461,13 @@ export default function LessonPlanPage() {
                     {canGenerate && editingQuiz && (
                       <div className="flex gap-2">
                         <Button
+                          onClick={handleAddQuizQuestion}
+                          variant="secondary"
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          ➕ Adicionar Questão
+                        </Button>
+                        <Button
                           onClick={handleCancelEditQuiz}
                           variant="secondary"
                           className="bg-gray-500 hover:bg-gray-600 text-white"
@@ -463,7 +486,15 @@ export default function LessonPlanPage() {
                   </div>
                   <div className="space-y-6">
                     {(editingQuiz ? editedQuiz : lessonPlan.quiz).map((question, index) => (
-                      <div key={question.id} className="border-l-4 border-primary-500 pl-6 py-4 bg-gradient-to-r from-primary-50/50 to-transparent rounded-r-xl">
+                      <div key={question.id} className="border-l-4 border-primary-500 pl-6 py-4 bg-gradient-to-r from-primary-50/50 to-transparent rounded-r-xl relative">
+                        {editingQuiz && (
+                          <div className="absolute top-2 right-2">
+                            <ConfirmDeleteButton
+                              onConfirm={() => handleRemoveQuizQuestion(question.id)}
+                              itemName="questão"
+                            />
+                          </div>
+                        )}
                         <div className="flex items-start gap-3 mb-4">
                           <span className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold flex-shrink-0">
                             {index + 1}
