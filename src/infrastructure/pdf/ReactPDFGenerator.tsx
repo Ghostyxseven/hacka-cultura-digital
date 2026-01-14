@@ -28,10 +28,15 @@ const cleanText = (text: string): string => {
       .replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])-\s+/g, '$1 ');
   }
   
-  // 5. Limpa espaços duplos e normaliza
-  // Garante espaço após palavras maiúsculas seguidas de minúsculas (ex: "CONTEÚDOonline" -> "CONTEÚDO online")
+  // 5. Garante espaço após palavras maiúsculas seguidas de minúsculas (ex: "CONTEÚDOonline" -> "CONTEÚDO online")
+  // Usa lookbehind para não quebrar palavras que já têm espaço antes
+  cleaned = cleaned.replace(/([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñÍ]{2,})([a-záàâãéèêíïóôõöúç])/g, '$1 $2');
+  
+  // 6. Remove hífens que ainda podem estar entre palavras (passada final)
+  cleaned = cleaned.replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])-([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])/gi, '$1$2');
+  
+  // 7. Limpa espaços duplos e normaliza
   cleaned = cleaned
-    .replace(/([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ]+)([a-záàâãéèêíïóôõöúç])/g, '$1 $2')
     .replace(/\s+/g, ' ')
     .trim();
   
