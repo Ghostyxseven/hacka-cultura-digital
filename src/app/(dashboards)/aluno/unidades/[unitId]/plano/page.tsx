@@ -220,34 +220,24 @@ export default function AlunoLessonPlanPage() {
                           </span>
                           <p className="font-semibold text-gray-900 text-lg leading-relaxed">{question.question}</p>
                         </div>
-                        <ul className="space-y-2 mb-4 ml-11">
+                        <ul className="space-y-2 ml-11">
                           {question.options.map((option, optIndex) => (
                             <li
                               key={optIndex}
-                              className={`p-3 rounded-xl transition-all ${
-                                optIndex === question.correctAnswer
-                                  ? 'bg-green-50 border-2 border-green-300 text-green-800 shadow-md'
-                                  : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
-                              }`}
+                              className="p-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition-all"
                             >
-                              <div className="flex items-center justify-between">
-                                <span>
-                                  <span className="font-bold mr-2">{String.fromCharCode(65 + optIndex)}.</span>
-                                  {option}
-                                </span>
-                                {optIndex === question.correctAnswer && (
-                                  <span className="text-green-700 font-bold text-lg">✓</span>
-                                )}
-                              </div>
+                              <span className="font-bold mr-2">{String.fromCharCode(65 + optIndex)}.</span>
+                              {option}
                             </li>
                           ))}
                         </ul>
-                        <div className="ml-11 bg-blue-50 p-4 rounded-xl text-sm text-blue-800 border border-blue-200">
-                          <strong className="text-blue-900">💡 Justificativa:</strong>
-                          <p className="mt-1 text-blue-700 leading-relaxed">{question.justification}</p>
-                        </div>
                       </div>
                     ))}
+                  </div>
+                  <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                    <p className="text-sm text-blue-800 text-center">
+                      💡 Responda as questões acessando o quiz interativo através do botão acima.
+                    </p>
                   </div>
                 </div>
               )}
