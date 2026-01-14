@@ -34,6 +34,13 @@ export default function LessonPlanPage() {
   const [editingQuiz, setEditingQuiz] = useState(false);
   const [editedQuiz, setEditedQuiz] = useState<QuizQuestionViewModel[]>([]);
   const [savingQuiz, setSavingQuiz] = useState(false);
+  const [editingObjectives, setEditingObjectives] = useState(false);
+  const [editedObjectives, setEditedObjectives] = useState<string[]>([]);
+  const [editingMethodology, setEditingMethodology] = useState(false);
+  const [editedMethodology, setEditedMethodology] = useState('');
+  const [editingContent, setEditingContent] = useState(false);
+  const [editedContent, setEditedContent] = useState('');
+  const [savingPlan, setSavingPlan] = useState(false);
   const lessonPlanService = getLessonPlanService();
 
   useEffect(() => {
@@ -58,6 +65,15 @@ export default function LessonPlanPage() {
         setLessonPlan(plan || null);
         if (plan?.quiz) {
           setEditedQuiz([...plan.quiz]);
+        }
+        if (plan?.objectives) {
+          setEditedObjectives([...plan.objectives]);
+        }
+        if (plan?.methodology) {
+          setEditedMethodology(plan.methodology);
+        }
+        if (plan?.content) {
+          setEditedContent(plan.content);
         }
       }
     } catch (error) {
@@ -254,6 +270,142 @@ export default function LessonPlanPage() {
     }
   };
 
+  const handleStartEditObjectives = () => {
+    if (lessonPlan?.objectives) {
+      setEditedObjectives([...lessonPlan.objectives]);
+      setEditingObjectives(true);
+    }
+  };
+
+  const handleCancelEditObjectives = () => {
+    if (lessonPlan?.objectives) {
+      setEditedObjectives([...lessonPlan.objectives]);
+    }
+    setEditingObjectives(false);
+  };
+
+  const handleUpdateObjective = (index: number, value: string) => {
+    setEditedObjectives(prev => {
+      const newObjectives = [...prev];
+      newObjectives[index] = value;
+      return newObjectives;
+    });
+  };
+
+  const handleAddObjective = () => {
+    setEditedObjectives(prev => [...prev, '']);
+  };
+
+  const handleRemoveObjective = (index: number) => {
+    setEditedObjectives(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSaveObjectives = async () => {
+    if (!lessonPlan) return;
+
+    setSavingPlan(true);
+    try {
+      const planEntity = lessonPlanService.getLessonPlanById(lessonPlan.id);
+      if (!planEntity) {
+        throw new Error('Plano de aula não encontrado');
+      }
+
+      const updatedPlan = {
+        ...planEntity,
+        objectives: editedObjectives.filter(obj => obj.trim().length > 0),
+      };
+
+      lessonPlanService.saveLessonPlan(updatedPlan);
+      loadData();
+      setEditingObjectives(false);
+      showSuccess('Objetivos atualizados com sucesso!');
+    } catch (error: any) {
+      showError(error.message || 'Erro ao salvar objetivos');
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
+  const handleStartEditMethodology = () => {
+    if (lessonPlan?.methodology) {
+      setEditedMethodology(lessonPlan.methodology);
+      setEditingMethodology(true);
+    }
+  };
+
+  const handleCancelEditMethodology = () => {
+    if (lessonPlan?.methodology) {
+      setEditedMethodology(lessonPlan.methodology);
+    }
+    setEditingMethodology(false);
+  };
+
+  const handleSaveMethodology = async () => {
+    if (!lessonPlan) return;
+
+    setSavingPlan(true);
+    try {
+      const planEntity = lessonPlanService.getLessonPlanById(lessonPlan.id);
+      if (!planEntity) {
+        throw new Error('Plano de aula não encontrado');
+      }
+
+      const updatedPlan = {
+        ...planEntity,
+        methodology: editedMethodology,
+      };
+
+      lessonPlanService.saveLessonPlan(updatedPlan);
+      loadData();
+      setEditingMethodology(false);
+      showSuccess('Metodologia atualizada com sucesso!');
+    } catch (error: any) {
+      showError(error.message || 'Erro ao salvar metodologia');
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
+  const handleStartEditContent = () => {
+    if (lessonPlan?.content) {
+      setEditedContent(lessonPlan.content);
+      setEditingContent(true);
+    }
+  };
+
+  const handleCancelEditContent = () => {
+    if (lessonPlan?.content) {
+      setEditedContent(lessonPlan.content);
+    }
+    setEditingContent(false);
+  };
+
+  const handleSaveContent = async () => {
+    if (!lessonPlan) return;
+
+    setSavingPlan(true);
+    try {
+      const planEntity = lessonPlanService.getLessonPlanById(lessonPlan.id);
+      if (!planEntity) {
+        throw new Error('Plano de aula não encontrado');
+      }
+
+      const updatedPlan = {
+        ...planEntity,
+        content: editedContent,
+      };
+
+      lessonPlanService.saveLessonPlan(updatedPlan);
+      loadData();
+      setEditingContent(false);
+      showSuccess('Conteúdo atualizado com sucesso!');
+    } catch (error: any) {
+      showError(error.message || 'Erro ao salvar conteúdo');
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -382,15 +534,68 @@ export default function LessonPlanPage() {
               {/* Objetivos */}
               {lessonPlan.objectives && lessonPlan.objectives.length > 0 && (
                 <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 border border-gray-200">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-3xl">🎯</span>
-                    <h3 className="text-2xl font-bold text-gray-900">Objetivos de Aprendizagem</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">🎯</span>
+                      <h3 className="text-2xl font-bold text-gray-900">Objetivos de Aprendizagem</h3>
+                    </div>
+                    {canGenerate && !editingObjectives && (
+                      <Button
+                        onClick={handleStartEditObjectives}
+                        variant="secondary"
+                        className="bg-primary-600 hover:bg-primary-700 text-white"
+                      >
+                        ✏️ Editar
+                      </Button>
+                    )}
+                    {canGenerate && editingObjectives && (
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={handleAddObjective}
+                          variant="secondary"
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          ➕ Adicionar
+                        </Button>
+                        <Button
+                          onClick={handleCancelEditObjectives}
+                          variant="secondary"
+                          className="bg-gray-500 hover:bg-gray-600 text-white"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          onClick={handleSaveObjectives}
+                          disabled={savingPlan}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          {savingPlan ? 'Salvando...' : '💾 Salvar'}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   <ul className="space-y-3">
-                    {lessonPlan.objectives.map((objective, index) => (
-                      <li key={index} className="flex items-start gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    {(editingObjectives ? editedObjectives : lessonPlan.objectives).map((objective, index) => (
+                      <li key={index} className="flex items-start gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100 relative">
+                        {editingObjectives && (
+                          <div className="absolute top-2 right-2">
+                            <ConfirmDeleteButton
+                              onConfirm={() => handleRemoveObjective(index)}
+                              itemName="objetivo"
+                            />
+                          </div>
+                        )}
                         <span className="text-primary-600 font-bold text-xl mt-0.5">•</span>
-                        <span className="text-gray-700 leading-relaxed">{objective}</span>
+                        {editingObjectives ? (
+                          <Input
+                            value={objective}
+                            onChange={(e) => handleUpdateObjective(index, e.target.value)}
+                            placeholder="Digite o objetivo..."
+                            className="flex-1"
+                          />
+                        ) : (
+                          <span className="text-gray-700 leading-relaxed">{objective}</span>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -418,26 +623,104 @@ export default function LessonPlanPage() {
               {/* Metodologia */}
               {lessonPlan.methodology && (
                 <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 border border-gray-200">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-3xl">📝</span>
-                    <h3 className="text-2xl font-bold text-gray-900">Metodologia</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">📝</span>
+                      <h3 className="text-2xl font-bold text-gray-900">Metodologia</h3>
+                    </div>
+                    {canGenerate && !editingMethodology && (
+                      <Button
+                        onClick={handleStartEditMethodology}
+                        variant="secondary"
+                        className="bg-primary-600 hover:bg-primary-700 text-white"
+                      >
+                        ✏️ Editar
+                      </Button>
+                    )}
+                    {canGenerate && editingMethodology && (
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={handleCancelEditMethodology}
+                          variant="secondary"
+                          className="bg-gray-500 hover:bg-gray-600 text-white"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          onClick={handleSaveMethodology}
+                          disabled={savingPlan}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          {savingPlan ? 'Salvando...' : '💾 Salvar'}
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                    <p className="text-gray-700 whitespace-pre-line leading-relaxed">{lessonPlan.methodology}</p>
-                  </div>
+                  {editingMethodology ? (
+                    <Textarea
+                      value={editedMethodology}
+                      onChange={(e) => setEditedMethodology(e.target.value)}
+                      placeholder="Digite a metodologia..."
+                      rows={8}
+                      className="w-full"
+                    />
+                  ) : (
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                      <p className="text-gray-700 whitespace-pre-line leading-relaxed">{lessonPlan.methodology}</p>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Conteúdo */}
               {lessonPlan.content && (
                 <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 border border-gray-200">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-3xl">📚</span>
-                    <h3 className="text-2xl font-bold text-gray-900">Conteúdo</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">📚</span>
+                      <h3 className="text-2xl font-bold text-gray-900">Conteúdo</h3>
+                    </div>
+                    {canGenerate && !editingContent && (
+                      <Button
+                        onClick={handleStartEditContent}
+                        variant="secondary"
+                        className="bg-primary-600 hover:bg-primary-700 text-white"
+                      >
+                        ✏️ Editar
+                      </Button>
+                    )}
+                    {canGenerate && editingContent && (
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={handleCancelEditContent}
+                          variant="secondary"
+                          className="bg-gray-500 hover:bg-gray-600 text-white"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          onClick={handleSaveContent}
+                          disabled={savingPlan}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          {savingPlan ? 'Salvando...' : '💾 Salvar'}
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                    <p className="text-gray-700 whitespace-pre-line leading-relaxed">{lessonPlan.content}</p>
-                  </div>
+                  {editingContent ? (
+                    <Textarea
+                      value={editedContent}
+                      onChange={(e) => setEditedContent(e.target.value)}
+                      placeholder="Digite o conteúdo..."
+                      rows={12}
+                      className="w-full"
+                    />
+                  ) : (
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                      <p className="text-gray-700 whitespace-pre-line leading-relaxed">{lessonPlan.content}</p>
+                    </div>
+                  )}
                 </div>
               )}
 
