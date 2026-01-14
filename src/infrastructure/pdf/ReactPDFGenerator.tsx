@@ -382,9 +382,9 @@ const styles = StyleSheet.create({
   },
   // Estilos para Slides
   slidePage: {
-    padding: 35,
+    padding: 50,
     backgroundColor: '#ffffff',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
   },
   slideTitleContainer: {
