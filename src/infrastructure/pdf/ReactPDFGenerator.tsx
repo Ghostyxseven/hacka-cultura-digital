@@ -350,9 +350,9 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
               <View style={styles.slideBodyBox}>
                 <Text style={styles.slideQuizQuestion}>{cleanText(question.question)}</Text>
                 {/* Grid de Alternativas em Duas Colunas */}
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 20 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 25, gap: 15 }}>
                   {question.options.map((option, optIndex) => (
-                    <View key={optIndex} style={{ width: '48%', marginBottom: 12 }}>
+                    <View key={optIndex} style={{ width: '48%', marginBottom: 20, paddingVertical: 8, paddingHorizontal: 10 }}>
                       <Text style={styles.slideQuizOptionText}>
                         <Text style={{ fontWeight: 'bold', color: '#3b82f6' }}>
                           {String.fromCharCode(65 + optIndex)}){' '}
