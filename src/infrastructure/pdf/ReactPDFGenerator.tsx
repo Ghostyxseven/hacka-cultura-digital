@@ -296,7 +296,7 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
     contentSections.forEach(section => {
       if (!section.data) return;
       
-      const textChunks = getParagraphChunks(section.data, 800);
+      const textChunks = getParagraphChunks(section.data, 650);
 
       textChunks.forEach((chunk: string, chunkIndex: number) => {
         const pageNumber = pages.length + 1;
