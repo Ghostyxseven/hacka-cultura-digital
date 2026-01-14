@@ -9,11 +9,12 @@ import { IPDFGeneratorService, ProvaPDFOptions, SlidesPDFOptions } from './IPDFG
 const cleanText = (text: string): string => {
   return text
     // 1. Remove hifens seguidos de quebra de linha (hifenização artificial) - preserva palavra completa
-    .replace(/(\w+)-\s*\n\s*/g, '$1 ')
+    .replace(/([a-záàâãéèêíïóôõöúç])-\s*\n\s*/gi, '$1 ')
     // 2. Remove hifens no meio de palavras quando seguidos de espaço (hífen órfão)
-    .replace(/(\w+)-\s+(\w)/g, '$1$2')
+    // Exemplo: "exclu-sivamente" -> "exclusivamente"
+    .replace(/([a-záàâãéèêíïóôõöúç])-\s+([a-záàâãéèêíïóôõöúç])/gi, '$1$2')
     // 3. Remove hifens que aparecem no final de linha antes de espaço
-    .replace(/(\w+)-\s/g, '$1 ')
+    .replace(/([a-záàâãéèêíïóôõöúç])-\s/g, '$1 ')
     // 4. Transforma quebras de linha simples em espaços
     .replace(/\n/g, ' ')
     // 5. Remove caracteres não-suportados (como os emojis corrompidos)
