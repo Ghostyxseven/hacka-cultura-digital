@@ -59,6 +59,104 @@ export default function AlunoLessonPlanPage() {
     }
   };
 
+  const handleGenerateProvaPDF = async () => {
+    if (!lessonPlan) return;
+
+    setGeneratingPDF(true);
+    try {
+      // Busca a entidade completa do plano de aula
+      const planEntity = lessonPlanService.getLessonPlanById(lessonPlan.id);
+      if (!planEntity) {
+        throw new Error('Plano de aula não encontrado');
+      }
+
+      const response = await fetch('/api/pdf/prova', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lessonPlan: planEntity,
+          options: {
+            schoolName: 'INSTITUTO FEDERAL DO PIAUÍ - IFPI',
+            includeAnswers: false, // Prova sem gabarito para alunos
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao gerar PDF da prova');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `prova-${lessonPlan.title.replace(/\s+/g, '-').toLowerCase()}-${lessonPlan.id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      showSuccess('PDF da prova gerado com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao gerar PDF da prova:', error);
+      showError(error.message || 'Erro ao gerar PDF da prova');
+    } finally {
+      setGeneratingPDF(false);
+    }
+  };
+
+  const handleGenerateSlidesPDF = async () => {
+    if (!lessonPlan) return;
+
+    setGeneratingSlides(true);
+    try {
+      // Busca a entidade completa do plano de aula
+      const planEntity = lessonPlanService.getLessonPlanById(lessonPlan.id);
+      if (!planEntity) {
+        throw new Error('Plano de aula não encontrado');
+      }
+
+      const response = await fetch('/api/pdf/slides', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lessonPlan: planEntity,
+          options: {
+            schoolName: 'INSTITUTO FEDERAL DO PIAUÍ - IFPI',
+            includeQuiz: true,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao gerar PDF dos slides');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `slides-${lessonPlan.title.replace(/\s+/g, '-').toLowerCase()}-${lessonPlan.id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      showSuccess('PDF dos slides gerado com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao gerar PDF dos slides:', error);
+      showError(error.message || 'Erro ao gerar PDF dos slides');
+    } finally {
+      setGeneratingSlides(false);
+    }
+  };
+
   if (!isAluno) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
