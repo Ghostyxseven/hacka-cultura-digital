@@ -10,7 +10,7 @@ import type { LessonPlanViewModel, UnitViewModel } from '@/application/viewmodel
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { EmptyState, BackButton, Button } from '@/components';
-import { showError } from '@/utils/notifications';
+import { showError, showSuccess } from '@/utils/notifications';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function AlunoLessonPlanPage() {
@@ -22,6 +22,8 @@ export default function AlunoLessonPlanPage() {
   const [unit, setUnit] = useState<UnitViewModel | null>(null);
   const [lessonPlan, setLessonPlan] = useState<LessonPlanViewModel | null>(null);
   const [loading, setLoading] = useState(true);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [generatingSlides, setGeneratingSlides] = useState(false);
   const lessonPlanService = getLessonPlanService();
 
   useEffect(() => {
@@ -127,19 +129,55 @@ export default function AlunoLessonPlanPage() {
                   </span>
                 </div>
                 
-                {/* Botão para fazer Quiz */}
-                {lessonPlan.quiz && lessonPlan.quiz.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-white/20">
+                {/* Botões de Ação */}
+                <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-white/20">
+                  {lessonPlan.quiz && lessonPlan.quiz.length > 0 && (
                     <Button
                       onClick={() => router.push(`/aluno/quiz/${lessonPlan.id}`)}
                       variant="secondary"
-                      className="w-full bg-white/20 hover:bg-white/30 text-white border-white/30 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                      className="bg-white/20 hover:bg-white/30 text-white border-white/30 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                     >
                       <span className="mr-2">✏️</span>
                       Fazer Quiz
                     </Button>
-                  </div>
-                )}
+                  )}
+                  <Button
+                    onClick={handleGenerateProvaPDF}
+                    disabled={generatingPDF}
+                    variant="secondary"
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                  >
+                    {generatingPDF ? (
+                      <>
+                        <span className="mr-2">⏳</span>
+                        Gerando...
+                      </>
+                    ) : (
+                      <>
+                        <span className="mr-2">📄</span>
+                        Gerar Prova PDF
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={handleGenerateSlidesPDF}
+                    disabled={generatingSlides}
+                    variant="secondary"
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                  >
+                    {generatingSlides ? (
+                      <>
+                        <span className="mr-2">⏳</span>
+                        Gerando...
+                      </>
+                    ) : (
+                      <>
+                        <span className="mr-2">📊</span>
+                        Gerar Slides PDF
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
 
               {/* Objetivos */}
