@@ -7,25 +7,31 @@ import { IPDFGeneratorService, ProvaPDFOptions, SlidesPDFOptions } from './IPDFG
  * Limpeza completa de texto: remove hífens órfãos, quebras e caracteres não suportados
  */
 const cleanText = (text: string): string => {
+  if (!text || typeof text !== 'string') return '';
+  
   let cleaned = text
     // 1. Remove hifens seguidos de quebra de linha (hifenização artificial) - preserva palavra completa
-    .replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ])-\s*\n\s*/gi, '$1 ')
+    .replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])-\s*\n\s*/gi, '$1 ')
     // 2. Transforma quebras de linha simples em espaços
     .replace(/\n/g, ' ')
     // 3. Remove caracteres não-suportados (como os emojis corrompidos)
     .replace(/[^\x20-\x7EáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ]/g, '');
   
   // 4. Remove hífens órfãos (palavras quebradas no meio) - múltiplas passadas para pegar todos os casos
-  for (let i = 0; i < 3; i++) {
+  // Exemplos: "atualiza-ção" -> "atualização", "exclu-sivamente" -> "exclusivamente"
+  for (let i = 0; i < 5; i++) {
     cleaned = cleaned
       // Remove hífen seguido de espaço quando a palavra continua (hífen órfão)
-      .replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ])-\s+([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ])/gi, '$1$2')
+      // Captura padrões como "palavra- ção" ou "palavra-mente"
+      .replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])-\s+([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])/gi, '$1$2')
       // Remove hífen no final de palavra antes de espaço (quando não é hifenização válida)
-      .replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ])-\s+/g, '$1 ');
+      .replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])-\s+/g, '$1 ');
   }
   
   // 5. Limpa espaços duplos e normaliza
+  // Garante espaço após palavras maiúsculas seguidas de minúsculas (ex: "CONTEÚDOonline" -> "CONTEÚDO online")
   cleaned = cleaned
+    .replace(/([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ]+)([a-záàâãéèêíïóôõöúç])/g, '$1 $2')
     .replace(/\s+/g, ' ')
     .trim();
   
