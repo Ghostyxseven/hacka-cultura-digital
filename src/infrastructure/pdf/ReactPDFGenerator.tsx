@@ -4,6 +4,148 @@ import { LessonPlan } from '@/core/entities/LessonPlan';
 import { IPDFGeneratorService, ProvaPDFOptions, SlidesPDFOptions } from './IPDFGeneratorService';
 
 /**
+ * Limpeza completa de texto: remove hífens órfãos, quebras e caracteres não suportados
+ * Versão conservadora que preserva caracteres válidos
+ */
+const cleanText = (text: string): string => {
+  if (!text || typeof text !== 'string') return '';
+  
+  let cleaned = text
+    // 1. Remove hifens seguidos de quebra de linha (hifenização artificial) - preserva palavra completa
+    .replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])-\s*\n\s*/gi, '$1 ')
+    // 2. Transforma quebras de linha simples em espaços
+    .replace(/\r\n/g, ' ')
+    .replace(/\n/g, ' ')
+    .replace(/\r/g, ' ');
+  
+  // 3. Remove apenas caracteres de controle realmente problemáticos (mantém caracteres acentuados válidos)
+  // Permite: espaço, ASCII visível, acentos latinos comuns, pontuação
+  cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+  
+  // 4. Remove hífens órfãos (palavras quebradas no meio) - múltiplas passadas para pegar todos os casos
+  // Exemplos: "atualiza-ção" -> "atualização", "exclu-sivamente" -> "exclusivamente"
+  for (let i = 0; i < 3; i++) {
+    cleaned = cleaned
+      // Remove hífen seguido de espaço quando a palavra continua (hífen órfão)
+      // Só remove se houver espaço entre o hífen e a próxima letra
+      .replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])-\s+([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])/gi, '$1$2');
+  }
+  
+  // 5. Garante espaço após palavras maiúsculas seguidas de minúsculas (ex: "CONTEÚDOonline" -> "CONTEÚDO online")
+  cleaned = cleaned.replace(/([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ]{2,})([a-záàâãéèêíïóôõöúç])/g, '$1 $2');
+  
+  // 6. Remove hífens órfãos no final de palavras (só se houver espaço depois)
+  cleaned = cleaned.replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])-\s+/g, '$1 ');
+  
+  // 7. Limpa espaços duplos e normaliza (mantém caracteres especiais válidos)
+  cleaned = cleaned
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  return cleaned;
+};
+
+/**
+ * Divide parágrafos em chunks evitando cortes no meio de palavras e frases
+ * Prioriza quebras em pontos finais, vírgulas e outros sinais de pontuação
+ */
+const getParagraphChunks = (text: string, limit: number = 700): string[] => {
+  if (!text || typeof text !== 'string') return [];
+  
+  const sanitized = cleanText(text);
+  const chunks: string[] = [];
+  let currentPos = 0;
+
+  while (currentPos < sanitized.length) {
+    let endPos = currentPos + limit;
+    
+    if (endPos >= sanitized.length) {
+      // Último chunk - pega o restante
+      const remaining = sanitized.substring(currentPos).trim();
+      if (remaining) {
+        chunks.push(remaining);
+      }
+      break;
+    }
+    
+    // Busca por pontos de quebra ideais (em ordem de preferência)
+    // 1. Ponto final seguido de espaço (quebra ideal)
+    let breakPoint = sanitized.lastIndexOf('. ', endPos);
+    
+    // 2. Dois pontos seguidos de espaço
+    if (breakPoint === -1 || breakPoint <= currentPos) {
+      breakPoint = sanitized.lastIndexOf(': ', endPos);
+    }
+    
+    // 3. Ponto e vírgula seguido de espaço
+    if (breakPoint === -1 || breakPoint <= currentPos) {
+      breakPoint = sanitized.lastIndexOf('; ', endPos);
+    }
+    
+    // 4. Vírgula seguida de espaço (mas só se não ficar muito curto)
+    if (breakPoint === -1 || breakPoint <= currentPos) {
+      const commaPos = sanitized.lastIndexOf(', ', endPos);
+      // Só usa vírgula se o chunk não ficar muito curto (menos de 60% do limite)
+      if (commaPos > currentPos && (commaPos - currentPos) >= limit * 0.6) {
+        breakPoint = commaPos;
+      }
+    }
+    
+    // 5. Espaço (garante que não corte no meio de palavra)
+    if (breakPoint === -1 || breakPoint <= currentPos) {
+      breakPoint = sanitized.lastIndexOf(' ', endPos);
+    }
+    
+    // 6. Se ainda não encontrou, tenta reduzir o limite em 20% e procurar novamente
+    if (breakPoint === -1 || breakPoint <= currentPos) {
+      const reducedLimit = Math.floor(limit * 0.8);
+      endPos = currentPos + reducedLimit;
+      breakPoint = sanitized.lastIndexOf(' ', endPos);
+    }
+    
+    // 7. Último recurso: corta no limite mesmo (mas só se realmente necessário)
+    if (breakPoint === -1 || breakPoint <= currentPos) {
+      breakPoint = currentPos + limit;
+    }
+    
+    // Evita deixar palavras muito curtas sozinhas no final (mínimo 3 caracteres)
+    const chunk = sanitized.substring(currentPos, breakPoint).trim();
+    const remainingAfterBreak = sanitized.substring(breakPoint).trim();
+    
+    // Se o próximo chunk começa com uma palavra muito curta, inclui no chunk atual
+    if (remainingAfterBreak && remainingAfterBreak.length > 0) {
+      const nextWordMatch = remainingAfterBreak.match(/^(\S{1,3})\s/);
+      if (nextWordMatch && breakPoint < sanitized.length - 1) {
+        // Estende o chunk para incluir a palavra curta
+        const nextSpace = sanitized.indexOf(' ', breakPoint + 1);
+        if (nextSpace !== -1) {
+          breakPoint = nextSpace;
+        }
+      }
+    }
+    
+    const finalChunk = sanitized.substring(currentPos, breakPoint).trim();
+    if (finalChunk) {
+      chunks.push(finalChunk);
+    }
+    
+    currentPos = breakPoint;
+    
+    // Pula espaços, pontos, vírgulas e outros caracteres de pontuação iniciais
+    while (currentPos < sanitized.length && 
+           (sanitized[currentPos] === ' ' || 
+            sanitized[currentPos] === '.' ||
+            sanitized[currentPos] === ',' ||
+            sanitized[currentPos] === ';' ||
+            sanitized[currentPos] === ':')) {
+      currentPos++;
+    }
+  }
+  
+  return chunks.length > 0 ? chunks : [sanitized];
+};
+
+/**
  * Implementação do gerador de PDF usando @react-pdf/renderer
  */
 export class ReactPDFGenerator implements IPDFGeneratorService {
@@ -108,95 +250,122 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
   ): Promise<Buffer> {
     const pages: any[] = [];
 
-    // Slide 1: Título
+    // Slide de Título (Landscape)
     pages.push(
-      <Page key="title" size="A4" style={styles.slidePage}>
+      <Page key="title" size="A4" orientation="landscape" style={styles.slidePage}>
         <View style={styles.slideTitleContainer}>
-          <Text style={styles.slideTitle}>{lessonPlan.title}</Text>
-          <Text style={styles.slideSubtitle}>{lessonPlan.subject}</Text>
-          <Text style={styles.slideInfo}>{lessonPlan.gradeYear}</Text>
+          <View style={styles.slideTitleBox}>
+            <Text style={styles.slideTitle}>{cleanText(lessonPlan.title)}</Text>
+            <View style={styles.slideTitleDivider} />
+            <Text style={styles.slideSubtitle}>{cleanText(lessonPlan.subject)}</Text>
+            <Text style={styles.slideInfo}>{cleanText(lessonPlan.gradeYear)}</Text>
+          </View>
           {options.schoolName && (
-            <Text style={styles.slideSchool}>{options.schoolName}</Text>
+            <View style={styles.slideFooterBox}>
+              <Text style={styles.slideSchool}>{cleanText(options.schoolName)}</Text>
+            </View>
           )}
         </View>
       </Page>
     );
 
-    // Slide 2: Objetivos
+    // Slide: Objetivos
     pages.push(
-      <Page key="objectives" size="A4" style={styles.slidePage}>
-        <View style={styles.slideContent}>
-          <Text style={styles.slideSectionTitle}>Objetivos de Aprendizagem</Text>
-          {lessonPlan.objectives.map((objective, index) => (
-            <Text key={index} style={styles.slideBullet}>
-              • {objective}
-            </Text>
-          ))}
+      <Page key="objectives" size="A4" orientation="landscape" style={styles.slidePage}>
+        <View style={styles.slideContentContainer}>
+          <View style={styles.slideHeaderBox}>
+            <Text style={styles.slideSectionTitle}>OBJETIVOS DE APRENDIZAGEM</Text>
+          </View>
+          <View style={styles.slideBodyBox}>
+            {lessonPlan.objectives.map((objective, index) => (
+              <View key={index} style={styles.slideBulletItem}>
+                <Text style={styles.slideBulletDot}>•</Text>
+                <Text style={styles.slideBulletText}>{cleanText(objective)}</Text>
+              </View>
+            ))}
+          </View>
+          <Text style={styles.slidePageNumber}>Página {pages.length + 1}</Text>
         </View>
       </Page>
     );
 
-    // Slides de Conteúdo (dividido em parágrafos)
-    const contentParagraphs = lessonPlan.content.split('\n\n').filter(p => p.trim());
-    contentParagraphs.forEach((paragraph, index) => {
-      pages.push(
-        <Page key={`content-${index}`} size="A4" style={styles.slidePage}>
-          <View style={styles.slideContent}>
-            <Text style={styles.slideSectionTitle}>Conteúdo</Text>
-            <Text style={styles.slideText}>{paragraph.trim()}</Text>
-          </View>
-        </Page>
-      );
-    });
+    // Processamento de Conteúdo com Divisão Automática
+    const contentSections = [
+      { title: 'CONTEÚDO', data: lessonPlan.content },
+      { title: 'METODOLOGIA', data: lessonPlan.methodology }
+    ];
 
-    // Slide: Metodologia
-    if (lessonPlan.methodology) {
-      const methodologyParagraphs = lessonPlan.methodology.split('\n\n').filter(p => p.trim());
-      methodologyParagraphs.forEach((paragraph, index) => {
+    contentSections.forEach(section => {
+      if (!section.data) return;
+      
+      const textChunks = getParagraphChunks(section.data, 650);
+
+      textChunks.forEach((chunk: string, chunkIndex: number) => {
+        const pageNumber = pages.length + 1;
         pages.push(
-          <Page key={`methodology-${index}`} size="A4" style={styles.slidePage}>
-            <View style={styles.slideContent}>
-              <Text style={styles.slideSectionTitle}>Metodologia</Text>
-              <Text style={styles.slideText}>{paragraph.trim()}</Text>
+          <Page key={`${section.title}-${chunkIndex}`} size="A4" orientation="landscape" style={styles.slidePage}>
+            <View style={styles.slideContentContainer}>
+              <View style={styles.slideHeaderBox}>
+                <Text style={styles.slideSectionTitle}>{section.title}</Text>
+              </View>
+              <View style={styles.slideBodyBox}>
+                <Text style={styles.slideText}>{chunk}</Text>
+              </View>
+              <Text style={styles.slidePageNumber}>Página {pageNumber}</Text>
             </View>
           </Page>
         );
       });
-    }
+    });
 
     // Slide: Competências BNCC
     if (lessonPlan.bnccCompetencies.length > 0) {
       pages.push(
-        <Page key="bncc" size="A4" style={styles.slidePage}>
-          <View style={styles.slideContent}>
-            <Text style={styles.slideSectionTitle}>Competências BNCC</Text>
-            {lessonPlan.bnccCompetencies.map((competency, index) => (
-              <Text key={index} style={styles.slideBullet}>
-                • {competency}
-              </Text>
-            ))}
+        <Page key="bncc" size="A4" orientation="landscape" style={styles.slidePage}>
+          <View style={styles.slideContentContainer}>
+            <View style={styles.slideHeaderBox}>
+              <Text style={styles.slideSectionTitle}>COMPETÊNCIAS BNCC</Text>
+            </View>
+            <View style={styles.slideBodyBox}>
+              {lessonPlan.bnccCompetencies.map((competency, index) => (
+                <View key={index} style={styles.slideBulletItem}>
+                  <Text style={styles.slideBulletDot}>✓</Text>
+                  <Text style={styles.slideBulletText}>{cleanText(competency)}</Text>
+                </View>
+              ))}
+            </View>
+            <Text style={styles.slidePageNumber}>Página {pages.length + 1}</Text>
           </View>
         </Page>
       );
     }
 
-    // Slide: Quiz (opcional)
+    // Slide: Quiz (opcional) - Layout em Duas Colunas
     if (options.includeQuiz && lessonPlan.quiz.length > 0) {
       lessonPlan.quiz.forEach((question, index) => {
         pages.push(
-          <Page key={`quiz-${index}`} size="A4" style={styles.slidePage}>
-            <View style={styles.slideContent}>
-              <Text style={styles.slideSectionTitle}>
-                Questão {index + 1}
-              </Text>
-              <Text style={styles.slideText}>{question.question}</Text>
-              <View style={styles.slideQuizOptions}>
-                {question.options.map((option, optIndex) => (
-                  <Text key={optIndex} style={styles.slideQuizOption}>
-                    {String.fromCharCode(65 + optIndex)}) {option}
-                  </Text>
-                ))}
+          <Page key={`quiz-${index}`} size="A4" orientation="landscape" style={styles.slidePage}>
+            <View style={styles.slideContentContainer}>
+              <View style={styles.slideHeaderBox}>
+                <Text style={styles.slideSectionTitle}>QUESTÃO {index + 1}</Text>
               </View>
+              <View style={styles.slideBodyBox}>
+                <Text style={styles.slideQuizQuestion}>{cleanText(question.question)}</Text>
+                {/* Grid de Alternativas em Duas Colunas */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 25, gap: 15 }}>
+                  {question.options.map((option, optIndex) => (
+                    <View key={optIndex} style={{ width: '48%', marginBottom: 20, paddingVertical: 8, paddingHorizontal: 10 }}>
+                      <Text style={styles.slideQuizOptionText}>
+                        <Text style={{ fontWeight: 'bold', color: '#3b82f6' }}>
+                          {String.fromCharCode(65 + optIndex)}){' '}
+                        </Text>
+                        {cleanText(option).replace(/^[A-E]\)\s*/i, '')}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+              <Text style={styles.slidePageNumber}>Página {pages.length + 1}</Text>
             </View>
           </Page>
         );
@@ -316,60 +485,159 @@ const styles = StyleSheet.create({
   },
   // Estilos para Slides
   slidePage: {
-    padding: 60,
-    justifyContent: 'center',
+    padding: 50,
+    backgroundColor: '#ffffff',
+    justifyContent: 'flex-start',
     alignItems: 'center',
   },
   slideTitleContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'column',
+  },
+  slideTitleBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 60,
   },
   slideTitle: {
     fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 15,
     textAlign: 'center',
+    color: '#1e3a8a',
+    lineHeight: 1.4,
+    maxWidth: '90%',
+  },
+  slideTitleDivider: {
+    width: 120,
+    height: 4,
+    backgroundColor: '#3b82f6',
+    marginBottom: 25,
+    marginTop: 5,
   },
   slideSubtitle: {
-    fontSize: 24,
-    marginBottom: 10,
-    color: '#333',
+    fontSize: 28,
+    marginBottom: 12,
+    color: '#1e40af',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
   slideInfo: {
-    fontSize: 18,
-    marginBottom: 20,
-    color: '#666',
+    fontSize: 20,
+    marginTop: 8,
+    color: '#64748b',
+    textAlign: 'center',
+  },
+  slideFooterBox: {
+    position: 'absolute',
+    bottom: 50,
+    width: '100%',
+    alignItems: 'center',
   },
   slideSchool: {
     fontSize: 14,
-    marginTop: 40,
-    color: '#999',
+    color: '#94a3b8',
+    textAlign: 'center',
   },
-  slideContent: {
+  slideContentContainer: {
     width: '100%',
+    height: '100%',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flexDirection: 'column',
+  },
+  slideHeaderBox: {
+    width: '100%',
+    marginBottom: 20,
+    paddingBottom: 15,
+    borderBottom: '4 solid #3b82f6',
+  },
+  slideBodyBox: {
+    width: '100%',
+    flex: 1,
+    justifyContent: 'flex-start',
   },
   slideSectionTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#2563eb',
+    color: '#1e3a8a',
+    textAlign: 'left',
   },
   slideText: {
-    fontSize: 14,
+    fontSize: 18,
     lineHeight: 1.6,
-    marginBottom: 15,
+    color: '#1e293b',
+    textAlign: 'left',
+    maxWidth: '100%',
   },
-  slideBullet: {
-    fontSize: 14,
-    lineHeight: 1.8,
-    marginBottom: 10,
-    marginLeft: 20,
+  slideBulletItem: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    alignItems: 'flex-start',
+    width: '100%',
+  },
+  slideBulletDot: {
+    fontSize: 20,
+    color: '#3b82f6',
+    marginRight: 12,
+    marginTop: 2,
+    fontWeight: 'bold',
+  },
+  slideBulletText: {
+    fontSize: 15,
+    lineHeight: 1.5,
+    color: '#1e293b',
+    flex: 1,
+    textAlign: 'left',
+    maxWidth: '100%',
+  },
+  slideQuizQuestion: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#1e3a8a',
+    lineHeight: 1.4,
+    textAlign: 'left',
+    maxWidth: '100%',
   },
   slideQuizOptions: {
     marginTop: 20,
+    width: '100%',
   },
-  slideQuizOption: {
+  slideQuizOptionItem: {
+    flexDirection: 'row',
+    marginBottom: 18,
+    alignItems: 'flex-start',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    borderLeft: '4 solid #3b82f6',
+  },
+  slideQuizOptionLetter: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#3b82f6',
+    marginRight: 12,
+    minWidth: 25,
+  },
+  slideQuizOptionText: {
     fontSize: 14,
-    marginBottom: 10,
-    marginLeft: 20,
+    lineHeight: 1.6,
+    color: '#1e293b',
+    flex: 1,
+    textAlign: 'left',
+    maxWidth: '100%',
+  },
+  slidePageNumber: {
+    position: 'absolute',
+    bottom: 20,
+    right: 50,
+    fontSize: 12,
+    color: '#94a3b8',
+    textAlign: 'right',
   },
 });
