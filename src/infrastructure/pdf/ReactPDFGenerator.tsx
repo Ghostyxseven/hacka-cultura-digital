@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
   },
   slideQuizOptionText: {
     fontSize: 14,
-    lineHeight: 1.4,
+    lineHeight: 1.6,
     color: '#1e293b',
     flex: 1,
     textAlign: 'left',
