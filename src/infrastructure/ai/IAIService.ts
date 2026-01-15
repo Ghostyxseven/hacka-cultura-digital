@@ -1,6 +1,5 @@
-import { LessonPlan } from "../../core/entities/LessonPlan";
-import { QuizResult } from "../../core/entities/QuizResult";
 import { LessonPlan, SupportMaterial } from "../../core/entities/LessonPlan";
+import { QuizResult } from "../../core/entities/QuizResult";
 
 /**
  * Interface que define o contrato para serviços de IA generativa.
@@ -11,7 +10,7 @@ export interface IAIService {
   /**
    * Gera um plano de aula completo baseado nos parâmetros fornecidos.
    */
-  generate(subject: string, topic: string, grade: string): Promise<LessonPlan>;
+  generate(subject: string, topic: string, grade: string, context?: string): Promise<LessonPlan>;
 
   /**
    * Analisa o desempenho de um aluno em um quiz e gera feedback pedagógico.
@@ -26,4 +25,9 @@ export interface IAIService {
    * Gera materiais de apoio extras para uma unidade/plano de aula
    */
   generateSupportMaterials(lessonPlan: LessonPlan): Promise<SupportMaterial[]>;
+
+  /**
+   * Faz uma pergunta genérica à IA (utilizado pelo Tutor Chat)
+   */
+  ask(prompt: string): Promise<string>;
 }

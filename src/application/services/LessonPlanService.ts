@@ -21,7 +21,10 @@ import { AnalyzePerformanceUseCase } from "../usecases/AnalyzePerformanceUseCase
 import { GenerateSupportMaterialsUseCase } from "../usecases/GenerateSupportMaterialsUseCase";
 import { GetQuizResultsByLessonPlanUseCase } from "../usecases/GetQuizResultsByLessonPlanUseCase";
 import { AddTeacherCommentUseCase } from "../usecases/AddTeacherCommentUseCase";
+import { UploadMaterialUseCase } from "../usecases/UploadMaterialUseCase";
+import { GetMaterialsByUnitUseCase } from "../usecases/GetMaterialsByUnitUseCase";
 import { QuizResult } from "../../core/entities/QuizResult";
+import { Material } from "../../core/entities/Material";
 
 
 /**
@@ -56,7 +59,9 @@ export class LessonPlanService {
     private analyzePerformanceUseCase: AnalyzePerformanceUseCase,
     private generateSupportMaterialsUseCase: GenerateSupportMaterialsUseCase,
     private getQuizResultsByLessonPlanUseCase: GetQuizResultsByLessonPlanUseCase,
-    private addTeacherCommentUseCase: AddTeacherCommentUseCase
+    private addTeacherCommentUseCase: AddTeacherCommentUseCase,
+    private uploadMaterialUseCase: UploadMaterialUseCase,
+    private getMaterialsByUnitUseCase: GetMaterialsByUnitUseCase
   ) { }
 
   // ========== MÉTODOS DE PLANOS DE AULA ==========
@@ -239,5 +244,15 @@ export class LessonPlanService {
    */
   addTeacherComment(quizResultId: string, comment: string): QuizResult {
     return this.addTeacherCommentUseCase.execute({ quizResultId, comment });
+  }
+
+  // ========== MÉTODOS DE MATERIAIS RAG ==========
+
+  uploadMaterial(data: { unitId: string; fileName: string; fileType: string; content: string }): Material {
+    return this.uploadMaterialUseCase.execute(data);
+  }
+
+  getMaterialsByUnit(unitId: string): Material[] {
+    return this.getMaterialsByUnitUseCase.execute(unitId);
   }
 }

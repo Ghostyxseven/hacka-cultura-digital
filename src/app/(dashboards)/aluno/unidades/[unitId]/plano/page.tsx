@@ -10,6 +10,7 @@ import type { LessonPlanViewModel, UnitViewModel } from '@/application/viewmodel
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { EmptyState, BackButton, Button } from '@/components';
+import { TutorChat } from '@/app/components/TutorChat';
 import { showError, showSuccess } from '@/utils/notifications';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
@@ -436,6 +437,8 @@ export default function AlunoLessonPlanPage() {
             </div>
           )}
         </PageContainer>
+
+        {lessonPlan && <TutorChat lessonPlan={lessonPlan} />}
       </div>
     </ProtectedRoute>
   );

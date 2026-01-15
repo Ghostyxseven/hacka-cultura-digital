@@ -5,6 +5,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button, ConfirmDeleteButton } from '@/components';
+import { MaterialRAGManager } from './MaterialRAGManager';
 import type { UnitViewModel } from '@/application/viewmodels';
 
 interface UnitCardProps {
@@ -88,6 +89,10 @@ export function UnitCard({
                   <span className="font-semibold">Disciplina:</span>
                   <span className="px-2 py-1 rounded-md bg-gray-100 font-medium text-gray-700">{subjectName}</span>
                 </div>
+              )}
+
+              {isProfessor && !unit.lessonPlanId && (
+                <MaterialRAGManager unitId={unit.id} />
               )}
             </div>
           </div>

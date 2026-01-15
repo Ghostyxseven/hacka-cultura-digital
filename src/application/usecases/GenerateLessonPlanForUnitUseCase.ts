@@ -2,6 +2,7 @@
 import { LessonPlan } from "../../core/entities/LessonPlan";
 import { Unit } from "../../core/entities/Unit";
 import { ILessonRepository } from "../../core/repositories/ILessonRepository";
+import { IMaterialRepository } from "../../core/repositories/IMaterialRepository";
 import { IAIService } from "../../infrastructure/ai/IAIService";
 import { GenerateLessonPlanUseCase } from "./GenerateLessonPlanUseCase";
 
@@ -17,7 +18,8 @@ export class GenerateLessonPlanForUnitUseCase {
 
   constructor(
     private repository: ILessonRepository,
-    private aiService: IAIService
+    private aiService: IAIService,
+    private materialRepository: IMaterialRepository
   ) {
     this.generateLessonPlanUseCase = new GenerateLessonPlanUseCase(aiService);
   }
@@ -61,11 +63,18 @@ export class GenerateLessonPlanForUnitUseCase {
       );
     }
 
-    // Gera o plano de aula usando o tema da unidade
+    // Busca materiais de apoio para usar como contexto (Fase 6 - RAG)
+    const materials = this.materialRepository.getByUnitId(unitId);
+    const context = materials.length > 0
+      ? materials.map(m => `MATERIAL DOCENTE (${m.fileName}):\n${m.content}`).join('\n\n')
+      : undefined;
+
+    // Gera o plano de aula usando o tema da unidade e o contexto dos materiais
     const lessonPlan = await this.generateLessonPlanUseCase.execute(
       subject.name,
       unit.topic,
-      unit.gradeYear
+      unit.gradeYear,
+      context
     );
 
     // Vincula o plano à unidade

@@ -53,7 +53,7 @@ export class GeminiService implements IAIService {
     });
   }
 
-  async generate(subject: string, topic: string, grade: string): Promise<LessonPlan> {
+  async generate(subject: string, topic: string, grade: string, context?: string): Promise<LessonPlan> {
     // Validação do ano escolar antes de processar
     this.validateSchoolYear(grade);
 
@@ -61,6 +61,14 @@ export class GeminiService implements IAIService {
     const prompt = `
 Você é um assistente pedagógico especializado em Cultura Digital, integrado ao sistema "Hacka Cultura Digital" do IFPI.
 Sua missão é criar um plano de aula completo e estruturado seguindo rigorosamente as diretrizes da BNCC.
+
+${context ? `
+CONHECIMENTO BASE (PRIORITÁRIO):
+Utilize as informações abaixo como BASE PRINCIPAL para o conteúdo da aula e questões do quiz:
+---
+${context}
+---
+` : ''}
 
 CONTEXTO:
 - Disciplina: ${subject}
@@ -70,7 +78,8 @@ CONTEXTO:
 INSTRUÇÕES OBRIGATÓRIAS:
 1. Siga as diretrizes da BNCC, especialmente as competências de Cultura Digital (Competência 5).
 2. O plano deve ser prático, aplicável e alinhado à realidade escolar brasileira.
-3. Inclua EXATAMENTE 3 questões de quiz com 4 alternativas cada (A, B, C, D).
+${context ? '3. O conteúdo DEVE estar diretamente relacionado ao material de base fornecido acima.' : ''}
+4. Inclua EXATAMENTE 3 questões de quiz com 4 alternativas cada (A, B, C, D).
 4. Cada questão deve ter uma justificativa pedagógica clara e fundamentada.
 5. A metodologia deve ser detalhada, passo a passo, para o professor aplicar em sala.
 
@@ -322,5 +331,15 @@ RETORNE APENAS UM JSON NO SEGUINTE FORMATO:
     };
 
     return lessonPlan;
+  }
+
+  async ask(prompt: string): Promise<string> {
+    try {
+      const result = await this.model.generateContent(prompt);
+      return result.response.text().trim();
+    } catch (error) {
+      console.error("Erro no chat do tutor:", error);
+      throw new Error("Não consegui processar sua dúvida agora. Tente novamente.");
+    }
   }
 }
