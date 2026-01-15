@@ -8,7 +8,7 @@ import { getLessonPlanService } from '@/lib/service';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { SubjectsList, UnitsList, StatsSection } from '@/app/components';
+import { SubjectsList, UnitsList, StatsSection, TeacherMural } from '@/app/components';
 import { PresentationMapper } from '@/application';
 import type { SubjectViewModel, UnitViewModel } from '@/application/viewmodels';
 import type { User } from '@/core/entities/User';
@@ -106,6 +106,11 @@ export default function AlunoPage() {
             </div>
           </div>
         )}
+
+        {/* Mural de Avisos do Professor */}
+        <div className="mb-8">
+          <TeacherMural />
+        </div>
 
         {/* Estatísticas */}
         {subjects.length > 0 || units.length > 0 ? (

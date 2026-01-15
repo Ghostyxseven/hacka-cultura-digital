@@ -43,6 +43,13 @@ export interface QuizQuestionViewModel {
   justification: string;
 }
 
+export interface SupportMaterialViewModel {
+  type: 'slide' | 'link' | 'video';
+  title: string;
+  url?: string;
+  slides?: { title: string; content: string[] }[];
+}
+
 export interface LessonPlanViewModel {
   id: string;
   title: string;
@@ -55,6 +62,8 @@ export interface LessonPlanViewModel {
   bnccCompetencies: string[];
   content: string;
   quiz: QuizQuestionViewModel[];
+  supportMaterials?: SupportMaterialViewModel[];
+  teacherNote?: string;
   metadata: {
     aiModel: string;
     promptVersion: string;

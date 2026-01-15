@@ -19,6 +19,8 @@ import { GetUnitByIdUseCase } from "../usecases/GetUnitByIdUseCase";
 import { GenerateLessonPlanForUnitUseCase } from "../usecases/GenerateLessonPlanForUnitUseCase";
 import { AnalyzePerformanceUseCase } from "../usecases/AnalyzePerformanceUseCase";
 import { GenerateSupportMaterialsUseCase } from "../usecases/GenerateSupportMaterialsUseCase";
+import { GetQuizResultsByLessonPlanUseCase } from "../usecases/GetQuizResultsByLessonPlanUseCase";
+import { AddTeacherCommentUseCase } from "../usecases/AddTeacherCommentUseCase";
 import { QuizResult } from "../../core/entities/QuizResult";
 
 
@@ -52,7 +54,9 @@ export class LessonPlanService {
     private generateLessonPlanForUnitUseCase: GenerateLessonPlanForUnitUseCase,
     private deleteUnitUseCase: DeleteUnitUseCase,
     private analyzePerformanceUseCase: AnalyzePerformanceUseCase,
-    private generateSupportMaterialsUseCase: GenerateSupportMaterialsUseCase
+    private generateSupportMaterialsUseCase: GenerateSupportMaterialsUseCase,
+    private getQuizResultsByLessonPlanUseCase: GetQuizResultsByLessonPlanUseCase,
+    private addTeacherCommentUseCase: AddTeacherCommentUseCase
   ) { }
 
   // ========== MÉTODOS DE PLANOS DE AULA ==========
@@ -221,5 +225,19 @@ export class LessonPlanService {
    */
   async generateSupportMaterials(lessonPlanId: string): Promise<LessonPlan> {
     return this.generateSupportMaterialsUseCase.execute({ lessonPlanId });
+  }
+
+  /**
+   * Busca resultados de quiz de um plano de aula
+   */
+  getQuizResults(lessonPlanId: string): QuizResult[] {
+    return this.getQuizResultsByLessonPlanUseCase.execute({ lessonPlanId });
+  }
+
+  /**
+   * Adiciona comentário do professor a um resultado
+   */
+  addTeacherComment(quizResultId: string, comment: string): QuizResult {
+    return this.addTeacherCommentUseCase.execute({ quizResultId, comment });
   }
 }

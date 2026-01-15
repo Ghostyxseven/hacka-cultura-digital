@@ -2,7 +2,6 @@
 // Exportações centralizadas dos componentes de página
 
 export { SubjectCard } from './SubjectCard';
-export * from './StudentGamificationCard';
 export * from './TeacherMural';
 export { UnitCard } from './UnitCard';
 export { StatsSection } from './StatsSection';

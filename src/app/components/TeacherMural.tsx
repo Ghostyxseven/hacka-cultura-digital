@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { showError, showSuccess } from '@/utils/notifications';
 
 export function TeacherMural() {
-    const { user } = useAuth();
+    const { user, isProfessor } = useAuth();
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [isAdding, setIsAdding] = useState(false);
     const [title, setTitle] = useState('');
@@ -24,8 +24,12 @@ export function TeacherMural() {
 
     const refreshAnnouncements = () => {
         if (user?.id) {
-            const data = service.getAnnouncements({ professorId: user.id });
-            setAnnouncements(data);
+            // Se for aluno, busca avisos do professor dele
+            const professorId = isProfessor ? user.id : user.professorId;
+            if (professorId) {
+                const data = service.getAnnouncements({ professorId });
+                setAnnouncements(data);
+            }
         }
     };
 
@@ -71,13 +75,15 @@ export function TeacherMural() {
                     <span className="text-2xl">📢</span>
                     <h2 className="text-2xl font-bold">Mural de Avisos</h2>
                 </div>
-                <Button
-                    variant="secondary"
-                    onClick={() => setIsAdding(!isAdding)}
-                    className="bg-white/20 hover:bg-white/30 border-white/30 text-white"
-                >
-                    {isAdding ? 'Cancelar' : '➕ Novo Aviso'}
-                </Button>
+                {isProfessor && (
+                    <Button
+                        variant="secondary"
+                        onClick={() => setIsAdding(!isAdding)}
+                        className="bg-white/20 hover:bg-white/30 border-white/30 text-white"
+                    >
+                        {isAdding ? 'Cancelar' : '➕ Novo Aviso'}
+                    </Button>
+                )}
             </div>
 
             <div className="p-6">
@@ -119,18 +125,20 @@ export function TeacherMural() {
                     {announcements.length === 0 ? (
                         <div className="text-center py-12 text-gray-400">
                             <span className="text-4xl block mb-2">📭</span>
-                            <p>Seu mural está vazio. Publique algo para seus alunos!</p>
+                            <p>{isProfessor ? 'Seu mural está vazio. Publique algo para seus alunos!' : 'Nenhum aviso no mural até o momento.'}</p>
                         </div>
                     ) : (
                         announcements.map((ann) => (
                             <div key={ann.id} className="group p-5 border border-gray-100 rounded-xl hover:bg-gray-50 transition-all border-l-4 border-l-orange-500 relative">
-                                <button
-                                    onClick={() => handleDelete(ann.id)}
-                                    className="absolute top-4 right-4 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    title="Remover aviso"
-                                >
-                                    🗑️
-                                </button>
+                                {isProfessor && (
+                                    <button
+                                        onClick={() => handleDelete(ann.id)}
+                                        className="absolute top-4 right-4 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        title="Remover aviso"
+                                    >
+                                        🗑️
+                                    </button>
+                                )}
                                 <h4 className="font-bold text-gray-900 text-lg mb-2 pr-8">{ann.title}</h4>
                                 <p className="text-gray-600 whitespace-pre-wrap mb-3 text-sm leading-relaxed">{ann.content}</p>
                                 <div className="text-xs text-gray-400 flex items-center gap-2">

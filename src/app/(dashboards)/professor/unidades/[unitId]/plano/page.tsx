@@ -41,6 +41,7 @@ export default function LessonPlanPage() {
   const [editingContent, setEditingContent] = useState(false);
   const [editedContent, setEditedContent] = useState('');
   const [savingPlan, setSavingPlan] = useState(false);
+  const [generatingMaterials, setGeneratingMaterials] = useState(false);
   const lessonPlanService = getLessonPlanService();
 
   useEffect(() => {
@@ -208,7 +209,7 @@ export default function LessonPlanPage() {
   };
 
   const handleUpdateQuizQuestion = (questionId: string, field: keyof QuizQuestionViewModel, value: string | number | string[]) => {
-    setEditedQuiz(prev => prev.map(q => 
+    setEditedQuiz(prev => prev.map(q =>
       q.id === questionId ? { ...q, [field]: value } : q
     ));
   };
@@ -406,6 +407,21 @@ export default function LessonPlanPage() {
     }
   };
 
+  const handleGenerateMaterials = async () => {
+    if (!lessonPlan) return;
+
+    setGeneratingMaterials(true);
+    try {
+      await lessonPlanService.generateSupportMaterials(lessonPlan.id);
+      loadData();
+      showSuccess('Materiais de apoio gerados com sucesso!');
+    } catch (error: any) {
+      showError(error.message || 'Erro ao gerar materiais de apoio');
+    } finally {
+      setGeneratingMaterials(false);
+    }
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -449,8 +465,8 @@ export default function LessonPlanPage() {
                   description={canGenerate ? "Clique no botão abaixo para gerar um plano de aula completo usando IA" : "Aguarde o professor gerar o plano de aula"}
                   action={
                     canGenerate ? (
-                      <Button 
-                        onClick={handleGenerate} 
+                      <Button
+                        onClick={handleGenerate}
                         disabled={generating}
                         className="mt-6 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                       >
@@ -487,7 +503,7 @@ export default function LessonPlanPage() {
                     ⏱️ {lessonPlan.duration}
                   </span>
                 </div>
-                
+
                 {/* Botões de Exportação */}
                 {canGenerate && (
                   <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-white/20">
@@ -801,11 +817,10 @@ export default function LessonPlanPage() {
                           {question.options.map((option, optIndex) => (
                             <li
                               key={optIndex}
-                              className={`p-3 rounded-xl transition-all ${
-                                !editingQuiz && optIndex === question.correctAnswer
-                                  ? 'bg-green-50 border-2 border-green-300 text-green-800 shadow-md'
-                                  : 'bg-gray-50 border border-gray-200'
-                              }`}
+                              className={`p-3 rounded-xl transition-all ${!editingQuiz && optIndex === question.correctAnswer
+                                ? 'bg-green-50 border-2 border-green-300 text-green-800 shadow-md'
+                                : 'bg-gray-50 border border-gray-200'
+                                }`}
                             >
                               <div className="flex items-center gap-3">
                                 <span className="font-bold text-gray-700">{String.fromCharCode(65 + optIndex)}.</span>
@@ -859,6 +874,66 @@ export default function LessonPlanPage() {
                   </div>
                 </div>
               )}
+
+              {/* Materiais de Apoio (Fase 4) */}
+              <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 border border-gray-200">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">🔗</span>
+                    <h3 className="text-2xl font-bold text-gray-900">Materiais de Apoio</h3>
+                  </div>
+                  {canGenerate && (
+                    <Button
+                      onClick={handleGenerateMaterials}
+                      disabled={generatingMaterials}
+                      variant="secondary"
+                      className="bg-orange-600 hover:bg-orange-700 text-white"
+                    >
+                      {generatingMaterials ? '🤖 Gerando...' : '🤖 Gerar Novos Materiais'}
+                    </Button>
+                  )}
+                </div>
+
+                {!lessonPlan.supportMaterials || lessonPlan.supportMaterials.length === 0 ? (
+                  <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300 text-gray-500">
+                    Nenhum material de apoio gerado ainda.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {lessonPlan.supportMaterials.map((material, idx) => (
+                      <div key={idx} className="p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-all flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">
+                            {material.type === 'slide' ? '📊' : material.type === 'video' ? '🎬' : '🔗'}
+                          </span>
+                          <h4 className="font-bold text-gray-800">{material.title}</h4>
+                        </div>
+                        {material.type === 'slide' && material.slides && (
+                          <div className="text-xs text-gray-600">
+                            <p className="font-semibold mb-1">Roteiro sugerido:</p>
+                            <ul className="list-disc ml-4 space-y-1">
+                              {material.slides.slice(0, 3).map((s, i) => (
+                                <li key={i}>{s.title}</li>
+                              ))}
+                              {material.slides.length > 3 && <li>... e mais {material.slides.length - 3} slides</li>}
+                            </ul>
+                          </div>
+                        )}
+                        {material.url && (
+                          <a
+                            href={material.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline text-sm font-medium flex items-center gap-1 mt-auto"
+                          >
+                            Acessar Recurso ↗
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Metadados */}
               <div className="bg-gradient-to-r from-gray-100 to-gray-50 rounded-2xl p-6 text-sm text-gray-600 border border-gray-200">

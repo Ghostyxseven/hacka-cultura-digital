@@ -226,7 +226,7 @@ export default function AlunoLessonPlanPage() {
                     ⏱️ {lessonPlan.duration}
                   </span>
                 </div>
-                
+
                 {/* Botões de Ação */}
                 <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-white/20">
                   {lessonPlan.quiz && lessonPlan.quiz.length > 0 && (
@@ -374,6 +374,50 @@ export default function AlunoLessonPlanPage() {
                     <p className="text-sm text-blue-800 text-center">
                       💡 Responda as questões acessando o quiz interativo através do botão acima.
                     </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Materiais de Apoio (Fase 4) */}
+              {lessonPlan.supportMaterials && lessonPlan.supportMaterials.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 border border-gray-200">
+                  <div className="flex items-center gap-3 mb-6">
+                    <span className="text-3xl">🔗</span>
+                    <h3 className="text-2xl font-bold text-gray-900">Materiais de Apoio</h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {lessonPlan.supportMaterials.map((material, idx) => (
+                      <div key={idx} className="p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-all flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">
+                            {material.type === 'slide' ? '📊' : material.type === 'video' ? '🎬' : '🔗'}
+                          </span>
+                          <h4 className="font-bold text-gray-800">{material.title}</h4>
+                        </div>
+                        {material.type === 'slide' && material.slides && (
+                          <div className="text-xs text-gray-600">
+                            <p className="font-semibold mb-1">Guia de estudo:</p>
+                            <ul className="list-disc ml-4 space-y-1">
+                              {material.slides.slice(0, 3).map((s, i) => (
+                                <li key={i}>{s.title}</li>
+                              ))}
+                              {material.slides.length > 3 && <li>... e outros {material.slides.length - 3} tópicos</li>}
+                            </ul>
+                          </div>
+                        )}
+                        {material.url && (
+                          <a
+                            href={material.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline text-sm font-medium flex items-center gap-1 mt-auto"
+                          >
+                            Acessar Conteúdo ↗
+                          </a>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
