@@ -19,6 +19,8 @@ import { GetUnitsUseCase } from '../application/usecases/GetUnitsUseCase';
 import { GetUnitByIdUseCase } from '../application/usecases/GetUnitByIdUseCase';
 import { GenerateLessonPlanForUnitUseCase } from '../application/usecases/GenerateLessonPlanForUnitUseCase';
 import { DeleteUnitUseCase } from '../application/usecases/DeleteUnitUseCase';
+import { AnalyzePerformanceUseCase } from '../application/usecases/AnalyzePerformanceUseCase';
+import { LocalStorageQuizRepository } from '../repository/implementations/LocalStorageQuizRepository';
 
 let serviceInstance: LessonPlanService | null = null;
 
@@ -49,6 +51,8 @@ export function getLessonPlanService(): LessonPlanService {
     const getUnitByIdUseCase = new GetUnitByIdUseCase(repository);
     const generateLessonPlanForUnitUseCase = new GenerateLessonPlanForUnitUseCase(repository, aiService);
     const deleteUnitUseCase = new DeleteUnitUseCase(repository);
+    const quizRepository = LocalStorageQuizRepository.getInstance();
+    const analyzePerformanceUseCase = new AnalyzePerformanceUseCase(aiService, quizRepository, repository);
 
     // Injeta UseCases no Serviço
     serviceInstance = new LessonPlanService(
@@ -65,7 +69,8 @@ export function getLessonPlanService(): LessonPlanService {
       getUnitsUseCase,
       getUnitByIdUseCase,
       generateLessonPlanForUnitUseCase,
-      deleteUnitUseCase
+      deleteUnitUseCase,
+      analyzePerformanceUseCase
     );
   }
   return serviceInstance;

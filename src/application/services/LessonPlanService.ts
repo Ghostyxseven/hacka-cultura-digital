@@ -17,6 +17,8 @@ import { SuggestUnitsUseCase } from "../usecases/SuggestUnitsUseCase";
 import { GetUnitsUseCase } from "../usecases/GetUnitsUseCase";
 import { GetUnitByIdUseCase } from "../usecases/GetUnitByIdUseCase";
 import { GenerateLessonPlanForUnitUseCase } from "../usecases/GenerateLessonPlanForUnitUseCase";
+import { AnalyzePerformanceUseCase } from "../usecases/AnalyzePerformanceUseCase";
+import { QuizResult } from "../../core/entities/QuizResult";
 
 
 /**
@@ -47,7 +49,8 @@ export class LessonPlanService {
     private getUnitsUseCase: GetUnitsUseCase,
     private getUnitByIdUseCase: GetUnitByIdUseCase,
     private generateLessonPlanForUnitUseCase: GenerateLessonPlanForUnitUseCase,
-    private deleteUnitUseCase: DeleteUnitUseCase
+    private deleteUnitUseCase: DeleteUnitUseCase,
+    private analyzePerformanceUseCase: AnalyzePerformanceUseCase
   ) { }
 
   // ========== MÉTODOS DE PLANOS DE AULA ==========
@@ -202,15 +205,11 @@ export class LessonPlanService {
     return this.generateLessonPlanForUnitUseCase.execute(unitId);
   }
 
-
-
-
-
-
-
-
-
-
-
-
+  /**
+   * Analisa o desempenho de um aluno e gera feedback de IA
+   * RF06 - Inteligência Pedagógica (Feedback IA)
+   */
+  async analyzePerformance(quizResultId: string): Promise<QuizResult> {
+    return this.analyzePerformanceUseCase.execute({ quizResultId });
+  }
 }
