@@ -9,9 +9,8 @@ import { PresentationMapper } from '@/application';
 import type { LessonPlanViewModel, UnitViewModel } from '@/application/viewmodels';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
-import { Button, BackButton } from '@/components';
-import { ConfirmDeleteButton } from '@/components/ui/ConfirmDeleteButton';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { Button, BackButton, ConfirmDeleteButton, EmptyState } from '@/components';
+import { LessonPlanRefiner } from '@/app/components/LessonPlanRefiner';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { showError, showSuccess } from '@/utils/notifications';
@@ -949,6 +948,10 @@ export default function LessonPlanPage() {
             </div>
           )}
         </PageContainer>
+
+        {lessonPlan && (
+          <LessonPlanRefiner lessonPlanId={lessonPlan.id} onRefined={loadData} />
+        )}
       </div>
     </ProtectedRoute>
   );

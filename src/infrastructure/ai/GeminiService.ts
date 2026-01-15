@@ -342,4 +342,55 @@ RETORNE APENAS UM JSON NO SEGUINTE FORMATO:
       throw new Error("Não consegui processar sua dúvida agora. Tente novamente.");
     }
   }
+
+  async refinePlan(lessonPlan: LessonPlan, command: string): Promise<LessonPlan> {
+    const prompt = `
+Você é um refinador de planos de aula pedagógicos. 
+Receba o plano de aula abaixo e modifique-o conforme o comando do professor.
+
+PLANO ATUAL:
+${JSON.stringify(lessonPlan)}
+
+COMANDO DO PROFESSOR:
+"${command}"
+
+INSTRUÇÕES:
+1. Mantenha a mesma estrutura JSON.
+2. Modifique apenas o necessário para atender ao comando.
+3. Garanta que o plano continue tecnicamente correto e alinhado à BNCC.
+4. Retorne APENAS o JSON completo (objeto único), sem markdown.
+
+${this.getJsonStructureDirective()}
+`;
+
+    try {
+      const result = await this.model.generateContent(prompt);
+      const text = result.response.text();
+      const cleanedText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const parsedData = JSON.parse(cleanedText);
+
+      // Reutiliza a validação existente
+      return this.validateAndBuildLessonPlan(parsedData, lessonPlan.subject, lessonPlan.gradeYear);
+    } catch (error) {
+      console.error("Erro no refinamento do plano:", error);
+      throw new Error("Não consegui refinar o plano conforme solicitado. Verifique seu comando e tente novamente.");
+    }
+  }
+
+  private getJsonStructureDirective(): string {
+    return `
+FORMATO JSON OBRIGATÓRIO:
+{
+  "title": "Título",
+  "objectives": ["..."],
+  "methodology": "...",
+  "duration": "...",
+  "bnccCompetencies": ["..."],
+  "content": "...",
+  "quiz": [
+    { "id": "quiz-1", "question": "...", "options": ["..."], "correctAnswer": 0, "justification": "..." }
+  ]
+}
+`;
+  }
 }

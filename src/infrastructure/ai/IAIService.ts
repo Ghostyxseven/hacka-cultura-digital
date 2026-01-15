@@ -30,4 +30,8 @@ export interface IAIService {
    * Faz uma pergunta genérica à IA (utilizado pelo Tutor Chat)
    */
   ask(prompt: string): Promise<string>;
+  /**
+  * Refina um plano de aula existente baseado em um comando do professor
+  */
+  refinePlan(lessonPlan: LessonPlan, command: string): Promise<LessonPlan>;
 }

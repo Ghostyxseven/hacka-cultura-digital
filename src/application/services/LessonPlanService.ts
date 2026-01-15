@@ -23,6 +23,8 @@ import { GetQuizResultsByLessonPlanUseCase } from "../usecases/GetQuizResultsByL
 import { AddTeacherCommentUseCase } from "../usecases/AddTeacherCommentUseCase";
 import { UploadMaterialUseCase } from "../usecases/UploadMaterialUseCase";
 import { GetMaterialsByUnitUseCase } from "../usecases/GetMaterialsByUnitUseCase";
+import { RefineLessonPlanUseCase } from "../usecases/RefineLessonPlanUseCase";
+import { GetClassTrendsUseCase } from "../usecases/GetClassTrendsUseCase";
 import { QuizResult } from "../../core/entities/QuizResult";
 import { Material } from "../../core/entities/Material";
 
@@ -61,7 +63,9 @@ export class LessonPlanService {
     private getQuizResultsByLessonPlanUseCase: GetQuizResultsByLessonPlanUseCase,
     private addTeacherCommentUseCase: AddTeacherCommentUseCase,
     private uploadMaterialUseCase: UploadMaterialUseCase,
-    private getMaterialsByUnitUseCase: GetMaterialsByUnitUseCase
+    private getMaterialsByUnitUseCase: GetMaterialsByUnitUseCase,
+    private refineLessonPlanUseCase: RefineLessonPlanUseCase,
+    private getClassTrendsUseCase: GetClassTrendsUseCase
   ) { }
 
   // ========== MÉTODOS DE PLANOS DE AULA ==========
@@ -254,5 +258,19 @@ export class LessonPlanService {
 
   getMaterialsByUnit(unitId: string): Material[] {
     return this.getMaterialsByUnitUseCase.execute(unitId);
+  }
+
+  /**
+   * Refina o plano de aula com IA
+   */
+  async refineLessonPlan(lessonPlanId: string, command: string): Promise<LessonPlan> {
+    return this.refineLessonPlanUseCase.execute(lessonPlanId, command);
+  }
+
+  /**
+   * Obtém análise de tendências da turma
+   */
+  async getClassTrends(lessonPlanId: string): Promise<string> {
+    return this.getClassTrendsUseCase.execute(lessonPlanId);
   }
 }
