@@ -1,5 +1,4 @@
-// src/infrastructure/ai/IAIService.ts
-import { LessonPlan } from "../../core/entities/LessonPlan";
+import { QuizResult } from "../../core/entities/QuizResult";
 
 /**
  * Interface que define o contrato para serviços de IA generativa.
@@ -9,12 +8,15 @@ import { LessonPlan } from "../../core/entities/LessonPlan";
 export interface IAIService {
   /**
    * Gera um plano de aula completo baseado nos parâmetros fornecidos.
-   * 
-   * @param subject - Nome da disciplina (ex: "Matemática", "História")
-   * @param topic - Tema/tópico da aula (ex: "Equações do 2º grau")
-   * @param grade - Ano/série escolar (ex: "8º Ano", "1º Ano EM")
-   * @returns Promise com o plano de aula completo e validado
-   * @throws Error se a geração falhar ou os dados retornados forem inválidos
    */
   generate(subject: string, topic: string, grade: string): Promise<LessonPlan>;
+
+  /**
+   * Analisa o desempenho de um aluno em um quiz e gera feedback pedagógico.
+   * 
+   * @param result - O resultado do quiz a ser analisado
+   * @param lessonPlan - O plano de aula original para contexto
+   * @returns Promise com o comentário pedagógico da IA
+   */
+  analyzePerformance(result: QuizResult, lessonPlan: LessonPlan): Promise<string>;
 }
