@@ -1,3 +1,4 @@
+import { LessonPlan } from "../../core/entities/LessonPlan";
 import { QuizResult } from "../../core/entities/QuizResult";
 
 /**
