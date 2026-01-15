@@ -1,11 +1,12 @@
 // src/infrastructure/ai/GeminiService.ts
-import { 
-  GoogleGenerativeAI, 
-  HarmCategory, 
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
   HarmBlockThreshold,
-  GenerativeModel 
+  GenerativeModel
 } from "@google/generative-ai";
-import { LessonPlan, SchoolYear, QuizQuestion } from "../../core/entities/LessonPlan";
+import { LessonPlan, SchoolYear, QuizQuestion, SupportMaterial } from "../../core/entities/LessonPlan";
+import { QuizResult } from "../../core/entities/QuizResult";
 import { IAIService } from "./IAIService";
 
 /**
@@ -15,7 +16,7 @@ import { IAIService } from "./IAIService";
 export class GeminiService implements IAIService {
   private model: GenerativeModel;
   private readonly API_KEY: string;
-  
+
   // Valores válidos de SchoolYear conforme definido na entidade
   private readonly VALID_SCHOOL_YEARS: readonly SchoolYear[] = [
     '6º Ano',
@@ -29,13 +30,13 @@ export class GeminiService implements IAIService {
 
   constructor() {
     this.API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
-    
+
     if (!this.API_KEY) {
       throw new Error("NEXT_PUBLIC_GEMINI_API_KEY não configurada. Configure a variável de ambiente.");
     }
 
     const genAI = new GoogleGenerativeAI(this.API_KEY);
-    
+
     this.model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
       // Configurações de segurança para evitar bloqueios bobos no dia do Pitch
@@ -55,7 +56,7 @@ export class GeminiService implements IAIService {
   async generate(subject: string, topic: string, grade: string): Promise<LessonPlan> {
     // Validação do ano escolar antes de processar
     this.validateSchoolYear(grade);
-    
+
     // Prompt estruturado com schema JSON explícito para garantir resposta válida
     const prompt = `
 Você é um assistente pedagógico especializado em Cultura Digital, integrado ao sistema "Hacka Cultura Digital" do IFPI.
@@ -119,35 +120,116 @@ IMPORTANTE:
     try {
       const result = await this.model.generateContent(prompt);
       const responseText = result.response.text();
-      
+
       // Remove possíveis markdown code blocks se a IA retornar
       const cleanedText = responseText
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
         .trim();
-      
+
       const parsedData = JSON.parse(cleanedText);
-      
+
       // Validação e construção do LessonPlan completo
       const lessonPlan = this.validateAndBuildLessonPlan(parsedData, subject, grade);
-      
+
       return lessonPlan;
     } catch (error) {
       console.error("Erro na geração do plano de aula:", error);
-      
+
       if (error instanceof SyntaxError) {
         throw new Error("Erro ao processar resposta da IA: formato JSON inválido. Tente novamente.");
       }
-      
+
       if (error instanceof Error && error.message.includes("API_KEY")) {
         throw new Error("Erro de configuração: chave da API não encontrada.");
       }
-      
+
       // Retorno de fallback para o sistema não travar na frente dos jurados
       throw new Error("A IA está processando sua solicitação. Por favor, tente novamente em alguns instantes.");
     }
   }
 
+  async analyzePerformance(result: QuizResult, lessonPlan: LessonPlan): Promise<string> {
+    const prompt = `
+Você é um mentor pedagógico especializado em Cultura Digital.
+Analise o desempenho de um aluno no quiz abaixo e forneça um feedback motivador, construtivo e breve (máximo 300 caracteres).
+
+CONTEXTO DA AULA:
+- Título: ${lessonPlan.title}
+- Disciplina: ${lessonPlan.subject}
+- Ano: ${lessonPlan.gradeYear}
+
+DESEMPENHO DO ALUNO:
+- Nota: ${result.score}%
+- Acertos: ${result.correctAnswers} de ${result.totalQuestions}
+- Respostas dadas: ${JSON.stringify(result.answers)}
+
+INSTRUÇÕES:
+1. Se a nota for alta (>= 70%), parabenize e destaque o domínio do conteúdo.
+2. Se a nota for média (50-69%), incentive e aponte que com um pouco mais de estudo ele chegará lá.
+3. Se a nota for baixa (< 50%), seja empático e sugira que ele revise o conteúdo da aula, focando nos pontos que errou.
+4. Identifique o tema principal onde o aluno falhou (baseado na justificativa das questões que ele errou).
+5. Retorne APENAS o texto do feedback, sem introduções ou formatação adicional.
+`;
+
+    try {
+      const response = await this.model.generateContent(prompt);
+      return response.response.text().trim();
+    } catch (error) {
+      console.error("Erro na análise de desempenho:", error);
+      return "Muito bem por concluir a atividade! Continue se dedicando aos estudos da Cultura Digital para aprimorar seus conhecimentos.";
+    }
+  }
+
+  async generateSupportMaterials(lessonPlan: LessonPlan): Promise<SupportMaterial[]> {
+    const prompt = `
+Você é um especialista em tecnologia educacional e Cultura Digital.
+Com base no plano de aula abaixo, gere materiais de apoio extras para o aluno.
+
+PLANO DE AULA:
+- Título: ${lessonPlan.title}
+- Tema: ${lessonPlan.content.substring(0, 500)}...
+- Público: ${lessonPlan.gradeYear}
+
+REQUISITOS:
+1. Gere um roteiro de slides estruturado (mínimo 5 slides).
+2. Sugira 2 links de leitura/notícias reais e confiáveis sobre o tema.
+3. Sugira 2 vídeos (YouTube) relevantes sobre o tema.
+
+RETORNE APENAS UM JSON NO SEGUINTE FORMATO:
+[
+  {
+    "type": "slide",
+    "title": "Estrutura de Slides Sugerida",
+    "slides": [
+      { "title": "Slide 1: Título", "content": ["Ponto 1", "Ponto 2"] }
+    ]
+  },
+  { "type": "link", "title": "Título do Link", "url": "https://..." },
+  { "type": "video", "title": "Título do Vídeo", "url": "https://..." }
+]
+`;
+
+    try {
+      const response = await this.model.generateContent(prompt);
+      const text = response.response.text().trim();
+      // Limpa possíveis marcações de markdown do JSON
+      const jsonStr = text.startsWith('```json') ? text.replace(/```json|```/g, '').trim() : text;
+      return JSON.parse(jsonStr);
+    } catch (error) {
+      console.error("Erro na geração de materiais de apoio:", error);
+      return [
+        {
+          type: 'slide',
+          title: 'Estrutura de Slides Básica',
+          slides: [
+            { title: 'Introdução', content: ['Definição do tema', 'Importância na Cultura Digital'] },
+            { title: 'Conclusão', content: ['Resumo dos pontos', 'Próximos passos'] }
+          ]
+        }
+      ];
+    }
+  }
   /**
    * Valida se o ano escolar fornecido é válido conforme a tipagem SchoolYear
    * @param grade - Ano escolar a ser validado
@@ -167,13 +249,13 @@ IMPORTANTE:
    * Valida e constrói um LessonPlan completo a partir dos dados da IA
    */
   private validateAndBuildLessonPlan(
-    data: any, 
-    subject: string, 
+    data: any,
+    subject: string,
     grade: string
   ): LessonPlan {
     // Validação do ano escolar (garantia adicional)
     this.validateSchoolYear(grade);
-    
+
     // Validações básicas
     if (!data.title || typeof data.title !== 'string') {
       throw new Error("Resposta da IA inválida: título ausente ou inválido");
@@ -225,8 +307,8 @@ IMPORTANTE:
       objectives: data.objectives,
       methodology: data.methodology,
       duration: data.duration || "Não especificado",
-      bnccCompetencies: Array.isArray(data.bnccCompetencies) 
-        ? data.bnccCompetencies 
+      bnccCompetencies: Array.isArray(data.bnccCompetencies)
+        ? data.bnccCompetencies
         : ["Competência 5 - Cultura Digital (BNCC)"],
       content: data.content || data.methodology, // Fallback para content se não vier
       quiz: validatedQuiz,

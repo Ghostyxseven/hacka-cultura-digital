@@ -1,4 +1,5 @@
 import { QuizResult } from "../../core/entities/QuizResult";
+import { LessonPlan, SupportMaterial } from "../../core/entities/LessonPlan";
 
 /**
  * Interface que define o contrato para serviços de IA generativa.
@@ -19,4 +20,9 @@ export interface IAIService {
    * @returns Promise com o comentário pedagógico da IA
    */
   analyzePerformance(result: QuizResult, lessonPlan: LessonPlan): Promise<string>;
+
+  /**
+   * Gera materiais de apoio extras para uma unidade/plano de aula
+   */
+  generateSupportMaterials(lessonPlan: LessonPlan): Promise<SupportMaterial[]>;
 }
