@@ -8,4 +8,6 @@ export const StorageKeys = {
     UNITS: '@hacka-cultura:units',
     USERS: '@hacka-cultura:users',
     QUIZ_RESULTS: '@hacka-cultura:quiz-results',
+    STUDENT_PROFILES: '@hacka-cultura:student-profiles',
+    ANNOUNCEMENTS: '@hacka-cultura:announcements',
 } as const;
