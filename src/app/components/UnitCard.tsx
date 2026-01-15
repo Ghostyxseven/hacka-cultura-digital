@@ -16,6 +16,7 @@ interface UnitCardProps {
   showSubject?: boolean;
   onDelete?: (id: string) => void;
   canDelete?: boolean;
+  quizResult?: { score: number; completedAt: Date };
 }
 
 export function UnitCard({
@@ -25,7 +26,8 @@ export function UnitCard({
   onGenerate,
   showSubject = false,
   onDelete,
-  canDelete = false
+  canDelete = false,
+  quizResult
 }: UnitCardProps) {
   const { isProfessor, isAdmin } = useAuth();
   const isAluno = !isProfessor && !isAdmin;
@@ -76,6 +78,15 @@ export function UnitCard({
                     </>
                   )}
                 </span>
+                {quizResult && (
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-sm shadow-sm ${quizResult.score >= 70 ? 'bg-green-100 text-green-700' :
+                    quizResult.score >= 50 ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                    <span className="text-lg">📊</span>
+                    Nota: {quizResult.score}%
+                  </span>
+                )}
               </div>
 
               {unit.description && (
@@ -131,15 +142,27 @@ export function UnitCard({
             </Link>
           )}
           {unit.lessonPlanId && (
-            <Link href={planHref}>
-              <Button
-                variant="success"
-                className="text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
-              >
-                <span className="mr-2">📖</span>
-                Ver Plano
-              </Button>
-            </Link>
+            <div className="flex flex-col gap-2">
+              <Link href={planHref}>
+                <Button
+                  variant="success"
+                  className="w-full text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
+                >
+                  <span className="mr-2">📖</span>
+                  Ver Plano
+                </Button>
+              </Link>
+              {isAluno && (
+                <Link href={`/aluno/quiz/${unit.lessonPlanId}`}>
+                  <Button
+                    className="w-full text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all bg-indigo-600 hover:bg-indigo-700 border-indigo-700"
+                  >
+                    <span className="mr-2">✏️</span>
+                    Fazer Quiz
+                  </Button>
+                </Link>
+              )}
+            </div>
           )}
         </div>
       </div>
