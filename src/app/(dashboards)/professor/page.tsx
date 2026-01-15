@@ -7,7 +7,7 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { StatsSection, SubjectsList, UnitsList } from '@/app/components';
+import { StatsSection, SubjectsList, UnitsList, TeacherMural } from '@/app/components';
 import { getLessonPlanService } from '@/lib/service';
 import { showError, showSuccess } from '@/utils/notifications';
 import Link from 'next/link';
@@ -82,6 +82,11 @@ export default function ProfessorPage() {
         {/* Estatísticas */}
         <div className="mb-8">
           <StatsSection stats={stats} />
+        </div>
+
+        {/* Mural de Avisos (Fase 4) */}
+        <div className="mb-8">
+          <TeacherMural />
         </div>
 
         {/* Botão Nova Disciplina */}
