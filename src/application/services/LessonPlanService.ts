@@ -18,6 +18,7 @@ import { GetUnitsUseCase } from "../usecases/GetUnitsUseCase";
 import { GetUnitByIdUseCase } from "../usecases/GetUnitByIdUseCase";
 import { GenerateLessonPlanForUnitUseCase } from "../usecases/GenerateLessonPlanForUnitUseCase";
 import { AnalyzePerformanceUseCase } from "../usecases/AnalyzePerformanceUseCase";
+import { GenerateSupportMaterialsUseCase } from "../usecases/GenerateSupportMaterialsUseCase";
 import { QuizResult } from "../../core/entities/QuizResult";
 
 
@@ -50,7 +51,8 @@ export class LessonPlanService {
     private getUnitByIdUseCase: GetUnitByIdUseCase,
     private generateLessonPlanForUnitUseCase: GenerateLessonPlanForUnitUseCase,
     private deleteUnitUseCase: DeleteUnitUseCase,
-    private analyzePerformanceUseCase: AnalyzePerformanceUseCase
+    private analyzePerformanceUseCase: AnalyzePerformanceUseCase,
+    private generateSupportMaterialsUseCase: GenerateSupportMaterialsUseCase
   ) { }
 
   // ========== MÉTODOS DE PLANOS DE AULA ==========
@@ -211,5 +213,13 @@ export class LessonPlanService {
    */
   async analyzePerformance(quizResultId: string): Promise<QuizResult> {
     return this.analyzePerformanceUseCase.execute({ quizResultId });
+  }
+
+  /**
+   * Gera materiais de apoio extras (slides, links, vídeos) via IA
+   * Fase 4 - Materiais Estendidos
+   */
+  async generateSupportMaterials(lessonPlanId: string): Promise<LessonPlan> {
+    return this.generateSupportMaterialsUseCase.execute({ lessonPlanId });
   }
 }
