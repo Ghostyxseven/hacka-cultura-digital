@@ -5,6 +5,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button, ConfirmDeleteButton } from '@/components';
+import { MaterialRAGManager } from './MaterialRAGManager';
 import type { UnitViewModel } from '@/application/viewmodels';
 
 interface UnitCardProps {
@@ -100,6 +101,10 @@ export function UnitCard({
                   <span className="px-2 py-1 rounded-md bg-gray-100 font-medium text-gray-700">{subjectName}</span>
                 </div>
               )}
+
+              {isProfessor && !unit.lessonPlanId && (
+                <MaterialRAGManager unitId={unit.id} />
+              )}
             </div>
           </div>
         </div>
@@ -124,6 +129,17 @@ export function UnitCard({
             >
               🤖 Gerar Plano
             </Button>
+          )}
+          {unit.lessonPlanId && isProfessor && (
+            <Link href={`/professor/unidades/${unit.id}/resultados`}>
+              <Button
+                variant="secondary"
+                className="text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100"
+              >
+                <span className="mr-2">📊</span>
+                Resultados
+              </Button>
+            </Link>
           )}
           {unit.lessonPlanId && (
             <div className="flex flex-col gap-2">
