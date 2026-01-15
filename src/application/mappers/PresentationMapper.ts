@@ -99,6 +99,8 @@ export class PresentationMapper {
       bnccCompetencies: lessonPlan.bnccCompetencies,
       content: lessonPlan.content,
       quiz: this.toQuizQuestionViewModels(lessonPlan.quiz),
+      supportMaterials: lessonPlan.supportMaterials,
+      teacherNote: lessonPlan.teacherNote,
       metadata: {
         aiModel: lessonPlan.metadata.aiModel,
         promptVersion: lessonPlan.metadata.promptVersion,

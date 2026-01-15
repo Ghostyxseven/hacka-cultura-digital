@@ -11,6 +11,8 @@ export interface QuizResult {
   score: number; // Pontuação (0-100)
   totalQuestions: number;
   correctAnswers: number;
+  aiFeedback?: string; // Comentário gerado pela IA (Fase 2)
+  teacherComments?: string; // Comentários do professor (Fase 4)
   completedAt: Date;
   timeSpent?: number; // Tempo gasto em segundos (opcional)
 }
