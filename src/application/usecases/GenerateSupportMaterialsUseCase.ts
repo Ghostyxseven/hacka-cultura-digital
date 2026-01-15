@@ -1,6 +1,6 @@
 // src/application/usecases/GenerateSupportMaterialsUseCase.ts
 import { IAIService } from '../../infrastructure/ai/IAIService';
-import { ILessonPlanRepository } from '../../core/repositories/ILessonPlanRepository';
+import { ILessonRepository } from '../../core/repositories/ILessonRepository';
 import { LessonPlan } from '../../core/entities/LessonPlan';
 
 export interface GenerateSupportMaterialsRequest {
@@ -10,7 +10,7 @@ export interface GenerateSupportMaterialsRequest {
 export class GenerateSupportMaterialsUseCase {
     constructor(
         private aiService: IAIService,
-        private lessonRepository: ILessonPlanRepository
+        private lessonRepository: ILessonRepository
     ) { }
 
     async execute(request: GenerateSupportMaterialsRequest): Promise<LessonPlan> {
