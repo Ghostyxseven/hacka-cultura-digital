@@ -5,12 +5,14 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getAuthService } from '@/lib/authService';
 import { getLessonPlanService } from '@/lib/service';
+import { getGetQuizResultsUseCase } from '@/lib/quizService';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SubjectsList, UnitsList, StatsSection } from '@/app/components';
 import { PresentationMapper } from '@/application';
 import type { SubjectViewModel, UnitViewModel } from '@/application/viewmodels';
+import type { QuizResult } from '@/core/entities/QuizResult';
 import type { User } from '@/core/entities/User';
 
 export default function AlunoPage() {
@@ -21,6 +23,7 @@ export default function AlunoPage() {
   const [professor, setProfessor] = useState<User | null>(null);
   const [subjects, setSubjects] = useState<SubjectViewModel[]>([]);
   const [units, setUnits] = useState<UnitViewModel[]>([]);
+  const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,6 +40,10 @@ export default function AlunoPage() {
 
       const allSubjects = lessonPlanService.getSubjects().map(s => PresentationMapper.toSubjectViewModel(s));
       const allUnits = lessonPlanService.getUnits().map(u => PresentationMapper.toUnitViewModel(u));
+
+      const quizUseCase = getGetQuizResultsUseCase();
+      const results = quizUseCase.getByUserId(user!.id);
+      setQuizResults(results);
 
       setSubjects(allSubjects);
       setUnits(allUnits.filter(u => u.lessonPlanId));
@@ -186,6 +193,7 @@ export default function AlunoPage() {
               <UnitsList
                 units={units}
                 subjects={subjects}
+                quizResults={quizResults}
                 showSubject
                 emptyStateTitle="Nenhum plano de aula disponível"
                 emptyStateDescription="Aguarde seu professor gerar planos de aula"

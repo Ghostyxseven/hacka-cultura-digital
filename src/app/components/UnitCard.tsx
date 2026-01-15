@@ -15,23 +15,25 @@ interface UnitCardProps {
   showSubject?: boolean;
   onDelete?: (id: string) => void;
   canDelete?: boolean;
+  quizResult?: { score: number; completedAt: Date };
 }
 
-export function UnitCard({ 
-  unit, 
-  subjectName, 
-  canGenerate = false, 
+export function UnitCard({
+  unit,
+  subjectName,
+  canGenerate = false,
   onGenerate,
   showSubject = false,
   onDelete,
-  canDelete = false
+  canDelete = false,
+  quizResult
 }: UnitCardProps) {
   const { isProfessor, isAdmin } = useAuth();
   const isAluno = !isProfessor && !isAdmin;
-  
+
   // Define a rota baseada no tipo de usuário
-  const planHref = isAluno 
-    ? `/aluno/unidades/${unit.id}/plano` 
+  const planHref = isAluno
+    ? `/aluno/unidades/${unit.id}/plano`
     : `/professor/unidades/${unit.id}/plano`;
 
   const handleDelete = () => {
@@ -44,7 +46,7 @@ export function UnitCard({
     <div className="group relative bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl hover:border-purple-300 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
       {/* Gradiente sutil no hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-50/0 to-pink-50/0 group-hover:from-purple-50/50 group-hover:to-pink-50/50 transition-all duration-300 pointer-events-none" />
-      
+
       <div className="relative flex justify-between items-start gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-4 mb-3">
@@ -52,12 +54,12 @@ export function UnitCard({
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-md group-hover:scale-110 transition-transform duration-300">
               📖
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">
                 {unit.topic}
               </h3>
-              
+
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 text-gray-800 font-semibold text-sm border border-gray-200 shadow-sm">
                   {unit.gradeYear}
@@ -75,14 +77,23 @@ export function UnitCard({
                     </>
                   )}
                 </span>
+                {quizResult && (
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-sm shadow-sm ${quizResult.score >= 70 ? 'bg-green-100 text-green-700' :
+                    quizResult.score >= 50 ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                    <span className="text-lg">📊</span>
+                    Nota: {quizResult.score}%
+                  </span>
+                )}
               </div>
-              
+
               {unit.description && (
                 <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
                   {unit.description}
                 </p>
               )}
-              
+
               {showSubject && subjectName && (
                 <div className="flex items-center gap-2 text-xs text-gray-500 mt-3">
                   <span className="font-semibold">Disciplina:</span>
@@ -92,7 +103,7 @@ export function UnitCard({
             </div>
           </div>
         </div>
-        
+
         <div className="flex gap-2 flex-shrink-0 items-start">
           {canDelete && onDelete && (
             <div onClick={(e) => e.stopPropagation()}>
@@ -115,15 +126,27 @@ export function UnitCard({
             </Button>
           )}
           {unit.lessonPlanId && (
-            <Link href={planHref}>
-              <Button 
-                variant="success" 
-                className="text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
-              >
-                <span className="mr-2">📖</span>
-                Ver Plano
-              </Button>
-            </Link>
+            <div className="flex flex-col gap-2">
+              <Link href={planHref}>
+                <Button
+                  variant="success"
+                  className="w-full text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
+                >
+                  <span className="mr-2">📖</span>
+                  Ver Plano
+                </Button>
+              </Link>
+              {isAluno && (
+                <Link href={`/aluno/quiz/${unit.lessonPlanId}`}>
+                  <Button
+                    className="w-full text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all bg-indigo-600 hover:bg-indigo-700 border-indigo-700"
+                  >
+                    <span className="mr-2">✏️</span>
+                    Fazer Quiz
+                  </Button>
+                </Link>
+              )}
+            </div>
           )}
         </div>
       </div>

@@ -14,6 +14,7 @@ interface UnitsListProps {
   showSubject?: boolean;
   onDelete?: (id: string) => void;
   canDelete?: boolean;
+  quizResults?: { lessonPlanId: string; score: number; completedAt: Date }[];
 }
 
 export function UnitsList({
@@ -26,6 +27,7 @@ export function UnitsList({
   showSubject = false,
   onDelete,
   canDelete = false,
+  quizResults = [],
 }: UnitsListProps) {
   if (units.length === 0) {
     return (
@@ -40,6 +42,8 @@ export function UnitsList({
     <div className="space-y-4">
       {units.map((unit) => {
         const subject = subjects.find(s => s.id === unit.subjectId);
+        const result = quizResults.find(r => r.lessonPlanId === unit.lessonPlanId);
+
         return (
           <UnitCard
             key={unit.id}
@@ -50,6 +54,7 @@ export function UnitsList({
             showSubject={showSubject}
             onDelete={onDelete}
             canDelete={canDelete}
+            quizResult={result ? { score: result.score, completedAt: result.completedAt } : undefined}
           />
         );
       })}
