@@ -31,7 +31,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await register(formData.name, formData.email, formData.password, formData.role as 'professor' | 'aluno');
+      await register(formData.name, formData.email, formData.password, 'professor');
       router.push('/');
     } catch (err) {
       setError('Erro ao registrar. Verifique os dados e tente novamente.');
@@ -98,19 +98,18 @@ export default function RegisterPage() {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-              Eu sou
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Senha
             </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
               onChange={handleChange}
               className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
-            >
-              <option value="professor">Professor</option>
-              <option value="aluno">Aluno</option>
-            </select>
+              required
+            />
           </div>
 
           <button

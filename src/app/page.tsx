@@ -19,8 +19,6 @@ export default function Home() {
       router.push('/admin');
     } else if (user.role === 'professor') {
       router.push('/professor');
-    } else if (user.role === 'aluno') {
-      router.push('/aluno');
     }
   }, [user, router]);
 

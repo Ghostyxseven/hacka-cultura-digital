@@ -6,13 +6,13 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'admin' | 'professor' | 'aluno';
+  role: 'admin' | 'professor';
 }
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, role: 'professor' | 'aluno') => Promise<void>;
+  register: (name: string, email: string, password: string, role: 'professor') => Promise<void>;
   logout: () => void;
 }
 
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionStorage.setItem('currentUser', JSON.stringify(userData));
   };
 
-  const register = async (name: string, email: string, password: string, role: 'professor' | 'aluno') => {
+  const register = async (name: string, email: string, password: string, role: 'professor') => {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     
     if (users.some((u: any) => u.email === email)) {
