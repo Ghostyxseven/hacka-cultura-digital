@@ -2,6 +2,7 @@
 import { IAIService } from '../../infrastructure/ai/IAIService';
 import { IQuizRepository } from '../../core/repositories/IQuizRepository';
 import { IStudentProfileRepository } from '../../core/repositories/IStudentProfileRepository';
+import { IUserRepository } from '../../core/repositories/IUserRepository';
 import { ILessonRepository } from '../../core/repositories/ILessonRepository';
 import { Alert } from '../../core/entities/Alert';
 
@@ -33,6 +34,7 @@ export class SuggestInterventionsUseCase {
     private aiService: IAIService,
     private quizRepository: IQuizRepository,
     private studentProfileRepository: IStudentProfileRepository,
+    private userRepository: IUserRepository,
     private lessonRepository: ILessonRepository
   ) {}
 
@@ -47,16 +49,18 @@ export class SuggestInterventionsUseCase {
 
     // Se tem aluno, busca dados do aluno
     if (request.studentId) {
-      const profile = this.studentProfileRepository.getByUserId(request.studentId);
+      const profile = this.studentProfileRepository.getProfileByUserId(request.studentId);
       const quizResults = this.quizRepository.getQuizResultsByUserId(request.studentId);
 
       if (profile && quizResults.length > 0) {
         const avgScore = quizResults.reduce((sum, r) => sum + r.score, 0) / quizResults.length;
         const recentResults = quizResults.slice(-5); // Últimos 5 quizzes
+        const user = this.userRepository.getUserById(request.studentId);
+        const studentName = user?.name || 'Aluno';
 
         context += `
 DADOS DO ALUNO:
-- Nome: ${profile.name || 'Aluno'}
+- Nome: ${studentName}
 - Média geral: ${avgScore.toFixed(1)}%
 - Total de quizzes: ${quizResults.length}
 - Últimos resultados: ${recentResults.map(r => `${r.score}%`).join(', ')}

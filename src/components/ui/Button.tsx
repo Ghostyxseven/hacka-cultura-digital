@@ -3,19 +3,27 @@ import { ButtonHTMLAttributes, ReactNode } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'success' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
   children: ReactNode;
   ariaLabel?: string;
 }
 
 export function Button({ 
-  variant = 'primary', 
+  variant = 'primary',
+  size = 'md',
   children, 
   className = '', 
   ariaLabel,
   type = 'button',
   ...props 
 }: ButtonProps) {
-  const baseClasses = 'px-4 py-2 rounded-lg transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2';
+  const sizeClasses = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2',
+    lg: 'px-6 py-3 text-lg',
+  };
+  
+  const baseClasses = `${sizeClasses[size]} rounded-lg transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2`;
   
   const variantClasses = {
     primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',

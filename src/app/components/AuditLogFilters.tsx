@@ -52,14 +52,12 @@ export function AuditLogFilters({ filters, onFilterChange, onReset }: AuditLogFi
           <Select
             value={filters.action || ''}
             onChange={(e) => onFilterChange({ ...filters, action: e.target.value as AuditActionType || undefined })}
-          >
-            <option value="">Todas</option>
-            {actionOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </Select>
+            placeholder="Todas"
+            options={[
+              { value: '', label: 'Todas' },
+              ...actionOptions,
+            ]}
+          />
         </div>
 
         <div>
@@ -69,14 +67,12 @@ export function AuditLogFilters({ filters, onFilterChange, onReset }: AuditLogFi
           <Select
             value={filters.severity || ''}
             onChange={(e) => onFilterChange({ ...filters, severity: e.target.value as AuditSeverity || undefined })}
-          >
-            <option value="">Todas</option>
-            {severityOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </Select>
+            placeholder="Todas"
+            options={[
+              { value: '', label: 'Todas' },
+              ...severityOptions,
+            ]}
+          />
         </div>
 
         <div>

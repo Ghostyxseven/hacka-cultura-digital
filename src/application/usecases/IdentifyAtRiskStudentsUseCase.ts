@@ -1,6 +1,7 @@
 // src/application/usecases/IdentifyAtRiskStudentsUseCase.ts
 import { IQuizRepository } from '../../core/repositories/IQuizRepository';
 import { IStudentProfileRepository } from '../../core/repositories/IStudentProfileRepository';
+import { IUserRepository } from '../../core/repositories/IUserRepository';
 import { Alert } from '../../core/entities/Alert';
 import { IAlertRepository } from '../../core/repositories/IAlertRepository';
 
@@ -42,6 +43,7 @@ export class IdentifyAtRiskStudentsUseCase {
   constructor(
     private quizRepository: IQuizRepository,
     private studentProfileRepository: IStudentProfileRepository,
+    private userRepository: IUserRepository,
     private alertRepository: IAlertRepository
   ) {}
 
@@ -55,7 +57,7 @@ export class IdentifyAtRiskStudentsUseCase {
     };
 
     // Busca todos os perfis de alunos
-    const allProfiles = this.studentProfileRepository.getAll();
+    const allProfiles = this.studentProfileRepository.getAllProfiles();
     
     // Filtra por disciplina/turma se especificado
     let profiles = allProfiles;
@@ -115,9 +117,13 @@ export class IdentifyAtRiskStudentsUseCase {
 
       // Se identificou riscos, adiciona à lista
       if (reasons.length > 0) {
+        // Busca o nome do aluno através do userRepository
+        const user = this.userRepository.getUserById(profile.userId);
+        const studentName = user?.name || 'Aluno';
+        
         atRiskStudents.push({
           studentId: profile.userId,
-          studentName: profile.name || 'Aluno',
+          studentName,
           riskLevel,
           reasons,
           averageScore: Math.round(averageScore),

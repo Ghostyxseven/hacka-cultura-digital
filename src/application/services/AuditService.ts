@@ -28,7 +28,7 @@ export class AuditService {
     } = {}
   ): void {
     // Busca informações do usuário
-    const user = this.userRepository.getById(userId);
+    const user = this.userRepository.getUserById(userId);
 
     const log: AuditLog = {
       id: `audit-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,

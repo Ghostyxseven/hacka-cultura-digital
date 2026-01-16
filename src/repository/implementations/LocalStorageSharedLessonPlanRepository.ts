@@ -24,7 +24,7 @@ export class LocalStorageSharedLessonPlanRepository implements ISharedLessonPlan
         const index = plans.findIndex(p => p.id === sharedPlan.id);
 
         if (index >= 0) {
-            plans[index] = { ...sharedPlan, updatedAt: new Date() };
+            plans[index] = sharedPlan;
         } else {
             plans.push(sharedPlan);
         }

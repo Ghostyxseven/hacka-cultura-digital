@@ -10,7 +10,7 @@ interface UserEditFormProps {
   user: User;
   professores: User[];
   checkEmailExists?: (email: string) => User | undefined;
-  onSubmit: (id: string, data: {
+  onSubmit: (data: {
     name?: string;
     email?: string;
     password?: string;
@@ -106,7 +106,7 @@ export function UserEditForm({ user, professores, checkEmailExists, onSubmit, on
       updates.professorId = professorId;
     }
 
-    const success = onSubmit(user.id, updates);
+    const success = onSubmit(updates);
 
     if (success) {
       setPassword('');

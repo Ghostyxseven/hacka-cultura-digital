@@ -45,7 +45,7 @@ export default function UsuariosPage() {
     );
   }
 
-  const handleCreate = (data: { name: string; email: string; password: string; professorId?: string }) => {
+  const handleCreate = (data: { name: string; email: string; password: string; professorId?: string }): boolean => {
     const success = userType === 'professor' 
       ? createProfessor(data)
       : createAluno({ ...data, professorId: data.professorId || professores[0]?.id || '' });
@@ -53,15 +53,18 @@ export default function UsuariosPage() {
     if (success) {
       setShowCreateForm(false);
     }
+    
+    return success;
   };
 
-  const handleEdit = (updates: any) => {
-    if (editingUser) {
-      const success = updateUser(editingUser.id, updates);
-      if (success) {
-        setEditingUser(null);
-      }
+  const handleEdit = (updates: any): boolean => {
+    if (!editingUser) return false;
+    
+    const success = updateUser(editingUser.id, updates);
+    if (success) {
+      setEditingUser(null);
     }
+    return success;
   };
 
   const handleDelete = (userId: string) => {
@@ -74,6 +77,12 @@ export default function UsuariosPage() {
   const checkEmailExists = (email: string): boolean => {
     const allUsers = [...professores, ...alunos];
     return allUsers.some(u => u.email.toLowerCase() === email.toLowerCase());
+  };
+
+  const checkEmailExistsForEdit = (email: string): User | undefined => {
+    const allUsers = [...professores, ...alunos];
+    const found = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase() && u.id !== editingUser?.id);
+    return found;
   };
 
   return (
@@ -148,7 +157,7 @@ export default function UsuariosPage() {
           <UserEditForm
             user={editingUser}
             professores={professores}
-            checkEmailExists={checkEmailExists}
+            checkEmailExists={checkEmailExistsForEdit}
             onSubmit={handleEdit}
             onCancel={() => setEditingUser(null)}
           />

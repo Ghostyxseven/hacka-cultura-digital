@@ -131,14 +131,12 @@ export function AlunoCreateForm({ professores, checkEmailExists, onSubmit, onCan
         }}
         error={professorError}
         required
-      >
-        <option value="">Selecione um professor</option>
-        {professores.map((prof) => (
-          <option key={prof.id} value={prof.id}>
-            {prof.name} ({prof.email})
-          </option>
-        ))}
-      </Select>
+        placeholder="Selecione um professor"
+        options={professores.map((prof) => ({
+          value: prof.id,
+          label: `${prof.name} (${prof.email})`,
+        }))}
+      />
       <div className="flex gap-2">
         <Button type="submit">Cadastrar</Button>
         <Button type="button" variant="secondary" onClick={onCancel}>

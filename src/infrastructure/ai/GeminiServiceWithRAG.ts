@@ -8,6 +8,7 @@ import {
 import { LessonPlan, SchoolYear, QuizQuestion, SupportMaterial } from "../../core/entities/LessonPlan";
 import { QuizResult } from "../../core/entities/QuizResult";
 import { IAIService } from "./IAIService";
+import { IAIServiceWithExplanation, GenerationResult } from "./IAIServiceWithExplanation";
 import { IRAGService } from "../rag/IRAGService";
 import { SimpleRAGService } from "../rag/SimpleRAGService";
 import { ExplainabilityService, AIExplanation } from "./ExplainabilityService";
