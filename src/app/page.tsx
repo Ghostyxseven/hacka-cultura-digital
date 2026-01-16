@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ApplicationServiceFactory } from '@/application';
-import { Subject } from '@/core/entities/Subject';
+import type { Subject } from '@/application/viewmodels';
 
 /**
  * Dashboard Principal - Single User Application

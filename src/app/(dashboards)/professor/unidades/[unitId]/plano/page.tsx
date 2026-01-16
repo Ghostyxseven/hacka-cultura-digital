@@ -4,10 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ApplicationServiceFactory } from '@/application';
-import { Unit } from '@/core/entities/Unit';
-import { LessonPlan } from '@/core/entities/LessonPlan';
-import { Activity } from '@/core/entities/Activity';
-import { Subject } from '@/core/entities/Subject';
+import type { Unit, LessonPlan, Activity, Subject } from '@/application/viewmodels';
 
 export default function GenerateLessonPlanPage() {
   const params = useParams();

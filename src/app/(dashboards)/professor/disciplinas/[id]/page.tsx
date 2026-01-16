@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ApplicationServiceFactory } from '@/application';
-import { Subject } from '@/core/entities/Subject';
-import { Unit } from '@/core/entities/Unit';
+import type { Subject, Unit } from '@/application/viewmodels';
 
 export default function SubjectDetailPage() {
   const params = useParams();

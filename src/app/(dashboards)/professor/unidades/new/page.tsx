@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ApplicationServiceFactory } from '@/application';
-import { Subject } from '@/core/entities/Subject';
+import type { Subject } from '@/application/viewmodels';
 
 export default function NewUnitPage() {
   const router = useRouter();
