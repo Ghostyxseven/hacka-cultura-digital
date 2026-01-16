@@ -84,8 +84,78 @@ export default function GenerateLessonPlanPage() {
   };
 
   const handleExportPDF = () => {
-    // TODO: Implementar exportação para PDF
-    alert('Funcionalidade de exportação em PDF será implementada em breve!');
+    // Exportação para PDF usando window.print com estilos otimizados
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Por favor, permita pop-ups para exportar o PDF');
+      return;
+    }
+
+    const printContent = document.querySelector('.export-content');
+    if (!printContent) {
+      alert('Conteúdo não encontrado para exportação');
+      return;
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Materiais Didáticos - ${lessonPlan?.title || 'Plano de Aula'}</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              padding: 40px;
+              background: white;
+            }
+            h1 { color: #1e3a8a; margin-bottom: 10px; font-size: 28px; }
+            h2 { color: #1e40af; margin-top: 30px; margin-bottom: 15px; font-size: 22px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px; }
+            h3 { color: #2563eb; margin-top: 20px; margin-bottom: 10px; font-size: 18px; }
+            p { margin-bottom: 12px; text-align: justify; }
+            ul { margin-left: 20px; margin-bottom: 15px; }
+            li { margin-bottom: 8px; }
+            .section { margin-bottom: 30px; page-break-inside: avoid; }
+            .badge { 
+              display: inline-block; 
+              padding: 4px 8px; 
+              background: #e0e7ff; 
+              color: #3730a3; 
+              border-radius: 4px; 
+              font-size: 12px;
+              margin: 5px 5px 5px 0;
+            }
+            .question-card { 
+              background: #f9fafb; 
+              border-left: 4px solid #6366f1; 
+              padding: 15px; 
+              margin: 15px 0;
+              border-radius: 4px;
+            }
+            @media print {
+              body { padding: 20px; }
+              .no-print { display: none; }
+              .section { page-break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    
+    setTimeout(() => {
+      printWindow.print();
+      // Opcional: fechar após impressão
+      // printWindow.close();
+    }, 250);
   };
 
   if (loading) {
