@@ -39,7 +39,7 @@ export default function NewUnitPage() {
     }
   };
 
-  const selectedSubject = subjects.find((s) => s.id === formData.subjectId);
+  const selectedSubject = subjects?.find((s) => s.id === formData.subjectId) || null;
 
   return (
     <div className="min-h-screen bg-gray-50">
