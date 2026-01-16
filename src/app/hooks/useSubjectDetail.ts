@@ -24,11 +24,14 @@ export function useSubjectDetail(subjectId: string) {
       const subjectData = await subjectService.findById(subjectId);
       const unitsData = await unitService.findBySubject(subjectId);
       
-      // Busca unidades arquivadas diretamente do repositório
-      // TODO: Criar método findArchivedBySubject no UnitService
+      // Busca unidades arquivadas usando findAll e filtrando manualmente
+      // Isso é necessário porque findArchivedBySubjectId não está na interface
       const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
       const unitRepository = new LocalStorageUnitRepository();
-      const archivedData = await unitRepository.findArchivedBySubjectId(subjectId);
+      const allUnits = await unitRepository.findAll();
+      const archivedData = allUnits.filter(
+        (u) => u.subjectId === subjectId && u.archived === true
+      );
 
       setSubject(subjectData);
       setUnits(unitsData);
