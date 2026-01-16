@@ -59,6 +59,13 @@ export default function AdminLayout({
             <span>👥</span>
             <span>Usuários</span>
           </Link>
+          <Link 
+            href="/admin/turmas"
+            className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:bg-red-50 hover:text-red-700 font-medium transition-all duration-200 flex items-center gap-2 block"
+          >
+            <span>🏫</span>
+            <span>Turmas</span>
+          </Link>
         </nav>
 
         <div className="absolute bottom-0 w-full p-4 border-t border-gray-200 bg-gray-50">
