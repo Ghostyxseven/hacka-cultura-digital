@@ -1,6 +1,6 @@
 'use client';
 
-import { Sidebar } from '@/app/components';
+import { Sidebar, AIAgent } from '@/app/components';
 
 /**
  * Layout do Professor - Single User Application
