@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { useUserManagement } from '@/hooks/useUserManagement';
 import { User } from '@/core/entities/User';
 import { UserCreateForm } from '../components/UserCreateForm';
+import { AlunoCreateForm } from '../components/AlunoCreateForm';
 import { UserEditForm } from '../components/UserEditForm';
 import { ConfirmDeleteButton } from '@/components';
 
@@ -44,10 +45,10 @@ export default function UsuariosPage() {
     );
   }
 
-  const handleCreate = (data: { name: string; email: string; password: string }) => {
+  const handleCreate = (data: { name: string; email: string; password: string; professorId?: string }) => {
     const success = userType === 'professor' 
       ? createProfessor(data)
-      : createAluno(data);
+      : createAluno({ ...data, professorId: data.professorId || professores[0]?.id || '' });
     
     if (success) {
       setShowCreateForm(false);
@@ -109,11 +110,35 @@ export default function UsuariosPage() {
           <h2 className="text-xl font-bold mb-4">
             Criar {userType === 'professor' ? 'Professor' : 'Aluno'}
           </h2>
-          <UserCreateForm
-            checkEmailExists={checkEmailExists}
-            onSubmit={handleCreate}
-            onCancel={() => setShowCreateForm(false)}
-          />
+          {userType === 'aluno' && professores.length === 0 ? (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-yellow-800">
+                É necessário ter pelo menos um professor cadastrado para criar alunos.
+              </p>
+              <Button
+                onClick={() => {
+                  setUserType('professor');
+                }}
+                variant="primary"
+                className="mt-2"
+              >
+                Criar Professor Primeiro
+              </Button>
+            </div>
+          ) : userType === 'professor' ? (
+            <UserCreateForm
+              checkEmailExists={checkEmailExists}
+              onSubmit={handleCreate}
+              onCancel={() => setShowCreateForm(false)}
+            />
+          ) : (
+            <AlunoCreateForm
+              professores={professores}
+              checkEmailExists={checkEmailExists}
+              onSubmit={handleCreate}
+              onCancel={() => setShowCreateForm(false)}
+            />
+          )}
         </div>
       )}
 

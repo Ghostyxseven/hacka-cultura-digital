@@ -54,6 +54,22 @@ export function useUserManagement() {
     }
   }, [authService, loadUsers]);
 
+  const createAluno = useCallback((data: UserFormData) => {
+    if (!data.professorId) {
+      showError('É necessário selecionar um professor para o aluno');
+      return false;
+    }
+    try {
+      authService.registerAluno(data.name.trim(), data.email.trim(), data.password, data.professorId);
+      showSuccess('Aluno cadastrado com sucesso!');
+      loadUsers();
+      return true;
+    } catch (error) {
+      showError(error instanceof Error ? error.message : 'Erro ao cadastrar aluno');
+      return false;
+    }
+  }, [authService, loadUsers]);
+
   const updateUser = useCallback((id: string, updates: UserUpdateData) => {
     try {
       authService.updateUser(id, updates);
@@ -66,13 +82,19 @@ export function useUserManagement() {
     }
   }, [authService, loadUsers]);
 
-  const deleteUser = useCallback((user: User) => {
+  const deleteUser = useCallback((userId: string) => {
+    const user = [...professores, ...alunos].find(u => u.id === userId);
+    if (!user) {
+      showError('Usuário não encontrado');
+      return false;
+    }
+
     if (!confirm(`Tem certeza que deseja excluir o usuário "${user.name}"?`)) {
       return false;
     }
 
     try {
-      authService.deleteUser(user.id);
+      authService.deleteUser(userId);
       showSuccess('Usuário excluído com sucesso!');
       loadUsers();
       return true;
@@ -80,7 +102,7 @@ export function useUserManagement() {
       showError(error instanceof Error ? error.message : 'Erro ao excluir usuário');
       return false;
     }
-  }, [authService, loadUsers]);
+  }, [authService, loadUsers, professores, alunos]);
 
   const getAlunosByProfessorId = useCallback((professorId: string) => {
     return authService.getAlunosByProfessorId(professorId);
@@ -104,6 +126,7 @@ export function useUserManagement() {
     loading,
     loadUsers,
     createProfessor,
+    createAluno,
     updateUser,
     deleteUser,
     getAlunosByProfessorId,
