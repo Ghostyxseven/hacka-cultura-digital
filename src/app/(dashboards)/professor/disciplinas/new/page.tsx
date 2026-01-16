@@ -109,10 +109,10 @@ export default function NewSubjectPage() {
                       key={year}
                       type="button"
                       onClick={() => toggleSchoolYear(year)}
-                      className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                      className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 ${
                         formData.schoolYears.includes(year)
-                          ? 'bg-indigo-600 text-white border-indigo-600'
-                          : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'
+                          ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white border-indigo-600 shadow-lg'
+                          : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400 hover:bg-indigo-50'
                       }`}
                     >
                       {year}
@@ -121,17 +121,27 @@ export default function NewSubjectPage() {
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 pt-6 border-t border-gray-200">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 disabled:transform-none"
                 >
-                  {loading ? 'Criando...' : 'Criar Disciplina'}
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Criando...
+                    </span>
+                  ) : (
+                    <>
+                      <span className="mr-2">✨</span>
+                      Criar Disciplina
+                    </>
+                  )}
                 </button>
                 <Link
                   href="/"
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  className="px-8 py-4 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all shadow-md hover:shadow-lg font-semibold border border-gray-300 transform hover:scale-105 active:scale-95"
                 >
                   Cancelar
                 </Link>
