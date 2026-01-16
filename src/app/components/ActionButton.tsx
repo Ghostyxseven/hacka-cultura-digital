@@ -24,21 +24,22 @@ export function ActionButton({
   icon,
   disabled = false,
   type = 'button',
-}: ActionButtonProps) {
-  const baseClasses = 'inline-flex items-center px-6 py-3 rounded-lg font-medium transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed';
+  className = '',
+}: ActionButtonProps & { className?: string }) {
+  const baseClasses = 'inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]';
   
   const variantClasses = {
-    primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
-    secondary: 'bg-gray-200 text-gray-700 hover:bg-gray-300',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
+    primary: 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white hover:from-indigo-700 hover:to-indigo-800',
+    secondary: 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 hover:from-gray-200 hover:to-gray-300 border border-gray-300',
+    danger: 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800',
   };
 
-  const classes = `${baseClasses} ${variantClasses[variant]}`;
+  const classes = `${baseClasses} ${variantClasses[variant]} ${className}`;
 
   if (href && !disabled) {
     return (
       <Link href={href} className={classes}>
-        {icon && <span className="mr-2">{icon}</span>}
+        {icon && <span className="mr-2 text-lg">{icon}</span>}
         {children}
       </Link>
     );
@@ -46,7 +47,7 @@ export function ActionButton({
 
   return (
     <button type={type} onClick={onClick} disabled={disabled} className={classes}>
-      {icon && <span className="mr-2">{icon}</span>}
+      {icon && <span className="mr-2 text-lg">{icon}</span>}
       {children}
     </button>
   );

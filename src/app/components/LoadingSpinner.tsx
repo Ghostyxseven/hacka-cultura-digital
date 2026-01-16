@@ -11,15 +11,18 @@ interface LoadingSpinnerProps {
  */
 export function LoadingSpinner({ message = 'Carregando...', size = 'md' }: LoadingSpinnerProps) {
   const sizeClasses = {
-    sm: 'h-6 w-6',
-    md: 'h-8 w-8',
-    lg: 'h-12 w-12',
+    sm: 'h-6 w-6 border-2',
+    md: 'h-10 w-10 border-3',
+    lg: 'h-16 w-16 border-4',
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-12">
-      <div className={`inline-block animate-spin rounded-full border-b-2 border-indigo-600 ${sizeClasses[size]} mb-4`}></div>
-      <p className="text-gray-600">{message}</p>
+    <div className="flex flex-col items-center justify-center py-16">
+      <div className={`relative ${sizeClasses[size]}`}>
+        <div className={`absolute inset-0 rounded-full border-transparent border-t-indigo-600 border-r-purple-600 animate-spin ${sizeClasses[size]}`}></div>
+        <div className={`absolute inset-0 rounded-full border-transparent border-t-purple-600 border-r-indigo-600 animate-spin ${sizeClasses[size]}`} style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+      </div>
+      <p className="text-gray-700 font-medium mt-6 text-base animate-pulse">{message}</p>
     </div>
   );
 }

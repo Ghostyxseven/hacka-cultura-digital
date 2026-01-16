@@ -16,23 +16,28 @@ interface TabsProps {
  */
 export function Tabs({ activeTab, onTabChange, tabs }: TabsProps) {
   return (
-    <div className="border-b border-gray-200 mb-6">
-      <nav className="flex space-x-8" aria-label="Tabs">
+    <div className="border-b-2 border-gray-200 mb-6 bg-white rounded-t-xl">
+      <nav className="flex space-x-2" aria-label="Tabs">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`
-              py-4 px-1 border-b-2 font-medium text-sm transition-colors
+              relative py-4 px-6 font-semibold text-sm transition-all duration-200 transform
               ${
                 activeTab === tab.id
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'text-indigo-700 bg-indigo-50 rounded-t-xl'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-t-xl'
               }
             `}
           >
-            {tab.icon && <span className="mr-2">{tab.icon}</span>}
-            {tab.label}
+            {activeTab === tab.id && (
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-t-full"></div>
+            )}
+            <span className="flex items-center gap-2">
+              {tab.icon && <span className="text-lg">{tab.icon}</span>}
+              <span>{tab.label}</span>
+            </span>
           </button>
         ))}
       </nav>
