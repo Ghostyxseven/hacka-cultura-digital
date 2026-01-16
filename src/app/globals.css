@@ -21,3 +21,49 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Estilos de Acessibilidade */
+.high-contrast {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+}
+
+.high-contrast body {
+  color: #000000;
+  background: #ffffff;
+}
+
+.high-contrast * {
+  border-color: #000000 !important;
+}
+
+/* Tamanhos de fonte */
+.font-normal {
+  font-size: 1rem;
+}
+
+.font-large {
+  font-size: 1.25rem;
+}
+
+.font-large * {
+  font-size: 1.25rem;
+}
+
+.font-extra-large {
+  font-size: 1.5rem;
+}
+
+.font-extra-large * {
+  font-size: 1.5rem;
+}
+
+/* Redução de movimento */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
