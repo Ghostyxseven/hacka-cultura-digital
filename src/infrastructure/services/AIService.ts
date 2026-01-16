@@ -127,9 +127,9 @@ export class GoogleAIProvider implements AIProvider {
     }
 
     try {
-      // Usando gemini-1.5-flash (mais rápido) ou gemini-1.5-pro (mais poderoso)
-      // gemini-pro não está mais disponível na v1beta
-      const model = 'models/gemini-1.5-flash';
+      // Usando gemini-2.5-flash (mais recente e rápido) ou gemini-2.5-pro (mais poderoso)
+      // gemini-pro e gemini-1.5-flash não estão mais disponíveis
+      const model = 'models/gemini-2.5-flash';
       const url = `${this.baseUrl}/${model}:generateContent?key=${this.apiKey}`;
 
       const response = await fetch(url, {
@@ -164,7 +164,7 @@ export class GoogleAIProvider implements AIProvider {
 
       return {
         content,
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         tokensUsed: data.usageMetadata?.totalTokenCount,
       };
     } catch (error) {
