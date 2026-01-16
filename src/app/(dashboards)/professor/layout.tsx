@@ -1,10 +1,10 @@
 'use client';
 
-import { Header } from '@/components/layout/Header';
+import { Sidebar } from '@/app/components';
 
 /**
  * Layout do Professor - Single User Application
- * Sem autenticação necessária
+ * Com sidebar de navegação moderna
  */
 export default function ProfessorLayout({
   children,
@@ -12,9 +12,11 @@ export default function ProfessorLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <Header />
-      {children}
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar />
+      <main className="flex-1 ml-64">
+        {children}
+      </main>
     </div>
   );
 }

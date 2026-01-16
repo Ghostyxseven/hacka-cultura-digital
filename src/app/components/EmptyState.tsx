@@ -16,14 +16,15 @@ interface EmptyStateProps {
  */
 export function EmptyState({ title, description, actionLabel, actionHref, icon = '📋' }: EmptyStateProps) {
   return (
-    <div className="bg-white rounded-lg shadow-md p-12 text-center">
-      <div className="text-6xl mb-4">{icon}</div>
-      <h3 className="text-xl font-bold text-gray-800 mb-2">{title}</h3>
-      <p className="text-gray-600 mb-6">{description}</p>
+    <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-12 text-center border border-gray-200">
+      <div className="text-7xl mb-6 animate-pulse">{icon}</div>
+      <h3 className="text-2xl font-bold text-gray-900 mb-3">{title}</h3>
+      <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">{description}</p>
       <Link
         href={actionHref}
-        className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
+        className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl font-semibold transform hover:scale-105"
       >
+        <span className="mr-2 text-lg">+</span>
         {actionLabel}
       </Link>
     </div>
