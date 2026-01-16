@@ -90,8 +90,8 @@ export default function GenerateLessonPlanPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="container mx-auto px-4 py-8">
+      <div className="min-h-screen bg-gray-50">
+        <div className="px-8 py-8">
           <LoadingSpinner message="Carregando materiais..." />
         </div>
       </div>
@@ -105,10 +105,14 @@ export default function GenerateLessonPlanPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        <Link href="/" className="text-indigo-600 hover:text-indigo-700 mb-4 inline-block text-sm">
-          ← Voltar para Dashboard
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-8 py-8">
+        <Link
+          href="/"
+          className="text-gray-600 hover:text-gray-900 mb-6 inline-flex items-center gap-2 text-sm font-medium transition-colors"
+        >
+          <span>←</span>
+          <span>Voltar para Dashboard</span>
         </Link>
 
         {error && (
@@ -136,10 +140,10 @@ export default function GenerateLessonPlanPage() {
         {lessonPlan && activity && !generating && !showForm && (
           <div className="export-content">
             {/* Header com botões de ação */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
               <div className="flex justify-between items-center flex-wrap gap-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-800 mb-2">Materiais Didáticos</h1>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">Materiais Didáticos</h1>
                   <p className="text-gray-600">Plano de aula, atividades e recursos para esta unidade</p>
                 </div>
                 <div className="flex gap-3 flex-wrap">
@@ -147,6 +151,7 @@ export default function GenerateLessonPlanPage() {
                     onClick={handleRegenerate}
                     icon="✏️"
                     variant="secondary"
+                    className="shadow-md hover:shadow-lg transition-shadow"
                   >
                     Editar/Regenerar
                   </ActionButton>
@@ -173,10 +178,10 @@ export default function GenerateLessonPlanPage() {
               )}
 
               {activeTab === 'slides' && (
-                <div id="slides" className="bg-white rounded-lg shadow-md p-12 text-center">
-                  <div className="text-6xl mb-4">🖼️</div>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Slides de Apresentação</h2>
-                  <p className="text-gray-600 mb-4">
+                <div id="slides" className="bg-white rounded-xl shadow-lg p-12 text-center border border-gray-200">
+                  <div className="text-6xl mb-6">🖼️</div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-3">Slides de Apresentação</h2>
+                  <p className="text-gray-600 mb-4 max-w-md mx-auto leading-relaxed">
                     Funcionalidade de geração de slides será implementada em breve.
                   </p>
                   <p className="text-gray-500 text-sm">

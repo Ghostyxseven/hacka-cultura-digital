@@ -13,6 +13,7 @@ export * from './ActivityView';
 export * from './GenerationForm';
 export * from './Tabs';
 export * from './ExportButton';
+export * from './Sidebar';
 export * from './StatsSection';
 export * from './SubjectCard';
 export * from './SubjectsList';

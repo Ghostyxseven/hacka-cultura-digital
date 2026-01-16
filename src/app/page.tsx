@@ -47,44 +47,77 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header - Baseado no design de referência */}
-        <header className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-3xl text-white">📖</span>
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-8 py-8">
+        {/* Saudação e Calendário - Design moderno */}
+        <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex items-center gap-4">
+            <span className="text-4xl">👋</span>
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">Cultura Digital</h1>
-              <p className="text-gray-600 text-sm">Plataforma Educacional</p>
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">Olá, Professor!</h1>
+              <p className="text-gray-600">Hoje é um ótimo dia para ensinar.</p>
             </div>
           </div>
-        </header>
-
-        {/* Título e Descrição */}
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Painel do Professor</h2>
-          <p className="text-gray-600">
-            Crie aulas, provas e tarefas de Cultura Digital alinhadas à BNCC
-          </p>
+          <div className="bg-white rounded-lg shadow-sm px-4 py-3 border border-gray-200 flex items-center gap-2">
+            <span className="text-xl">📅</span>
+            <span className="text-sm text-gray-700 font-medium">
+              {new Date().toLocaleDateString('pt-BR', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
+            </span>
+          </div>
         </div>
 
-        {/* Botões de Ação - Baseado no design de referência */}
-        <div className="mb-8 flex flex-wrap gap-4">
-          <ActionButton href="/professor/disciplinas/new" icon="➕">
-            Criar conteúdo
-          </ActionButton>
+        {/* Estatísticas - Cards visuais */}
+        <div className="mb-8">
+          <DashboardStats stats={stats} loading={loading} />
+        </div>
+
+        {/* Botões de Ação Principais */}
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
-            href="/"
-            className="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium shadow-sm"
+            href="/professor/disciplinas/new"
+            className="bg-gradient-to-br from-teal-600 to-teal-700 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] group"
           >
-            <span className="mr-2">📄</span>
-            Meus conteúdos
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-3xl">✨</span>
+              <span className="text-2xl opacity-80">✨</span>
+            </div>
+            <h3 className="font-bold text-lg mb-1">Criar Aula com IA</h3>
+            <p className="text-sm text-teal-100">Gere conteúdo automaticamente</p>
           </Link>
+
+          <Link
+            href="/professor/disciplinas"
+            className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all hover:scale-[1.02] border border-gray-200 group"
+          >
+            <span className="text-3xl mb-3 block">📝</span>
+            <h3 className="font-bold text-gray-900 text-lg mb-1">Meus Planos</h3>
+            <p className="text-sm text-gray-600">Visualize seus planos</p>
+          </Link>
+
+          <Link
+            href="/#meus-conteudos"
+            className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all hover:scale-[1.02] border border-gray-200 group"
+          >
+            <span className="text-3xl mb-3 block">📁</span>
+            <h3 className="font-bold text-gray-900 text-lg mb-1">Meus Conteúdos</h3>
+            <p className="text-sm text-gray-600">Gerencie disciplinas</p>
+          </Link>
+
+          <button
+            disabled
+            className="bg-white rounded-xl p-6 shadow-md border border-gray-200 opacity-60 cursor-not-allowed"
+          >
+            <span className="text-3xl mb-3 block">✅</span>
+            <h3 className="font-bold text-gray-900 text-lg mb-1">Corrigir</h3>
+            <p className="text-sm text-gray-600">Em breve</p>
+          </button>
         </div>
 
-        {/* Card de Seleção de Conteúdo - Baseado no design de referência */}
+        {/* Card de Seleção de Conteúdo - Geração Rápida */}
         <div className="mb-8">
           <ContentSelectionCard
             subjects={subjects.map((s) => ({ id: s.id, name: s.name }))}
@@ -99,20 +132,20 @@ export default function Home() {
           </div>
         )}
 
-        {/* Estatísticas (opcional - pode ser removido se não estiver no design) */}
+        {/* Grid de Disciplinas - "Meus conteúdos" */}
         {subjects.length > 0 && (
-          <>
-            <DashboardStats stats={stats} loading={loading} />
-
-            {/* Grid de Disciplinas - "Meus conteúdos" */}
-            <div className="mt-8">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Disciplinas Cadastradas</h3>
-              <SubjectGrid
-                subjects={subjectsWithStats.length > 0 ? subjectsWithStats : subjects}
-                loading={loading}
-              />
+          <div id="meus-conteudos" className="mt-8 scroll-mt-8">
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Disciplinas Cadastradas</h3>
+              <p className="text-gray-600">
+                Gerencie suas disciplinas e unidades de ensino criadas
+              </p>
             </div>
-          </>
+            <SubjectGrid
+              subjects={subjectsWithStats.length > 0 ? subjectsWithStats : subjects}
+              loading={loading}
+            />
+          </div>
         )}
       </div>
     </div>

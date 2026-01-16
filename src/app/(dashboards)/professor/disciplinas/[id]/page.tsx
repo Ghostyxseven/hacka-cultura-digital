@@ -56,8 +56,8 @@ export default function SubjectDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-8 py-8">
         <Link href="/" className="text-indigo-600 hover:text-indigo-700 mb-4 inline-block text-sm">
           ← Voltar para Dashboard
         </Link>
