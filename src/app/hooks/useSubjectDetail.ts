@@ -9,6 +9,7 @@ import type { Subject, Unit } from '@/application/viewmodels';
 export function useSubjectDetail(subjectId: string) {
   const [subject, setSubject] = useState<Subject | null>(null);
   const [units, setUnits] = useState<Unit[]>([]);
+  const [archivedUnits, setArchivedUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,13 +21,18 @@ export function useSubjectDetail(subjectId: string) {
       const subjectService = ApplicationServiceFactory.createSubjectService();
       const unitService = ApplicationServiceFactory.createUnitService();
 
-      const [subjectData, unitsData] = await Promise.all([
-        subjectService.findById(subjectId),
-        unitService.findBySubject(subjectId),
-      ]);
+      const subjectData = await subjectService.findById(subjectId);
+      const unitsData = await unitService.findBySubject(subjectId);
+      
+      // Busca unidades arquivadas diretamente do repositório
+      // TODO: Criar método findArchivedBySubject no UnitService
+      const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
+      const unitRepository = new LocalStorageUnitRepository();
+      const archivedData = await unitRepository.findArchivedBySubjectId(subjectId);
 
       setSubject(subjectData);
       setUnits(unitsData);
+      setArchivedUnits(archivedData);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar dados');
       console.error('Erro ao carregar dados:', err);
@@ -52,12 +58,39 @@ export function useSubjectDetail(subjectId: string) {
     }
   }, [subjectId]);
 
+  const archiveUnit = useCallback(async (unitId: string) => {
+    try {
+      const unitService = ApplicationServiceFactory.createUnitService();
+      await (unitService as any).archive(unitId);
+      await loadData(); // Recarrega dados
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Erro ao arquivar unidade');
+      return false;
+    }
+  }, [loadData]);
+
+  const unarchiveUnit = useCallback(async (unitId: string) => {
+    try {
+      const unitService = ApplicationServiceFactory.createUnitService();
+      await (unitService as any).unarchive(unitId);
+      await loadData(); // Recarrega dados
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Erro ao desarquivar unidade');
+      return false;
+    }
+  }, [loadData]);
+
   return {
     subject,
     units,
+    archivedUnits,
     loading,
     error,
     reload: loadData,
     deleteSubject,
+    archiveUnit,
+    unarchiveUnit,
   };
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSubjectDetail, useToast } from '@/app/hooks';
@@ -18,8 +19,9 @@ export default function SubjectDetailPage() {
   const router = useRouter();
   const subjectId = params.id as string;
 
-  const { subject, units, loading, error, deleteSubject } = useSubjectDetail(subjectId);
+  const { subject, units, archivedUnits, loading, error, deleteSubject, archiveUnit, unarchiveUnit } = useSubjectDetail(subjectId);
   const { toasts, showToast, removeToast } = useToast();
+  const [showArchived, setShowArchived] = useState(false);
 
   const handleDelete = async () => {
     if (!confirm('Tem certeza que deseja deletar esta disciplina?')) {
@@ -110,7 +112,8 @@ export default function SubjectDetailPage() {
           </ActionButton>
         </div>
 
-        {units.length === 0 ? (
+        {/* Unidades Ativas */}
+        {units.length === 0 && archivedUnits.length === 0 ? (
           <EmptyState
             icon="📖"
             title="Nenhuma unidade cadastrada"
@@ -119,11 +122,67 @@ export default function SubjectDetailPage() {
             actionHref={`/professor/unidades/new?subjectId=${subjectId}`}
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {units.map((unit) => (
-              <UnitCard key={unit.id} unit={unit} />
-            ))}
-          </div>
+          <>
+            {units.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {units.map((unit) => (
+                  <UnitCard
+                    key={unit.id}
+                    unit={unit}
+                    onArchive={async () => {
+                      const success = await archiveUnit(unit.id);
+                      if (success) {
+                        showToast('Unidade arquivada com sucesso!', 'success');
+                      } else {
+                        showToast(error || 'Erro ao arquivar unidade', 'error');
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Unidades Arquivadas */}
+            {archivedUnits.length > 0 && (
+              <div className="mt-8 pt-8 border-t border-gray-300">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-700">📦 Unidades Arquivadas</h3>
+                    <p className="text-gray-600 text-sm mt-1">
+                      {archivedUnits.length} unidade(s) arquivada(s). Você pode restaurá-las a qualquer momento.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowArchived(!showArchived)}
+                    className="px-4 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+                  >
+                    {showArchived ? 'Ocultar' : 'Mostrar'}
+                  </button>
+                </div>
+
+                {showArchived && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {archivedUnits.map((unit) => (
+                      <UnitCard
+                        key={unit.id}
+                        unit={unit}
+                        archived
+                        onUnarchive={async () => {
+                          const success = await unarchiveUnit(unit.id);
+                          if (success) {
+                            showToast('Unidade restaurada com sucesso!', 'success');
+                            setShowArchived(false);
+                          } else {
+                            showToast(error || 'Erro ao restaurar unidade', 'error');
+                          }
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
         </div>
       </div>
@@ -139,11 +198,21 @@ export default function SubjectDetailPage() {
  * - Atividade
  * - Slides (futuro)
  */
-function UnitCard({ unit }: { unit: Unit }) {
+function UnitCard({
+  unit,
+  archived = false,
+  onArchive,
+  onUnarchive,
+}: {
+  unit: Unit;
+  archived?: boolean;
+  onArchive?: () => void;
+  onUnarchive?: () => void;
+}) {
   const baseUrl = `/professor/unidades/${unit.id}/plano`;
 
   return (
-    <div className="bg-gradient-to-br from-white to-indigo-50/20 rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-indigo-400 group relative overflow-hidden">
+    <div className={`bg-gradient-to-br from-white ${archived ? 'to-gray-50/50' : 'to-indigo-50/20'} rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 border ${archived ? 'border-gray-300' : 'border-gray-200'} ${archived ? '' : 'hover:border-indigo-400'} group relative overflow-hidden ${archived ? 'opacity-75' : ''}`}>
       {/* Gradiente de fundo sutil no hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/5 group-hover:to-purple-500/5 transition-all duration-300"></div>
       
@@ -177,28 +246,44 @@ function UnitCard({ unit }: { unit: Unit }) {
 
         {/* Botões de Ação */}
         <div className="flex flex-col gap-2.5">
-          <Link
-            href={baseUrl}
-            className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-          >
-            <span className="mr-2 text-lg">📋</span>
-            Plano de Aula
-          </Link>
-          <Link
-            href={`${baseUrl}#atividade`}
-            className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-xl hover:from-blue-100 hover:to-indigo-100 transition-all text-sm font-semibold border-2 border-blue-200 hover:border-blue-300 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
-          >
-            <span className="mr-2 text-lg">📝</span>
-            Atividade
-          </Link>
-          <button
-            disabled
-            className="flex items-center justify-center px-4 py-3 bg-gray-50 text-gray-400 rounded-xl text-sm font-medium border-2 border-gray-200 cursor-not-allowed opacity-60"
-            title="Em breve"
-          >
-            <span className="mr-2 text-lg">🖼️</span>
-            Slides (Em breve)
-          </button>
+          {archived ? (
+            <>
+              <button
+                onClick={onUnarchive}
+                className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl hover:from-green-700 hover:to-emerald-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+              >
+                <span className="mr-2 text-lg">📦</span>
+                Restaurar Unidade
+              </button>
+              <div className="text-center text-xs text-gray-500 mt-2 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                Unidade arquivada em {unit.archivedAt ? new Date(unit.archivedAt).toLocaleDateString('pt-BR') : 'data não disponível'}
+              </div>
+            </>
+          ) : (
+            <>
+              <Link
+                href={baseUrl}
+                className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+              >
+                <span className="mr-2 text-lg">📋</span>
+                Plano de Aula
+              </Link>
+              <Link
+                href={`${baseUrl}#atividade`}
+                className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-xl hover:from-blue-100 hover:to-indigo-100 transition-all text-sm font-semibold border-2 border-blue-200 hover:border-blue-300 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
+              >
+                <span className="mr-2 text-lg">📝</span>
+                Atividade
+              </Link>
+              <button
+                onClick={onArchive}
+                className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all text-sm font-semibold border-2 border-gray-300 hover:border-gray-400 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
+              >
+                <span className="mr-2 text-lg">📦</span>
+                Arquivar
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
