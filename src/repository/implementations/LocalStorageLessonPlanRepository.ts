@@ -44,7 +44,8 @@ export class LocalStorageLessonPlanRepository implements ILessonPlanRepository {
 
   async findByUnitId(unitId: string): Promise<LessonPlan | null> {
     const plans = await this.getAllFromStorage();
-    return plans.find((p) => p.unitId === unitId) || null;
+    // Retorna apenas planos não arquivados por padrão
+    return plans.find((p) => p.unitId === unitId && !p.archived) || null;
   }
 
   async findById(id: string): Promise<LessonPlan | null> {

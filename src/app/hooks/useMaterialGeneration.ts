@@ -69,6 +69,60 @@ export function useMaterialGeneration(unitId: string) {
     }
   }, []);
 
+  const archiveLessonPlan = useCallback(async () => {
+    try {
+      if (!lessonPlan) return false;
+
+      const { LocalStorageLessonPlanRepository } = await import('@/repository/implementations/LocalStorageLessonPlanRepository');
+      const planRepository = new LocalStorageLessonPlanRepository();
+      
+      await planRepository.update(lessonPlan.id, {
+        archived: true,
+        archivedAt: new Date().toISOString(),
+      });
+      
+      setLessonPlan(null);
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Erro ao arquivar plano de aula');
+      return false;
+    }
+  }, [lessonPlan]);
+
+  const archiveActivity = useCallback(async () => {
+    try {
+      if (!activity) return false;
+
+      const { LocalStorageActivityRepository } = await import('@/repository/implementations/LocalStorageActivityRepository');
+      const activityRepository = new LocalStorageActivityRepository();
+      
+      await activityRepository.update(activity.id, {
+        archived: true,
+        archivedAt: new Date().toISOString(),
+      });
+      
+      setActivity(null);
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Erro ao arquivar atividade');
+      return false;
+    }
+  }, [activity]);
+
+  const archiveAllMaterials = useCallback(async () => {
+    try {
+      const results = await Promise.all([
+        archiveLessonPlan(),
+        archiveActivity(),
+      ]);
+      
+      return results.every(r => r === true);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao arquivar materiais');
+      return false;
+    }
+  }, [archiveLessonPlan, archiveActivity]);
+
   return {
     lessonPlan,
     activity,
@@ -77,5 +131,8 @@ export function useMaterialGeneration(unitId: string) {
     error,
     loadMaterials,
     generateMaterials,
+    archiveLessonPlan,
+    archiveActivity,
+    archiveAllMaterials,
   };
 }

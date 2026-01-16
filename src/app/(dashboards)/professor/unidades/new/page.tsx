@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useUnitForm } from '@/app/hooks';
+import { useUnitForm, useToast } from '@/app/hooks';
+import { ToastContainer } from '@/app/components';
 
 /**
  * Página de criação de unidade
@@ -27,23 +28,29 @@ export default function NewUnitPage() {
     selectSuggestion,
     createUnit,
   } = useUnitForm(subjectId);
+  const { toasts, showToast, removeToast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
       const unit = await createUnit(formData);
-      router.push(`/professor/unidades/${unit.id}/plano`);
-    } catch (err) {
-      // Erro já está sendo tratado no hook
+      showToast('Unidade criada com sucesso!', 'success');
+      setTimeout(() => {
+        router.push(`/professor/unidades/${unit.id}/plano`);
+      }, 500);
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao criar unidade', 'error');
     }
   };
 
-  const selectedSubject = subjects.find((s) => s.id === formData.subjectId);
+  const selectedSubject = subjects?.find((s) => s.id === formData.subjectId) || null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="px-8 py-8">
+    <>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <div className="min-h-screen bg-gray-50">
+        <div className="px-8 py-8">
         <div className="max-w-3xl mx-auto">
           <Link
             href="/"
@@ -61,11 +68,6 @@ export default function NewUnitPage() {
               </p>
             </div>
 
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
 
             <form onSubmit={handleSubmit}>
               <div className="mb-6">
@@ -81,7 +83,7 @@ export default function NewUnitPage() {
                   onChange={(e) => {
                     setFormData({ ...formData, subjectId: e.target.value });
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-300"
                   required
                   disabled={loadingSubjects}
                 >
@@ -110,8 +112,9 @@ export default function NewUnitPage() {
                       <button
                         type="button"
                         onClick={() => setShowSuggestions(!showSuggestions)}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium shadow-md"
+                        className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
                       >
+                        <span className="mr-2">{showSuggestions ? '👁️' : '✨'}</span>
                         {showSuggestions ? 'Ocultar' : 'Ver Sugestões'}
                       </button>
                     </div>
@@ -136,7 +139,7 @@ export default function NewUnitPage() {
                                   selectSuggestion(suggestion);
                                   setShowSuggestions(false);
                                 }}
-                                className="w-full text-left p-4 bg-white rounded-lg hover:shadow-lg transition-all border-2 border-gray-200 hover:border-indigo-400 hover:bg-indigo-50 group"
+                                className="w-full text-left p-5 bg-white rounded-xl hover:shadow-xl transition-all duration-300 border-2 border-gray-200 hover:border-indigo-400 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-blue-50 group transform hover:scale-[1.02] active:scale-[0.98]"
                               >
                                 <div className="flex items-start gap-3">
                                   <span className="text-lg mt-0.5">💡</span>
@@ -145,8 +148,8 @@ export default function NewUnitPage() {
                                       {suggestion.title}
                                     </h4>
                                     <p className="text-sm text-gray-600 leading-relaxed">{suggestion.theme}</p>
-                                    <span className="inline-block mt-2 px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
-                                      Alinhado à BNCC
+                                    <span className="inline-block mt-3 px-3 py-1.5 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-lg text-xs font-semibold border border-green-200 shadow-sm">
+                                      ✅ Alinhado à BNCC
                                     </span>
                                   </div>
                                   <span className="text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -155,12 +158,13 @@ export default function NewUnitPage() {
                                 </div>
                               </button>
                             ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-600">Nenhuma sugestão disponível</p>
-                      )}
-                    </div>
-                  )}
+                          </div>
+                        ) : (
+                          <p className="text-gray-600">Nenhuma sugestão disponível</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -173,7 +177,7 @@ export default function NewUnitPage() {
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-gray-400 transition-colors"
                   placeholder="Ex: Introdução à Cultura Digital"
                   required
                 />
@@ -191,7 +195,7 @@ export default function NewUnitPage() {
                   value={formData.theme}
                   onChange={(e) => setFormData({ ...formData, theme: e.target.value })}
                   rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-gray-400 transition-colors"
                   placeholder="Descreva o tema detalhadamente. Ex: Conceitos básicos de cultura digital, uso responsável das tecnologias, ética na internet..."
                   required
                 />
@@ -200,17 +204,27 @@ export default function NewUnitPage() {
                 </p>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 pt-6 border-t border-gray-200">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 disabled:transform-none"
                 >
-                  {loading ? 'Criando...' : 'Criar Unidade'}
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Criando...
+                    </span>
+                  ) : (
+                    <>
+                      <span className="mr-2">✨</span>
+                      Criar Unidade
+                    </>
+                  )}
                 </button>
                 <Link
                   href="/"
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  className="px-8 py-4 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all shadow-md hover:shadow-lg font-semibold border border-gray-300 transform hover:scale-105 active:scale-95"
                 >
                   Cancelar
                 </Link>
@@ -219,6 +233,7 @@ export default function NewUnitPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

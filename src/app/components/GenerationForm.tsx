@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 
 interface GenerationFormProps {
   onSubmit: (data: { year?: string; additionalContext?: string }) => Promise<void>;
@@ -17,7 +17,7 @@ export function GenerationForm({ onSubmit, loading }: GenerationFormProps) {
     additionalContext: '',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await onSubmit({
       year: formData.year || undefined,
@@ -26,28 +26,34 @@ export function GenerationForm({ onSubmit, loading }: GenerationFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-8 mb-6 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-800 mb-2">Gerar Materiais Didáticos</h1>
-      <p className="text-gray-600 mb-6">
-        Gere automaticamente um plano de aula e uma atividade avaliativa alinhados à BNCC usando
-        Inteligência Artificial.
-      </p>
+    <div className="bg-gradient-to-br from-white to-indigo-50/30 rounded-xl shadow-lg p-8 mb-6 max-w-2xl mx-auto border border-gray-200">
+      <div className="mb-6 pb-6 border-b border-gray-200">
+        <h1 className="text-3xl font-bold text-gray-900 mb-3 flex items-center gap-3">
+          <span className="text-3xl">✨</span>
+          Gerar Materiais Didáticos
+        </h1>
+        <p className="text-gray-600 leading-relaxed">
+          Gere automaticamente um plano de aula e uma atividade avaliativa alinhados à BNCC usando
+          Inteligência Artificial.
+        </p>
+      </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="space-y-4 mb-6">
+        <div className="space-y-6 mb-8">
           <div>
-            <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-2">
-              Ano/Série (opcional)
+            <label htmlFor="year" className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <span className="text-lg">🎓</span>
+              Ano/Série <span className="text-gray-500 font-normal">(opcional)</span>
             </label>
             <input
               type="text"
               id="year"
               value={formData.year}
               onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-gray-400 transition-colors"
               placeholder="Ex: 7º ano, 1º ano EM"
             />
-            <p className="text-gray-500 text-xs mt-1">
+            <p className="text-gray-500 text-xs mt-2 leading-relaxed">
               Informe o ano/série para melhor alinhamento com a BNCC
             </p>
           </div>
@@ -55,19 +61,20 @@ export function GenerationForm({ onSubmit, loading }: GenerationFormProps) {
           <div>
             <label
               htmlFor="additionalContext"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2"
             >
-              Contexto Adicional (opcional)
+              <span className="text-lg">📝</span>
+              Contexto Adicional <span className="text-gray-500 font-normal">(opcional)</span>
             </label>
             <textarea
               id="additionalContext"
               value={formData.additionalContext}
               onChange={(e) => setFormData({ ...formData, additionalContext: e.target.value })}
               rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-gray-400 transition-colors"
               placeholder="Informações adicionais sobre a aula, alunos, recursos disponíveis..."
             />
-            <p className="text-gray-500 text-xs mt-1">
+            <p className="text-gray-500 text-xs mt-2 leading-relaxed">
               Informe detalhes que podem ajudar na geração de materiais mais adequados
             </p>
           </div>
@@ -76,15 +83,18 @@ export function GenerationForm({ onSubmit, loading }: GenerationFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          className="w-full px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 disabled:transform-none"
         >
           {loading ? (
-            <span className="flex items-center justify-center">
-              <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></span>
-              Gerando Materiais...
+            <span className="flex items-center justify-center gap-3">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>Gerando Materiais com IA...</span>
             </span>
           ) : (
-            '✨ Gerar Plano de Aula e Atividade'
+            <>
+              <span className="mr-2">✨</span>
+              Gerar Plano de Aula e Atividade
+            </>
           )}
         </button>
       </form>

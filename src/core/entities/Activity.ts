@@ -13,6 +13,10 @@ export interface Activity {
   evaluationCriteria: string; // Critérios de avaliação
   createdAt: string;
   updatedAt?: string;
+  /** Indica se a atividade está arquivada (padrão: false) */
+  archived?: boolean;
+  /** Data de arquivamento no formato ISO 8601 (opcional) */
+  archivedAt?: string;
 }
 
 /**
@@ -181,6 +185,7 @@ export function createActivity(data: Omit<Activity, 'id' | 'createdAt'>): Activi
     questions: data.questions || [],
     instructions: data.instructions || '',
     evaluationCriteria: data.evaluationCriteria || '',
+    archived: data.archived ?? false,
   };
 
   if (!validateActivity(activity)) {
@@ -196,6 +201,7 @@ export function createActivity(data: Omit<Activity, 'id' | 'createdAt'>): Activi
     questions: data.questions || [],
     instructions: data.instructions?.trim() || '',
     evaluationCriteria: data.evaluationCriteria?.trim() || '',
+    archived: data.archived ?? false,
     createdAt: new Date().toISOString(),
   };
 }
