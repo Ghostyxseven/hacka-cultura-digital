@@ -1,0 +1,42 @@
+{
+  "name": "Hacka Cultura Digital",
+  "short_name": "Cultura Digital",
+  "description": "Sistema inteligente para geração de materiais didáticos de Cultura Digital alinhados à BNCC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard Professor",
+      "short_name": "Professor",
+      "description": "Acessar dashboard do professor",
+      "url": "/professor",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard Aluno",
+      "short_name": "Aluno",
+      "description": "Acessar dashboard do aluno",
+      "url": "/aluno",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
