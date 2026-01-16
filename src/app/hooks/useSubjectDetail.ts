@@ -61,6 +61,24 @@ export function useSubjectDetail(subjectId: string) {
     }
   }, [subjectId]);
 
+  const archiveSubject = useCallback(async () => {
+    try {
+      // Usa update do repositório para arquivar a disciplina
+      const { LocalStorageSubjectRepository } = await import('@/repository/implementations/LocalStorageSubjectRepository');
+      const subjectRepository = new LocalStorageSubjectRepository();
+      
+      await subjectRepository.update(subjectId, {
+        archived: true,
+        archivedAt: new Date().toISOString(),
+      });
+      
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Erro ao arquivar disciplina');
+      return false;
+    }
+  }, [subjectId]);
+
   const archiveUnit = useCallback(async (unitId: string) => {
     try {
       // Usa update do repositório para arquivar a unidade
@@ -107,6 +125,7 @@ export function useSubjectDetail(subjectId: string) {
     error,
     reload: loadData,
     deleteSubject,
+    archiveSubject,
     archiveUnit,
     unarchiveUnit,
   };

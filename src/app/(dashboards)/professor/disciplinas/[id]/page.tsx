@@ -19,25 +19,25 @@ export default function SubjectDetailPage() {
   const router = useRouter();
   const subjectId = params.id as string;
 
-  const { subject, units, archivedUnits, loading, error, deleteSubject, archiveUnit, unarchiveUnit } = useSubjectDetail(subjectId);
+  const { subject, units, archivedUnits, loading, error, archiveSubject, archiveUnit, unarchiveUnit } = useSubjectDetail(subjectId);
   const { toasts, showToast, removeToast } = useToast();
   const [showArchived, setShowArchived] = useState(false);
 
-  const handleDelete = async () => {
-    if (!confirm('Tem certeza que deseja deletar esta disciplina?')) {
+  const handleArchive = async () => {
+    if (!confirm('Tem certeza que deseja arquivar esta disciplina? Ela será removida da lista ativa, mas poderá ser restaurada depois.')) {
       return;
     }
 
     try {
-      const success = await deleteSubject();
+      const success = await archiveSubject();
       if (success) {
-        showToast('Disciplina deletada com sucesso!', 'success');
+        showToast('Disciplina arquivada com sucesso!', 'success');
         setTimeout(() => {
-          router.push('/');
+          router.push('/professor');
         }, 500);
       }
     } catch (err: any) {
-      showToast(err.message || 'Erro ao deletar disciplina', 'error');
+      showToast(err.message || 'Erro ao arquivar disciplina', 'error');
     }
   };
 
@@ -93,8 +93,8 @@ export default function SubjectDetailPage() {
                 ))}
               </div>
             </div>
-            <ActionButton onClick={handleDelete} variant="danger" icon="🗑️">
-              Deletar
+            <ActionButton onClick={handleArchive} variant="secondary" icon="📦">
+              Arquivar
             </ActionButton>
           </div>
         </div>
