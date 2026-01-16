@@ -5,7 +5,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button, ConfirmDeleteButton } from '@/components';
-import { MaterialRAGManager } from './MaterialRAGManager';
+import { LazyMaterialRAGManager } from '@/components/lazy';
 import type { UnitViewModel } from '@/application/viewmodels';
 
 interface UnitCardProps {
@@ -103,7 +103,7 @@ export function UnitCard({
               )}
 
               {isProfessor && !unit.lessonPlanId && (
-                <MaterialRAGManager unitId={unit.id} />
+                <LazyMaterialRAGManager unitId={unit.id} />
               )}
             </div>
           </div>
