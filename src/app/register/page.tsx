@@ -9,10 +9,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { showError, showSuccess } from '@/utils/notifications';
-import { GetClassesUseCase } from '@/application/usecases/GetClassesUseCase';
+import { getClassService } from '@/lib/service';
 import { CreateUserUseCase } from '@/application/usecases/CreateUserUseCase';
-import { AssignStudentToClassUseCase } from '@/application/usecases/AssignStudentToClassUseCase';
-import { LocalStorageClassRepository } from '@/repository/implementations/LocalStorageClassRepository';
 import { LocalStorageUserRepository } from '@/repository/implementations/LocalStorageUserRepository';
 import { Class } from '@/core/entities/Class';
 
@@ -38,14 +36,14 @@ export default function RegisterPage() {
     professorId?: string;
   }>({});
 
-  const classRepository = LocalStorageClassRepository.getInstance();
+
 
   // Carrega lista de turmas e professores
   useEffect(() => {
     try {
       // Sistema novo: carrega turmas
-      const getClassesUseCase = new GetClassesUseCase(classRepository);
-      const allClasses = getClassesUseCase.execute();
+      const classService = getClassService();
+      const allClasses = classService.getClasses();
       setClasses(allClasses);
 
       // Sistema antigo (compatibilidade): carrega professores
@@ -65,7 +63,7 @@ export default function RegisterPage() {
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     }
-  }, [authService, classRepository]);
+  }, [authService]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -135,11 +133,11 @@ export default function RegisterPage() {
         );
 
         // Associa aluno à turma
-        const assignUseCase = new AssignStudentToClassUseCase(classRepository, userRepository);
+        const classService = getClassService();
         const aluno = userRepository.getUserByEmail(email.trim());
         if (aluno) {
           try {
-            assignUseCase.execute(classId, aluno.id);
+            classService.assignStudent(classId, aluno.id);
           } catch (e) {
             // Aluno já está na turma (ok)
             console.log('Aluno já associado à turma');

@@ -10,11 +10,8 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { StatsSection, SubjectsList, UnitsList, ClassCard } from '@/app/components';
 import { LazyTeacherMural } from '@/components/lazy';
-import { getLessonPlanService } from '@/lib/service';
+import { getClassService, getLessonPlanService } from '@/lib/service';
 import { showError, showSuccess } from '@/utils/notifications';
-import { GetTeacherClassesUseCase } from '@/application/usecases/GetTeacherClassesUseCase';
-import { LocalStorageClassRepository } from '@/repository/implementations/LocalStorageClassRepository';
-import { LocalStorageUserRepository } from '@/repository/implementations/LocalStorageUserRepository';
 import { Class } from '@/core/entities/Class';
 import Link from 'next/link';
 
@@ -38,10 +35,8 @@ export default function ProfessorPage() {
 
   const loadClasses = () => {
     try {
-      const classRepository = LocalStorageClassRepository.getInstance();
-      const userRepository = LocalStorageUserRepository.getInstance();
-      const getTeacherClassesUseCase = new GetTeacherClassesUseCase(classRepository, userRepository);
-      const teacherClasses = getTeacherClassesUseCase.execute(user!.id);
+      const classService = getClassService();
+      const teacherClasses = classService.getTeacherClasses(user!.id);
       setClasses(teacherClasses);
     } catch (error) {
       console.error('Erro ao carregar turmas:', error);

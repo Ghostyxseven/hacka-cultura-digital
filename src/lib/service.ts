@@ -29,8 +29,23 @@ import { RefineLessonPlanUseCase } from '../application/usecases/RefineLessonPla
 import { GetClassTrendsUseCase } from '../application/usecases/GetClassTrendsUseCase';
 import { LocalStorageQuizRepository } from '../repository/implementations/LocalStorageQuizRepository';
 import { LocalStorageMaterialRepository } from '../repository/implementations/LocalStorageMaterialRepository';
+import { ClassService } from '../application/services/ClassService';
+import { LocalStorageClassRepository } from '../repository/implementations/LocalStorageClassRepository';
+import { LocalStorageUserRepository } from '../repository/implementations/LocalStorageUserRepository';
+import { CreateClassUseCase } from '../application/usecases/CreateClassUseCase';
+import { GetClassesUseCase } from '../application/usecases/GetClassesUseCase';
+import { GetClassByIdUseCase } from '../application/usecases/GetClassByIdUseCase';
+import { AssignTeacherToClassUseCase } from '../application/usecases/AssignTeacherToClassUseCase';
+import { AssignStudentToClassUseCase } from '../application/usecases/AssignStudentToClassUseCase';
+import { RemoveTeacherFromClassUseCase } from '../application/usecases/RemoveTeacherFromClassUseCase';
+import { RemoveStudentFromClassUseCase } from '../application/usecases/RemoveStudentFromClassUseCase';
+import { DeleteClassUseCase } from '../application/usecases/DeleteClassUseCase';
+import { GetClassTeachersUseCase } from '../application/usecases/GetClassTeachersUseCase';
+import { GetClassStudentsUseCase } from '../application/usecases/GetClassStudentsUseCase';
+import { GetTeacherClassesUseCase } from '../application/usecases/GetTeacherClassesUseCase';
 
 let serviceInstance: LessonPlanService | null = null;
+let classServiceInstance: ClassService | null = null;
 
 /**
  * Obtém instância singleton do LessonPlanService
@@ -99,4 +114,26 @@ export function getLessonPlanService(): LessonPlanService {
     );
   }
   return serviceInstance;
+}
+
+export function getClassService(): ClassService {
+  if (!classServiceInstance) {
+    const classRepository = LocalStorageClassRepository.getInstance();
+    const userRepository = LocalStorageUserRepository.getInstance();
+
+    classServiceInstance = new ClassService(
+      new CreateClassUseCase(classRepository),
+      new GetClassesUseCase(classRepository),
+      new GetClassByIdUseCase(classRepository),
+      new AssignTeacherToClassUseCase(classRepository, userRepository),
+      new AssignStudentToClassUseCase(classRepository, userRepository),
+      new RemoveTeacherFromClassUseCase(classRepository, userRepository),
+      new RemoveStudentFromClassUseCase(classRepository, userRepository),
+      new DeleteClassUseCase(classRepository, userRepository),
+      new GetClassTeachersUseCase(classRepository, userRepository),
+      new GetClassStudentsUseCase(classRepository, userRepository),
+      new GetTeacherClassesUseCase(classRepository, userRepository)
+    );
+  }
+  return classServiceInstance;
 }

@@ -4,7 +4,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getAuthService } from '@/lib/authService';
-import { getLessonPlanService } from '@/lib/service';
 import { getGetQuizResultsUseCase } from '@/lib/quizService';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
@@ -13,10 +12,8 @@ import { Button } from '@/components/ui/Button';
 import { SubjectsList, UnitsList, StatsSection, ClassTeacherList } from '@/app/components';
 import { LazyTeacherMural } from '@/components/lazy';
 import { PresentationMapper } from '@/application';
-import { GetClassByIdUseCase } from '@/application/usecases/GetClassByIdUseCase';
-import { GetClassTeachersUseCase, ClassTeacherInfo } from '@/application/usecases/GetClassTeachersUseCase';
-import { LocalStorageClassRepository } from '@/repository/implementations/LocalStorageClassRepository';
-import { LocalStorageUserRepository } from '@/repository/implementations/LocalStorageUserRepository';
+import { getClassService, getLessonPlanService } from '@/lib/service';
+import { ClassTeacherInfo } from '@/application/usecases/GetClassTeachersUseCase';
 import type { SubjectViewModel, UnitViewModel } from '@/application/viewmodels';
 import type { QuizResult } from '@/core/entities/QuizResult';
 import type { User } from '@/core/entities/User';
@@ -36,8 +33,7 @@ export default function AlunoPage() {
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const classRepository = LocalStorageClassRepository.getInstance();
-  const userRepository = LocalStorageUserRepository.getInstance();
+
 
   useEffect(() => {
     if (isAluno && user) {
@@ -50,13 +46,12 @@ export default function AlunoPage() {
     try {
       // Busca turma do aluno (sistema novo)
       if (user!.classId) {
-        const getClassUseCase = new GetClassByIdUseCase(classRepository);
-        const classData = getClassUseCase.execute(user!.classId);
+        const classService = getClassService();
+        const classData = classService.getClassById(user!.classId);
         setClassEntity(classData || null);
 
         if (classData) {
-          const getTeachersUseCase = new GetClassTeachersUseCase(classRepository, userRepository);
-          const teachersData = getTeachersUseCase.execute(user!.classId);
+          const teachersData = classService.getClassTeachers(user!.classId);
           setTeachers(teachersData);
         }
       }

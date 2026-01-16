@@ -9,13 +9,8 @@ import { Input, Select } from '@/components';
 import { ClassCard } from '@/app/components/ClassCard';
 import { Class } from '@/core/entities/Class';
 import { SchoolYear } from '@/core/entities/LessonPlan';
-import { CreateClassUseCase } from '@/application/usecases/CreateClassUseCase';
-import { GetClassesUseCase } from '@/application/usecases/GetClassesUseCase';
-import { DeleteClassUseCase } from '@/application/usecases/DeleteClassUseCase';
-import { LocalStorageClassRepository } from '@/repository/implementations/LocalStorageClassRepository';
-import { LocalStorageUserRepository } from '@/repository/implementations/LocalStorageUserRepository';
+import { getClassService } from '@/lib/service';
 import { showSuccess, showError } from '@/utils/notifications';
-import { ConfirmDeleteButton } from '@/components';
 
 const SCHOOL_YEARS: SchoolYear[] = [
   '6º Ano',
@@ -42,8 +37,7 @@ export default function TurmasPage() {
     schoolYear: new Date().getFullYear().toString(),
   });
 
-  const classRepository = LocalStorageClassRepository.getInstance();
-  const userRepository = LocalStorageUserRepository.getInstance();
+  const classService = getClassService();
 
   useEffect(() => {
     if (isAdmin) {
@@ -53,8 +47,7 @@ export default function TurmasPage() {
 
   const loadClasses = () => {
     try {
-      const getClassesUseCase = new GetClassesUseCase(classRepository);
-      const allClasses = getClassesUseCase.execute();
+      const allClasses = classService.getClasses();
       setClasses(allClasses);
     } catch (error) {
       showError('Erro ao carregar turmas');
@@ -73,8 +66,7 @@ export default function TurmasPage() {
     }
 
     try {
-      const createClassUseCase = new CreateClassUseCase(classRepository);
-      createClassUseCase.execute(
+      classService.createClass(
         formData.name,
         formData.gradeYear as SchoolYear,
         formData.schoolYear
@@ -94,8 +86,7 @@ export default function TurmasPage() {
 
   const handleDelete = (id: string) => {
     try {
-      const deleteClassUseCase = new DeleteClassUseCase(classRepository, userRepository);
-      deleteClassUseCase.execute(id);
+      classService.deleteClass(id);
       showSuccess('Turma excluída com sucesso!');
       loadClasses();
     } catch (error: any) {

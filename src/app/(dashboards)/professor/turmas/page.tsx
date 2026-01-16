@@ -8,10 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Select } from '@/components';
 import { ClassCard } from '@/app/components/ClassCard';
 import { Class } from '@/core/entities/Class';
-import { GetTeacherClassesUseCase } from '@/application/usecases/GetTeacherClassesUseCase';
-import { LocalStorageClassRepository } from '@/repository/implementations/LocalStorageClassRepository';
-import { LocalStorageUserRepository } from '@/repository/implementations/LocalStorageUserRepository';
-import { getLessonPlanService } from '@/lib/service';
+import { getClassService, getLessonPlanService } from '@/lib/service';
 import Link from 'next/link';
 
 export default function ProfessorTurmasPage() {
@@ -20,8 +17,6 @@ export default function ProfessorTurmasPage() {
   const [loading, setLoading] = useState(true);
   const [filterSubjectId, setFilterSubjectId] = useState('');
 
-  const classRepository = LocalStorageClassRepository.getInstance();
-  const userRepository = LocalStorageUserRepository.getInstance();
   const lessonPlanService = getLessonPlanService();
 
   useEffect(() => {
@@ -32,8 +27,8 @@ export default function ProfessorTurmasPage() {
 
   const loadClasses = () => {
     try {
-      const getTeacherClassesUseCase = new GetTeacherClassesUseCase(classRepository, userRepository);
-      const teacherClasses = getTeacherClassesUseCase.execute(
+      const classService = getClassService();
+      const teacherClasses = classService.getTeacherClasses(
         user!.id,
         filterSubjectId || undefined
       );

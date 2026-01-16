@@ -8,12 +8,8 @@ import { PageContainer } from '@/components';
 import { Button } from '@/components/ui/Button';
 import { ClassTeacherList, ClassStudentList } from '@/app/components';
 import { Class } from '@/core/entities/Class';
-import { GetClassByIdUseCase } from '@/application/usecases/GetClassByIdUseCase';
-import { GetClassTeachersUseCase, ClassTeacherInfo } from '@/application/usecases/GetClassTeachersUseCase';
-import { GetClassStudentsUseCase } from '@/application/usecases/GetClassStudentsUseCase';
-import { LocalStorageClassRepository } from '@/repository/implementations/LocalStorageClassRepository';
-import { LocalStorageUserRepository } from '@/repository/implementations/LocalStorageUserRepository';
-import { getLessonPlanService } from '@/lib/service';
+import { ClassTeacherInfo } from '@/application/usecases/GetClassTeachersUseCase';
+import { getClassService, getLessonPlanService } from '@/lib/service';
 import Link from 'next/link';
 
 export default function ProfessorTurmaDetailPage() {
@@ -27,8 +23,6 @@ export default function ProfessorTurmaDetailPage() {
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const classRepository = LocalStorageClassRepository.getInstance();
-  const userRepository = LocalStorageUserRepository.getInstance();
   const lessonPlanService = getLessonPlanService();
 
   useEffect(() => {
@@ -39,17 +33,15 @@ export default function ProfessorTurmaDetailPage() {
 
   const loadData = () => {
     try {
-      const getClassUseCase = new GetClassByIdUseCase(classRepository);
-      const classData = getClassUseCase.execute(classId);
+      const classService = getClassService();
+      const classData = classService.getClassById(classId);
       setClassEntity(classData || null);
 
       if (classData) {
-        const getTeachersUseCase = new GetClassTeachersUseCase(classRepository, userRepository);
-        const teachersData = getTeachersUseCase.execute(classId);
+        const teachersData = classService.getClassTeachers(classId);
         setTeachers(teachersData);
 
-        const getStudentsUseCase = new GetClassStudentsUseCase(classRepository, userRepository);
-        const studentsData = getStudentsUseCase.execute(classId);
+        const studentsData = classService.getClassStudents(classId);
         setStudents(studentsData);
       }
     } catch (error) {

@@ -10,17 +10,10 @@ import { ClassTeacherList } from '@/app/components/ClassTeacherList';
 import { ClassStudentList } from '@/app/components/ClassStudentList';
 import { Class } from '@/core/entities/Class';
 import { User } from '@/core/entities/User';
-import { GetClassByIdUseCase } from '@/application/usecases/GetClassByIdUseCase';
-import { GetClassTeachersUseCase, ClassTeacherInfo } from '@/application/usecases/GetClassTeachersUseCase';
-import { GetClassStudentsUseCase } from '@/application/usecases/GetClassStudentsUseCase';
-import { AssignTeacherToClassUseCase } from '@/application/usecases/AssignTeacherToClassUseCase';
-import { AssignStudentToClassUseCase } from '@/application/usecases/AssignStudentToClassUseCase';
-import { RemoveTeacherFromClassUseCase } from '@/application/usecases/RemoveTeacherFromClassUseCase';
-import { RemoveStudentFromClassUseCase } from '@/application/usecases/RemoveStudentFromClassUseCase';
-import { LocalStorageClassRepository } from '@/repository/implementations/LocalStorageClassRepository';
-import { LocalStorageUserRepository } from '@/repository/implementations/LocalStorageUserRepository';
-import { getLessonPlanService } from '@/lib/service';
+import { ClassTeacherInfo } from '@/application/usecases/GetClassTeachersUseCase';
+import { getClassService, getLessonPlanService } from '@/lib/service';
 import { showSuccess, showError } from '@/utils/notifications';
+import { LocalStorageUserRepository } from '@/repository/implementations/LocalStorageUserRepository';
 
 export default function TurmaDetailPage() {
   const params = useParams();
@@ -40,9 +33,9 @@ export default function TurmaDetailPage() {
   const [selectedSubjectId, setSelectedSubjectId] = useState('');
   const [selectedStudentId, setSelectedStudentId] = useState('');
 
-  const classRepository = LocalStorageClassRepository.getInstance();
-  const userRepository = LocalStorageUserRepository.getInstance();
+  const classService = getClassService();
   const lessonPlanService = getLessonPlanService();
+  const userRepository = LocalStorageUserRepository.getInstance(); // Ainda necessário para listagem geral de users
 
   useEffect(() => {
     if (isAdmin && classId) {
@@ -52,17 +45,14 @@ export default function TurmaDetailPage() {
 
   const loadData = () => {
     try {
-      const getClassUseCase = new GetClassByIdUseCase(classRepository);
-      const classData = getClassUseCase.execute(classId);
+      const classData = classService.getClassById(classId);
       setClassEntity(classData || null);
 
       if (classData) {
-        const getTeachersUseCase = new GetClassTeachersUseCase(classRepository, userRepository);
-        const teachersData = getTeachersUseCase.execute(classId);
+        const teachersData = classService.getClassTeachers(classId);
         setTeachers(teachersData);
 
-        const getStudentsUseCase = new GetClassStudentsUseCase(classRepository, userRepository);
-        const studentsData = getStudentsUseCase.execute(classId);
+        const studentsData = classService.getClassStudents(classId);
         setStudents(studentsData);
       }
     } catch (error) {
@@ -80,8 +70,7 @@ export default function TurmaDetailPage() {
     }
 
     try {
-      const assignUseCase = new AssignTeacherToClassUseCase(classRepository, userRepository);
-      assignUseCase.execute(classId, selectedTeacherId, selectedSubjectId);
+      classService.assignTeacher(classId, selectedTeacherId, selectedSubjectId);
       showSuccess('Professor associado com sucesso!');
       setShowAddTeacher(false);
       setSelectedTeacherId('');
@@ -99,8 +88,7 @@ export default function TurmaDetailPage() {
     }
 
     try {
-      const assignUseCase = new AssignStudentToClassUseCase(classRepository, userRepository);
-      assignUseCase.execute(classId, selectedStudentId);
+      classService.assignStudent(classId, selectedStudentId);
       showSuccess('Aluno associado com sucesso!');
       setShowAddStudent(false);
       setSelectedStudentId('');
@@ -112,8 +100,7 @@ export default function TurmaDetailPage() {
 
   const handleRemoveTeacher = (teacherId: string, subjectId: string) => {
     try {
-      const removeUseCase = new RemoveTeacherFromClassUseCase(classRepository, userRepository);
-      removeUseCase.execute(classId, teacherId, subjectId);
+      classService.removeTeacher(classId, teacherId, subjectId);
       showSuccess('Professor removido com sucesso!');
       loadData();
     } catch (error: any) {
@@ -123,8 +110,7 @@ export default function TurmaDetailPage() {
 
   const handleRemoveStudent = (studentId: string) => {
     try {
-      const removeUseCase = new RemoveStudentFromClassUseCase(classRepository, userRepository);
-      removeUseCase.execute(classId, studentId);
+      classService.removeStudent(classId, studentId);
       showSuccess('Aluno removido com sucesso!');
       loadData();
     } catch (error: any) {
@@ -167,7 +153,7 @@ export default function TurmaDetailPage() {
   const allStudents = userRepository.getUsersByRole('aluno').filter(s => !s.classId || s.classId === classId);
   const allSubjects = lessonPlanService.getSubjects();
 
-  const availableTeachers = allTeachers.filter(t => 
+  const availableTeachers = allTeachers.filter(t =>
     t.subjects?.includes(selectedSubjectId) || !selectedSubjectId
   );
 
