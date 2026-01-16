@@ -8,7 +8,6 @@ import {
   SubjectGrid,
   ActionButton,
   LoadingSpinner,
-  ContentSelectionCard,
 } from '@/app/components';
 
 /**
@@ -121,14 +120,6 @@ export default function ProfessorDashboard() {
             <h3 className="font-bold text-gray-900 text-lg mb-2">Corrigir</h3>
             <p className="text-sm text-gray-600">Em breve</p>
           </button>
-        </div>
-
-        {/* Card de Seleção de Conteúdo - Geração Rápida */}
-        <div className="mb-8">
-          <ContentSelectionCard
-            subjects={subjects.map((s) => ({ id: s.id, name: s.name }))}
-            onGenerate={handleGenerateContent}
-          />
         </div>
 
         {/* Mensagens de Feedback */}

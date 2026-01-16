@@ -26,6 +26,10 @@ export interface Subject {
   createdAt: string;
   /** Data da última atualização no formato ISO 8601 (opcional) */
   updatedAt?: string;
+  /** Indica se a disciplina está arquivada (padrão: false) */
+  archived?: boolean;
+  /** Data de arquivamento no formato ISO 8601 (opcional) */
+  archivedAt?: string;
 }
 
 /** Constantes para validação */
@@ -97,6 +101,7 @@ export function createSubject(data: Omit<Subject, 'id' | 'createdAt'>): Subject 
     name: data.name,
     description: data.description || '',
     schoolYears: data.schoolYears || [],
+    archived: data.archived ?? false,
   };
 
   if (!validateSubject(subject)) {
@@ -108,6 +113,7 @@ export function createSubject(data: Omit<Subject, 'id' | 'createdAt'>): Subject 
     name: data.name.trim(),
     description: data.description?.trim() || '',
     schoolYears: data.schoolYears,
+    archived: data.archived ?? false,
     createdAt: new Date().toISOString(),
   };
 }
