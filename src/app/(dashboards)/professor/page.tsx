@@ -1,26 +1,23 @@
 'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
-import { PageContainer } from '@/components/layout/PageContainer';
-import { StatsSection } from '@/app/components/StatsSection';
-import { SubjectsList } from '@/app/components/SubjectsList';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { ApplicationServiceFactory } from '@/application';
+import type { Subject } from '@/application/viewmodels';
 
+/**
+ * Dashboard do Professor - Single User Application
+ * Redireciona para a página principal
+ */
 export default function ProfessorDashboard() {
-  const { user } = useAuth();
-
   return (
-    <PageContainer>
-      <div className="py-8">
-        <h1 className="text-3xl font-bold mb-6">Meus Materiais Didáticos</h1>
-        <p className="text-gray-600">Bem-vindo, Professor(a) {user?.name}!</p>
-        
-        <StatsSection />
-        
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Minhas Disciplinas</h2>
-          <SubjectsList />
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="text-center">
+        <p className="text-gray-600 mb-4">Redirecionando...</p>
+        <Link href="/" className="text-indigo-600 hover:text-indigo-700">
+          Ir para Dashboard
+        </Link>
       </div>
-    </PageContainer>
+    </div>
   );
 }
