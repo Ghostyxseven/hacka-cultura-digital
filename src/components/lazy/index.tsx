@@ -1,4 +1,4 @@
-// src/components/lazy/index.ts
+// src/components/lazy/index.tsx
 // Lazy loading de componentes pesados para melhorar performance
 
 import dynamic from 'next/dynamic';

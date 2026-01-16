@@ -50,4 +50,8 @@ export class LocalStorageAnnouncementRepository implements IAnnouncementReposito
         const data = localStorage.getItem(StorageKeys.ANNOUNCEMENTS);
         return parseJSONWithDates<Announcement>(data);
     }
+
+    getById(id: string): Announcement | undefined {
+        return this.getAll().find(a => a.id === id);
+    }
 }

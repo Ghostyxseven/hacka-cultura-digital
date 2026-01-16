@@ -93,6 +93,6 @@ export function SubjectCard({
           </div>
         )}
       </div>
-    </div>
+    </article>
   );
 }
