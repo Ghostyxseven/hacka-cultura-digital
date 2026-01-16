@@ -14,6 +14,7 @@ import { getClassService, getLessonPlanService } from '@/lib/service';
 import { showError, showSuccess } from '@/utils/notifications';
 import { Class } from '@/core/entities/Class';
 import { ClassHealthWidget } from '@/app/components/ClassHealthWidget';
+import { TeacherCopilotWidget } from '@/app/components/TeacherCopilotWidget';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -287,6 +288,9 @@ export default function ProfessorPage() {
           </div>
         )}
       </PageContainer>
+
+      {/* Copilot Flutuante */}
+      <TeacherCopilotWidget />
     </div>
   );
 }

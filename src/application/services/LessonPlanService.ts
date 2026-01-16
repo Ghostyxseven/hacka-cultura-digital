@@ -26,6 +26,10 @@ import { GetMaterialsByUnitUseCase } from "../usecases/GetMaterialsByUnitUseCase
 import { RefineLessonPlanUseCase } from "../usecases/RefineLessonPlanUseCase";
 import { GetClassTrendsUseCase } from "../usecases/GetClassTrendsUseCase";
 import { GetStudentAverageScoreUseCase } from "../usecases/GetStudentAverageScoreUseCase";
+<<<<<<< HEAD
+=======
+import { AskTeacherCopilotUseCase } from "../usecases/AskTeacherCopilotUseCase";
+>>>>>>> layer/application
 import { QuizResult } from "../../core/entities/QuizResult";
 import { Material } from "../../core/entities/Material";
 
@@ -67,7 +71,12 @@ export class LessonPlanService {
     private getMaterialsByUnitUseCase: GetMaterialsByUnitUseCase,
     private refineLessonPlanUseCase: RefineLessonPlanUseCase,
     private getClassTrendsUseCase: GetClassTrendsUseCase,
+<<<<<<< HEAD
     private getStudentAverageScoreUseCase: GetStudentAverageScoreUseCase
+=======
+    private getStudentAverageScoreUseCase: GetStudentAverageScoreUseCase,
+    private askTeacherCopilotUseCase: AskTeacherCopilotUseCase
+>>>>>>> layer/application
   ) { }
 
   // ========== MÉTODOS DE PLANOS DE AULA ==========
@@ -260,6 +269,17 @@ export class LessonPlanService {
 
   getMaterialsByUnit(unitId: string): Material[] {
     return this.getMaterialsByUnitUseCase.execute(unitId);
+  }
+
+  getStudentAverageScore(userId: string): number {
+    return this.getStudentAverageScoreUseCase.execute(userId);
+  }
+
+  /**
+   * Consulta o Copilot do Professor
+   */
+  async askCopilot(question: string, context?: string): Promise<string> {
+    return this.askTeacherCopilotUseCase.execute(question, context);
   }
 
   /**
