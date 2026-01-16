@@ -11,7 +11,9 @@ export { EmptyState } from './ui/EmptyState';
 export { StatCard } from './ui/StatCard';
 export { ConfirmDeleteButton } from './ui/ConfirmDeleteButton';
 export { BackButton } from './ui/BackButton';
+export { ErrorBoundary } from './ui/ErrorBoundary';
 
 // Layout Components
 export { Header } from './layout/Header';
 export { PageContainer } from './layout/PageContainer';
+export { ErrorBoundaryWrapper } from './layout/ErrorBoundaryWrapper';
