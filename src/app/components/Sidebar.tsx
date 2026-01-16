@@ -72,7 +72,7 @@ export function Sidebar() {
       {/* Footer da Sidebar */}
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800">
         <Link
-          href="/"
+          href="/professor"
           className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all"
         >
           <span className="text-lg">←</span>
