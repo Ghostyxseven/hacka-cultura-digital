@@ -12,11 +12,31 @@ export function InstitutionalPerformance() {
 
     useEffect(() => {
         const service = getInstitutionalService();
-        // Em um sistema real isso seria async
         const result = service.getOverview();
         setData(result);
         setLoading(false);
     }, []);
+
+    const handleExport = () => {
+        if (!data) return;
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Ano/Serie,Disciplina,Media,Total Atividades\n";
+
+        data.performanceByGrade.forEach(grade => {
+            grade.subjectStats.forEach(sub => {
+                csvContent += `${grade.gradeYear},${sub.subjectName},${sub.averageScore}%,${sub.totalQuizzes}\n`;
+            });
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `relatorio-institucional-${new Date().toLocaleDateString()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     if (loading) return <Loading />;
     if (!data) return null;
@@ -98,7 +118,7 @@ export function InstitutionalPerformance() {
             <div className="flex justify-center">
                 <button
                     className="bg-gray-800 text-white px-8 py-3 rounded-xl font-bold hover:bg-gray-900 transition-all shadow-lg flex items-center gap-2"
-                    onClick={() => alert('Relatório CSV preparado para download (Simulação)')}
+                    onClick={handleExport}
                 >
                     <span>📥</span>
                     Exportar Relatório Consolidado (CSV)

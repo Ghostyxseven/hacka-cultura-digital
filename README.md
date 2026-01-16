@@ -119,6 +119,14 @@ Conforme os requisitos funcionais (RF) estabelecidos no edital:
 - Alinhamento automático com a BNCC
 - Materiais prontos para uso em sala de aula
 
+### 🚀 Recursos Avançados (Fases 5-9)
+Além dos requisitos base, o sistema conta com funcionalidades de ponta:
+- **Fase 5: Dashboard Analítico Institucional** - Visão completa do desempenho da escola, identificação de alunos em risco e exportação de relatórios.
+- **Fase 6: Integração RAG Customizada** - Professores podem subir seus próprios materiais (apostilas, textos) para que a IA gere planos baseados nesse contexto específico.
+- **Fase 7: Tutor de IA Socrático** - Chat interativo para o aluno, onde a IA não dá a resposta pronta, mas guia o aprendizado através de perguntas socráticas baseadas no plano de aula.
+- **Fase 8: Refinamento Iterativo com IA** - O professor pode "conversar" com o plano de aula gerado, pedindo ajustes finos (ex: "torne mais prático", "adicione mais questões").
+- **Fase 9: Inteligência de Turma** - Análise automática de erros e acertos de toda a turma para identificar falhas de aprendizado e sugerir intervenções pedagógicas.
+
 ---
 
 ## 🛠️ Tecnologias Utilizadas

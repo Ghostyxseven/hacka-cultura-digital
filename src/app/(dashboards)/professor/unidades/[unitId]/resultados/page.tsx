@@ -26,6 +26,9 @@ export default function UnitResultsPage() {
     const [selectedResult, setSelectedResult] = useState<QuizResult | null>(null);
     const [comment, setComment] = useState('');
     const [saving, setSaving] = useState(false);
+    const [trends, setTrends] = useState<string | null>(null);
+    const [analyzing, setAnalyzing] = useState(false);
+    const [lessonPlanId, setLessonPlanId] = useState<string | null>(null);
 
     const lessonPlanService = getLessonPlanService();
     const authService = getAuthService();
@@ -43,6 +46,7 @@ export default function UnitResultsPage() {
                 return;
             }
             setUnitTopic(unit.topic);
+            setLessonPlanId(unit.lessonPlanId || null);
 
             if (unit.lessonPlanId) {
                 const resultsData = lessonPlanService.getQuizResults(unit.lessonPlanId);
@@ -84,6 +88,20 @@ export default function UnitResultsPage() {
         }
     };
 
+    const handleAnalyzeTrends = async () => {
+        if (!lessonPlanId) return;
+        setAnalyzing(true);
+        try {
+            const result = await lessonPlanService.getClassTrends(lessonPlanId);
+            setTrends(result);
+            showSuccess('Análise de tendências gerada!');
+        } catch (error) {
+            showError('Não foi possível gerar a análise.');
+        } finally {
+            setAnalyzing(false);
+        }
+    };
+
     if (loading) return <Loading />;
 
     return (
@@ -103,6 +121,35 @@ export default function UnitResultsPage() {
                 </div>
 
                 <PageContainer>
+                    {/* Análise de Tendências (IA) */}
+                    <div className="mb-8 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-6 border border-indigo-100 shadow-inner">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <span className="text-3xl">🧩</span>
+                                <h2 className="text-xl font-bold text-indigo-900">Análise de Tendências da Turma</h2>
+                            </div>
+                            <Button
+                                onClick={handleAnalyzeTrends}
+                                disabled={analyzing || !lessonPlanId || results.length === 0}
+                                className="bg-indigo-600 hover:bg-indigo-700 shadow-md"
+                            >
+                                {analyzing ? 'Analisando...' : '🪄 Gerar Insights com IA'}
+                            </Button>
+                        </div>
+
+                        {trends ? (
+                            <div className="bg-white/80 backdrop-blur-sm p-5 rounded-xl border border-white/50 shadow-sm animate-in fade-in duration-500">
+                                <p className="text-gray-700 whitespace-pre-line leading-relaxed italic">
+                                    {trends}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="text-center py-6 text-indigo-400">
+                                <p className="text-sm">Clique em "Gerar Insights" para que a IA analise os erros mais comuns e sugira intervenções.</p>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">

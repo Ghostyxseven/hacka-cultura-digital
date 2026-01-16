@@ -25,6 +25,8 @@ import { GetQuizResultsByLessonPlanUseCase } from '../application/usecases/GetQu
 import { AddTeacherCommentUseCase } from '../application/usecases/AddTeacherCommentUseCase';
 import { UploadMaterialUseCase } from '../application/usecases/UploadMaterialUseCase';
 import { GetMaterialsByUnitUseCase } from '../application/usecases/GetMaterialsByUnitUseCase';
+import { RefineLessonPlanUseCase } from '../application/usecases/RefineLessonPlanUseCase';
+import { GetClassTrendsUseCase } from '../application/usecases/GetClassTrendsUseCase';
 import { LocalStorageQuizRepository } from '../repository/implementations/LocalStorageQuizRepository';
 import { LocalStorageMaterialRepository } from '../repository/implementations/LocalStorageMaterialRepository';
 
@@ -65,6 +67,8 @@ export function getLessonPlanService(): LessonPlanService {
     const materialRepository = LocalStorageMaterialRepository.getInstance();
     const uploadMaterialUseCase = new UploadMaterialUseCase(materialRepository);
     const getMaterialsByUnitUseCase = new GetMaterialsByUnitUseCase(materialRepository);
+    const refineLessonPlanUseCase = new RefineLessonPlanUseCase(aiService, repository);
+    const getClassTrendsUseCase = new GetClassTrendsUseCase(aiService, quizRepository);
 
     const generateLessonPlanForUnitUseCase = new GenerateLessonPlanForUnitUseCase(repository, aiService, materialRepository);
 
@@ -89,7 +93,9 @@ export function getLessonPlanService(): LessonPlanService {
       getQuizResultsByLessonPlanUseCase,
       addTeacherCommentUseCase,
       uploadMaterialUseCase,
-      getMaterialsByUnitUseCase
+      getMaterialsByUnitUseCase,
+      refineLessonPlanUseCase,
+      getClassTrendsUseCase
     );
   }
   return serviceInstance;

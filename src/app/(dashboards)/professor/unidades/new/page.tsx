@@ -9,7 +9,7 @@ import type { SubjectViewModel, SchoolYearViewModel } from '@/application/viewmo
 import { SCHOOL_YEARS } from '@/core/constants/SchoolYears';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
-import { Button } from '@/components';
+import { Button, BackButton } from '@/components';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
@@ -143,9 +143,9 @@ function NewUnitPageContent() {
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-3">
-                <BackButton 
-                  href={`/professor/disciplinas/${subjectId}`} 
-                  className="bg-white/20 hover:bg-white/30 text-white border-white/30" 
+                <BackButton
+                  href={`/professor/disciplinas/${subjectId}`}
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30"
                 />
               </div>
               <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
