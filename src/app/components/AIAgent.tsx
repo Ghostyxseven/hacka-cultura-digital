@@ -69,19 +69,44 @@ export function AIAgent() {
   } => {
     const lowerText = text.toLowerCase();
 
-    // Criar disciplina
-    if (lowerText.includes('criar') && (lowerText.includes('disciplina') || lowerText.includes('matéria'))) {
-      const match = lowerText.match(/(?:criar|adicionar)\s+(?:a\s+)?(?:disciplina|matéria)\s+([^,\n]+?)(?:\s+para\s+([^\n]+))?/);
-      const subjectName = match?.[1]?.trim() || '';
+    // Criar disciplina - Melhorado para aceitar variações: "crie", "criar", "adicionar", "criar uma", etc.
+    if ((lowerText.includes('crie') || lowerText.includes('criar') || lowerText.includes('adicionar')) && 
+        (lowerText.includes('disciplina') || lowerText.includes('matéria') || lowerText.includes('matéria'))) {
+      
+      // Padrões mais flexíveis para extrair nome e anos
+      // Ex: "crie uma disciplina de historia" -> "historia"
+      // Ex: "criar disciplina Matemática para 6º ano" -> "Matemática", "6º ano"
+      // Ex: "adicionar matéria de ciências para 7º e 8º ano" -> "ciências", "7º e 8º ano"
+      
+      let match = lowerText.match(/(?:crie|criar|adicionar)(?:\s+uma|\s+um)?\s+(?:disciplina|matéria|matéria)(?:\s+de)?\s+([^,\n]+?)(?:\s+para\s+([^\n]+))?$/);
+      
+      // Se não encontrou, tenta padrão alternativo: "criar disciplina X"
+      if (!match) {
+        match = lowerText.match(/(?:crie|criar|adicionar)(?:\s+uma|\s+um)?\s+(?:disciplina|matéria|matéria)(?:\s+de|\s+)?(.+?)$/);
+      }
+      
+      let subjectName = match?.[1]?.trim() || '';
       const schoolYears = match?.[2]?.trim() || '';
+      
+      // Remove palavras desnecessárias do nome
+      subjectName = subjectName.replace(/^(de|da|do|para)\s+/i, '').trim();
+      
+      // Se ainda não tem nome, tenta pegar após "disciplina"
+      if (!subjectName || subjectName.length < 2) {
+        const fallbackMatch = lowerText.match(/(?:disciplina|matéria)(?:\s+de|\s+)?\s+([a-záàâãéêíóôõúç\s]+?)(?:\s+para|$)/i);
+        subjectName = fallbackMatch?.[1]?.trim() || '';
+      }
 
-      return {
-        action: 'create_subject',
-        params: {
-          name: subjectName,
-          schoolYears: schoolYears,
-        },
-      };
+      // Se encontrou algum nome de disciplina, executa a ação
+      if (subjectName && subjectName.length >= 2) {
+        return {
+          action: 'create_subject',
+          params: {
+            name: subjectName,
+            schoolYears: schoolYears,
+          },
+        };
+      }
     }
 
     // Gerar atividade
