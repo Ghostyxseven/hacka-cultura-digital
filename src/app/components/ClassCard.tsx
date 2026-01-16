@@ -16,8 +16,8 @@ interface ClassCardProps {
  * Componente de card para exibir informações de uma turma
  */
 export function ClassCard({ classEntity, showActions = false, onDelete, onView }: ClassCardProps) {
-  const studentCount = classEntity.students.length;
-  const teacherCount = classEntity.teachers.length;
+  const studentCount = classEntity.students?.length || 0;
+  const teacherCount = classEntity.teachers?.length || 0;
 
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-xl border border-gray-200 p-6 transition-all duration-300">
