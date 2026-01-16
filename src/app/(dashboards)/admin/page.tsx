@@ -22,11 +22,6 @@ export default function AdminPage() {
 
   return (
     <PageContainer>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Painel Administrativo</h1>
-        <p className="text-gray-600">Gerencie usuários e monitore o sistema</p>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <Link href="/admin/auditoria">
           <StatCard
@@ -38,12 +33,15 @@ export default function AdminPage() {
           />
         </Link>
 
-        <StatCard
-          title="Usuários"
-          value="Gerenciar"
-          description="Gerencie usuários do sistema"
-          icon="👥"
-        />
+        <Link href="/admin/usuarios">
+          <StatCard
+            title="Usuários"
+            value="Gerenciar"
+            description="Gerencie usuários do sistema"
+            icon="👥"
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+          />
+        </Link>
 
         <StatCard
           title="Sistema"
@@ -61,12 +59,11 @@ export default function AdminPage() {
               📋 Ver Logs de Auditoria
             </Button>
           </Link>
-          <Button variant="secondary">
-            👥 Gerenciar Usuários
-          </Button>
-          <Button variant="secondary">
-            ⚙️ Configurações
-          </Button>
+          <Link href="/admin/usuarios">
+            <Button variant="secondary">
+              👥 Gerenciar Usuários
+            </Button>
+          </Link>
         </div>
       </div>
     </PageContainer>
