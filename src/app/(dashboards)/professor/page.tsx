@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useDashboard } from '@/app/hooks';
+import { useDashboard, useToast } from '@/app/hooks';
 import {
   DashboardStats,
   SubjectGrid,
@@ -10,7 +10,6 @@ import {
   LoadingSpinner,
   SearchBar,
 } from '@/app/components';
-import { useToast } from '@/app/hooks';
 
 /**
  * Dashboard Principal - Single User Application
