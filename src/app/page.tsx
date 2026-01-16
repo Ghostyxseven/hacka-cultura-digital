@@ -51,22 +51,26 @@ export default function Home() {
       <div className="px-8 py-8">
         {/* Saudação e Calendário - Design moderno */}
         <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex items-center gap-4">
-            <span className="text-4xl">👋</span>
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 flex items-center gap-4">
+            <span className="text-5xl">👋</span>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-1">Olá, Professor!</h1>
               <p className="text-gray-600">Hoje é um ótimo dia para ensinar.</p>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-sm px-4 py-3 border border-gray-200 flex items-center gap-2">
-            <span className="text-xl">📅</span>
-            <span className="text-sm text-gray-700 font-medium">
-              {new Date().toLocaleDateString('pt-BR', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            </span>
+          <div className="bg-white rounded-xl shadow-sm px-5 py-3 border border-gray-200 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center border border-red-100">
+              <span className="text-red-600 font-bold text-lg">{new Date().getDate()}</span>
+            </div>
+            <div>
+              <span className="text-sm text-gray-700 font-medium block">
+                {new Date().toLocaleDateString('pt-BR', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -79,22 +83,22 @@ export default function Home() {
         <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
             href="/professor/disciplinas/new"
-            className="bg-gradient-to-br from-teal-600 to-teal-700 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] group"
+            className="bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] group"
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-3xl">✨</span>
-              <span className="text-2xl opacity-80">✨</span>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-4xl">✨</span>
+              <span className="text-3xl opacity-70">✨</span>
             </div>
-            <h3 className="font-bold text-lg mb-1">Criar Aula com IA</h3>
-            <p className="text-sm text-teal-100">Gere conteúdo automaticamente</p>
+            <h3 className="font-bold text-lg mb-2">Criar Aula com IA</h3>
+            <p className="text-sm text-teal-50">Gere conteúdo automaticamente</p>
           </Link>
 
           <Link
             href="/professor/disciplinas"
             className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all hover:scale-[1.02] border border-gray-200 group"
           >
-            <span className="text-3xl mb-3 block">📝</span>
-            <h3 className="font-bold text-gray-900 text-lg mb-1">Meus Planos</h3>
+            <span className="text-4xl mb-4 block">📝</span>
+            <h3 className="font-bold text-gray-900 text-lg mb-2">Meus Planos</h3>
             <p className="text-sm text-gray-600">Visualize seus planos</p>
           </Link>
 
@@ -102,8 +106,8 @@ export default function Home() {
             href="/#meus-conteudos"
             className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all hover:scale-[1.02] border border-gray-200 group"
           >
-            <span className="text-3xl mb-3 block">📁</span>
-            <h3 className="font-bold text-gray-900 text-lg mb-1">Meus Conteúdos</h3>
+            <span className="text-4xl mb-4 block">📁</span>
+            <h3 className="font-bold text-gray-900 text-lg mb-2">Meus Conteúdos</h3>
             <p className="text-sm text-gray-600">Gerencie disciplinas</p>
           </Link>
 
@@ -111,8 +115,8 @@ export default function Home() {
             disabled
             className="bg-white rounded-xl p-6 shadow-md border border-gray-200 opacity-60 cursor-not-allowed"
           >
-            <span className="text-3xl mb-3 block">✅</span>
-            <h3 className="font-bold text-gray-900 text-lg mb-1">Corrigir</h3>
+            <span className="text-4xl mb-4 block">✅</span>
+            <h3 className="font-bold text-gray-900 text-lg mb-2">Corrigir</h3>
             <p className="text-sm text-gray-600">Em breve</p>
           </button>
         </div>
