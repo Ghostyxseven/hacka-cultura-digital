@@ -1,6 +1,6 @@
 /**
  * Serviço de Integração com IA Generativa
- * Suporta múltiplos provedores (OpenAI, mock para desenvolvimento)
+ * Suporta múltiplos provedores (Google Gemini, OpenAI, mock para desenvolvimento)
  */
 
 export interface AIGenerationRequest {
@@ -109,6 +109,69 @@ export class MockAIProvider implements AIProvider {
 }
 
 /**
+ * Provedor Google Gemini - Integração com Google AI (Gemini API)
+ */
+export class GoogleAIProvider implements AIProvider {
+  private apiKey: string;
+  private baseUrl: string;
+
+  constructor(apiKey?: string) {
+    this.apiKey = apiKey || process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || '';
+    this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
+  }
+
+  async generateText(request: AIGenerationRequest): Promise<AIGenerationResponse> {
+    if (!this.apiKey) {
+      throw new Error('Chave API do Google AI não configurada. Configure NEXT_PUBLIC_GOOGLE_AI_API_KEY');
+    }
+
+    try {
+      const model = 'models/gemini-pro';
+      const url = `${this.baseUrl}/${model}:generateContent?key=${this.apiKey}`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `Você é um assistente pedagógico especializado em materiais didáticos alinhados à BNCC.\n\n${request.prompt}`,
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            temperature: request.temperature || 0.7,
+            maxOutputTokens: request.maxTokens || 2000,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Erro na API Google Gemini: ${error.error?.message || 'Erro desconhecido'}`);
+      }
+
+      const data = await response.json();
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+      return {
+        content,
+        model: 'gemini-pro',
+        tokensUsed: data.usageMetadata?.totalTokenCount,
+      };
+    } catch (error) {
+      console.error('Erro ao gerar texto com Google Gemini:', error);
+      throw error;
+    }
+  }
+}
+
+/**
  * Provedor OpenAI - Integração real com API do OpenAI
  */
 export class OpenAIProvider implements AIProvider {
@@ -171,17 +234,26 @@ export class OpenAIProvider implements AIProvider {
 
 /**
  * Serviço principal de IA - Gerencia qual provedor usar
+ * Prioridade: Google AI > OpenAI > Mock
  */
 export class AIService {
   private provider: AIProvider;
 
   constructor(provider?: AIProvider) {
-    // Se não for fornecido um provedor, tenta usar OpenAI ou fallback para Mock
+    // Se não for fornecido um provedor, tenta usar Google AI, OpenAI ou fallback para Mock
     if (provider) {
       this.provider = provider;
     } else {
-      const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-      this.provider = apiKey ? new OpenAIProvider(apiKey) : new MockAIProvider();
+      const googleApiKey = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY;
+      const openAiApiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+
+      if (googleApiKey) {
+        this.provider = new GoogleAIProvider(googleApiKey);
+      } else if (openAiApiKey) {
+        this.provider = new OpenAIProvider(openAiApiKey);
+      } else {
+        this.provider = new MockAIProvider();
+      }
     }
   }
 
