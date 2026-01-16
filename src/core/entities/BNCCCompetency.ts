@@ -1,18 +1,44 @@
 /**
  * Entidade de domínio: Competência BNCC
- * Representa uma competência ou habilidade da Base Nacional Comum Curricular
+ * 
+ * Representa uma competência ou habilidade da Base Nacional Comum Curricular.
  * Usada como base de conhecimento para RAG (Retrieval Augmented Generation)
+ * na geração de materiais didáticos alinhados à BNCC.
+ * 
+ * @example
+ * ```typescript
+ * const competency: BNCCCompetency = {
+ *   id: 'bncc_comp_5',
+ *   code: 'COMP5',
+ *   name: 'Compreender, utilizar e criar tecnologias digitais',
+ *   description: 'Descrição detalhada...',
+ *   area: 'Competência Geral',
+ *   component: 'Tecnologias Digitais',
+ *   yearRange: ['6º ano', '7º ano'],
+ *   skills: ['Compreender tecnologias', 'Criar conteúdos digitais'],
+ *   culturalDigital: true
+ * };
+ * ```
  */
 export interface BNCCCompetency {
+  /** Identificador único da competência */
   id: string;
-  code: string; // Código da competência (ex: "EF05CI01")
-  name: string; // Nome da competência
-  description: string; // Descrição detalhada
-  area: string; // Área de conhecimento (ex: "Ciências da Natureza")
-  component: string; // Componente curricular (ex: "Ciências")
-  yearRange: string[]; // Anos escolares (ex: ["5º ano", "6º ano"])
-  skills: string[]; // Habilidades relacionadas
-  culturalDigital: boolean; // Se está relacionada à Cultura Digital
+  /** Código da competência (ex: "EF05CI01", "COMP5") */
+  code: string;
+  /** Nome da competência */
+  name: string;
+  /** Descrição detalhada da competência */
+  description: string;
+  /** Área de conhecimento (ex: "Ciências da Natureza", "Competência Geral") */
+  area: string;
+  /** Componente curricular (ex: "Ciências", "Tecnologias Digitais") */
+  component: string;
+  /** Anos escolares em que a competência é aplicável (ex: ["5º ano", "6º ano"]) */
+  yearRange: string[];
+  /** Habilidades relacionadas a esta competência */
+  skills: string[];
+  /** Se está relacionada à Cultura Digital */
+  culturalDigital: boolean;
 }
 
 /**
