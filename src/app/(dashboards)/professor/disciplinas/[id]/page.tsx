@@ -2,8 +2,8 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useSubjectDetail } from '@/app/hooks';
-import { LoadingSpinner, EmptyState, ActionButton } from '@/app/components';
+import { useSubjectDetail, useToast } from '@/app/hooks';
+import { LoadingSpinner, EmptyState, ActionButton, ToastContainer } from '@/app/components';
 import type { Unit } from '@/application/viewmodels';
 
 /**
@@ -19,15 +19,23 @@ export default function SubjectDetailPage() {
   const subjectId = params.id as string;
 
   const { subject, units, loading, error, deleteSubject } = useSubjectDetail(subjectId);
+  const { toasts, showToast, removeToast } = useToast();
 
   const handleDelete = async () => {
     if (!confirm('Tem certeza que deseja deletar esta disciplina?')) {
       return;
     }
 
-    const success = await deleteSubject();
-    if (success) {
-      router.push('/');
+    try {
+      const success = await deleteSubject();
+      if (success) {
+        showToast('Disciplina deletada com sucesso!', 'success');
+        setTimeout(() => {
+          router.push('/');
+        }, 500);
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao deletar disciplina', 'error');
     }
   };
 
@@ -56,8 +64,10 @@ export default function SubjectDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="px-8 py-8">
+    <>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <div className="min-h-screen bg-gray-50">
+        <div className="px-8 py-8">
         <Link href="/" className="text-indigo-600 hover:text-indigo-700 mb-4 inline-block text-sm">
           ← Voltar para Dashboard
         </Link>
@@ -115,8 +125,9 @@ export default function SubjectDetailPage() {
             ))}
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

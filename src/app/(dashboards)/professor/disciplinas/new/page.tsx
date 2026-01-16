@@ -1,8 +1,10 @@
 'use client';
 
+import { FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useSubjectForm } from '@/app/hooks';
+import { useSubjectForm, useToast } from '@/app/hooks';
+import { ToastContainer } from '@/app/components';
 
 const SCHOOL_YEARS = [
   '6º ano',
@@ -22,21 +24,27 @@ export default function NewSubjectPage() {
   const router = useRouter();
   const { formData, setFormData, loading, error, toggleSchoolYear, createSubject } =
     useSubjectForm();
+  const { toasts, showToast, removeToast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
       const subject = await createSubject(formData);
-      router.push(`/professor/disciplinas/${subject.id}`);
-    } catch (err) {
-      // Erro já está sendo tratado no hook
+      showToast('Disciplina criada com sucesso!', 'success');
+      setTimeout(() => {
+        router.push(`/professor/disciplinas/${subject.id}`);
+      }, 500);
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao criar disciplina', 'error');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="px-8 py-8">
+    <>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <div className="min-h-screen bg-gray-50">
+        <div className="px-8 py-8">
         <div className="max-w-3xl mx-auto">
           <Link
             href="/"
@@ -54,11 +62,6 @@ export default function NewSubjectPage() {
               </p>
             </div>
 
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
 
             <form onSubmit={handleSubmit}>
               <div className="mb-6">
@@ -150,6 +153,7 @@ export default function NewSubjectPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useMaterialGeneration } from '@/app/hooks';
+import { useMaterialGeneration, useToast } from '@/app/hooks';
 import {
   LoadingSpinner,
   GenerationForm,
@@ -12,6 +12,7 @@ import {
   Tabs,
   ExportButton,
   ActionButton,
+  ToastContainer,
 } from '@/app/components';
 
 type TabType = 'plano' | 'atividade' | 'slides';
@@ -46,6 +47,7 @@ export default function GenerateLessonPlanPage() {
     loadMaterials,
     generateMaterials,
   } = useMaterialGeneration(unitId);
+  const { toasts, showToast, removeToast } = useToast();
 
   useEffect(() => {
     loadMaterials().then((result) => {
@@ -72,10 +74,11 @@ export default function GenerateLessonPlanPage() {
         year: data.year,
         additionalContext: data.additionalContext,
       });
+      showToast('Materiais gerados com sucesso!', 'success');
       setShowForm(false);
       setActiveTab('plano'); // Volta para aba de plano após gerar
-    } catch (err) {
-      // Erro já está sendo tratado no hook
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao gerar materiais', 'error');
     }
   };
 
@@ -87,13 +90,13 @@ export default function GenerateLessonPlanPage() {
     // Exportação para PDF usando window.print com estilos otimizados
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert('Por favor, permita pop-ups para exportar o PDF');
+      showToast('Por favor, permita pop-ups para exportar o PDF', 'warning');
       return;
     }
 
     const printContent = document.querySelector('.export-content');
     if (!printContent) {
-      alert('Conteúdo não encontrado para exportação');
+      showToast('Conteúdo não encontrado para exportação', 'error');
       return;
     }
 
@@ -175,8 +178,10 @@ export default function GenerateLessonPlanPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="px-8 py-8">
+    <>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <div className="min-h-screen bg-gray-50">
+        <div className="px-8 py-8">
         <Link
           href="/"
           className="text-gray-600 hover:text-gray-900 mb-6 inline-flex items-center gap-2 text-sm font-medium transition-colors"
@@ -184,12 +189,6 @@ export default function GenerateLessonPlanPage() {
           <span>←</span>
           <span>Voltar para Dashboard</span>
         </Link>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            ⚠️ {error}
-          </div>
-        )}
 
         {/* Formulário de geração */}
         {showForm && !lessonPlan && (
@@ -263,13 +262,8 @@ export default function GenerateLessonPlanPage() {
           </div>
         )}
 
-        {/* Feedback de sucesso */}
-        {lessonPlan && activity && !generating && !showForm && (
-          <div className="mt-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
-            ✅ Plano de aula e atividade gerados com sucesso! Use as abas acima para navegar.
-          </div>
-        )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
