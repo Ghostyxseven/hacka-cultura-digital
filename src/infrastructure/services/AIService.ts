@@ -117,7 +117,8 @@ export class GoogleAIProvider implements AIProvider {
 
   constructor(apiKey?: string) {
     this.apiKey = apiKey || process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || '';
-    this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
+    // Usando v1 ao invés de v1beta para modelos mais recentes
+    this.baseUrl = 'https://generativelanguage.googleapis.com/v1';
   }
 
   async generateText(request: AIGenerationRequest): Promise<AIGenerationResponse> {
@@ -126,7 +127,9 @@ export class GoogleAIProvider implements AIProvider {
     }
 
     try {
-      const model = 'models/gemini-pro';
+      // Usando gemini-1.5-flash (mais rápido) ou gemini-1.5-pro (mais poderoso)
+      // gemini-pro não está mais disponível na v1beta
+      const model = 'models/gemini-1.5-flash';
       const url = `${this.baseUrl}/${model}:generateContent?key=${this.apiKey}`;
 
       const response = await fetch(url, {
@@ -161,7 +164,7 @@ export class GoogleAIProvider implements AIProvider {
 
       return {
         content,
-        model: 'gemini-pro',
+        model: 'gemini-1.5-flash',
         tokensUsed: data.usageMetadata?.totalTokenCount,
       };
     } catch (error) {
