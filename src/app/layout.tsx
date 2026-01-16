@@ -1,0 +1,72 @@
+import type { Metadata } from 'next'
+import { Toaster } from 'react-hot-toast'
+import './globals.css'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
+import { ErrorBoundaryWrapper } from '@/components'
+import { PWARegister } from './components/PWARegister'
+
+export const metadata: Metadata = {
+  title: 'Hacka Cultura Digital - Sistema de Materiais Didáticos',
+  description: 'Sistema inteligente para geração de materiais didáticos de Cultura Digital alinhados à BNCC',
+}
+
+import { Poppins, Roboto } from 'next/font/google'
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-poppins'
+})
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-roboto'
+})
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="pt-BR" className={`${poppins.variable} ${roboto.variable}`}>
+      <body className="antialiased bg-background font-sans">
+        <PWARegister />
+        <ErrorBoundaryWrapper>
+          <ThemeProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </ThemeProvider>
+        </ErrorBoundaryWrapper>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#fff',
+              color: '#333',
+              borderRadius: '8px',
+              padding: '16px',
+              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+            },
+            success: {
+              iconTheme: {
+                primary: '#10b981',
+                secondary: '#fff',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
+      </body>
+    </html>
+  )
+}

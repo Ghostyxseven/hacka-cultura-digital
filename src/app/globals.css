@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand Colors - Visual "Professional & Educational" (Teal + Olive) */
+
+    /* Primary: Teal (Azul Petróleo) - Confiança e Profissionalismo */
+    --primary: 15 118 110;
+    /* Teal 700 - #0f766e */
+    --primary-foreground: 255 255 255;
+
+    /* Secondary: Olive (Verde Oliva) - Crescimento e Natureza */
+    --secondary: 95 111 82;
+    /* Olive Mix - #5f6f52 */
+    --secondary-foreground: 255 255 255;
+
+    /* Neutral Colors for Text and Backgrounds */
+    --background: 255 252 248;
+    /* Warm White / Cream - #fffcf8 */
+    --surface: 255 255 255;
+    /* Pure White */
+
+    --text-main: 22 78 99;
+    /* Cyan 900 (Deep Teal Black) */
+    --text-secondary: 71 85 105;
+    /* Slate 600 */
+    --border: 226 232 240;
+    /* Slate 200 */
+
+    /* Feedback Colors */
+    --success: 20 184 166;
+    /* Teal 500 */
+    --warning: 245 158 11;
+    /* Amber 500 */
+    --error: 225 29 72;
+    /* Rose 600 */
+    --info: 14 165 233;
+    /* Sky 500 */
+
+    /* Radius */
+    --radius: 1rem;
+    /* 16px - Cards mais arredondados e amigáveis */
+  }
+
+  body {
+    @apply bg-background text-text-main antialiased font-sans;
+    background-color: rgb(var(--background));
+    color: rgb(var(--text-main));
+  }
+}
+
+@layer components {
+
+  /* Utilitário para Cartões com efeito Glassmorphism suave */
+  .card-glass {
+    @apply bg-surface/80 backdrop-blur-md border border-border shadow-sm rounded-xl transition-all duration-300;
+  }
+
+  .card-hover {
+    @apply hover:shadow-md hover:-translate-y-1;
+  }
+
+  /* Inputs Padronizados */
+  .input-base {
+    @apply w-full px-4 py-3 rounded-lg border border-border bg-surface text-text-main focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Botões Padronizados - Sobrescreve classes antigas se houver conflito, mas idealmente usaremos componentes */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:brightness-110 active:brightness-95 transition-all shadow-sm hover:shadow font-medium rounded-lg px-6 py-2.5;
+    background-color: rgb(var(--primary));
+    color: rgb(var(--primary-foreground));
+  }
+}
+
+/* Scrollbar Customizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+}

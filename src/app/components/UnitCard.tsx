@@ -1,0 +1,171 @@
+// src/app/components/UnitCard.tsx
+// Componente reutilizável para card de unidade
+'use client';
+
+import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button, ConfirmDeleteButton } from '@/components';
+import { LazyMaterialRAGManager } from '@/components/lazy';
+import type { UnitViewModel } from '@/application/viewmodels';
+
+interface UnitCardProps {
+  unit: UnitViewModel;
+  subjectName?: string;
+  canGenerate?: boolean;
+  onGenerate?: (unitId: string) => void;
+  showSubject?: boolean;
+  onDelete?: (id: string) => void;
+  canDelete?: boolean;
+  quizResult?: { score: number; completedAt: Date };
+}
+
+export function UnitCard({
+  unit,
+  subjectName,
+  canGenerate = false,
+  onGenerate,
+  showSubject = false,
+  onDelete,
+  canDelete = false,
+  quizResult
+}: UnitCardProps) {
+  const { isProfessor, isAdmin } = useAuth();
+  const isAluno = !isProfessor && !isAdmin;
+
+  // Define a rota baseada no tipo de usuário
+  const planHref = isAluno
+    ? `/aluno/unidades/${unit.id}/plano`
+    : `/professor/unidades/${unit.id}/plano`;
+
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(unit.id);
+    }
+  };
+
+  return (
+    <div className="group relative bg-surface border border-border rounded-2xl p-6 hover:shadow-lg hover:border-primary/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+      {/* Gradiente sutil no hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:to-primary/10 transition-all duration-300 pointer-events-none" />
+
+      <div className="relative flex justify-between items-start gap-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start gap-4 mb-3">
+            {/* Ícone do plano */}
+            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg flex-shrink-0 shadow-md group-hover:scale-110 transition-transform duration-300">
+              📖
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-xl text-text-main mb-3 group-hover:text-primary transition-colors">
+                {unit.topic}
+              </h3>
+
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-secondary/20 text-secondary-foreground font-semibold text-sm border border-border shadow-sm">
+                  {unit.gradeYear}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-sm shadow-sm">
+                  {unit.isSuggestedByAI ? (
+                    <>
+                      <span className="text-lg">🤖</span>
+                      <span className="text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">Sugerida por IA</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg">✍️</span>
+                      <span className="text-secondary-foreground bg-secondary/20 px-2 py-0.5 rounded-full border border-border">Criada manualmente</span>
+                    </>
+                  )}
+                </span>
+                {quizResult && (
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-sm shadow-sm ${quizResult.score >= 70 ? 'bg-green-100 text-green-700' :
+                    quizResult.score >= 50 ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                    <span className="text-lg">📊</span>
+                    Nota: {quizResult.score}%
+                  </span>
+                )}
+              </div>
+
+              {unit.description && (
+                <p className="text-sm text-text-secondary mb-3 line-clamp-2 leading-relaxed">
+                  {unit.description}
+                </p>
+              )}
+
+              {showSubject && subjectName && (
+                <div className="flex items-center gap-2 text-xs text-text-secondary mt-3">
+                  <span className="font-semibold">Disciplina:</span>
+                  <span className="px-2 py-1 rounded-md bg-secondary/10 font-medium text-text-main border border-border">{subjectName}</span>
+                </div>
+              )}
+
+              {isProfessor && !unit.lessonPlanId && (
+                <LazyMaterialRAGManager unitId={unit.id} />
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-2 flex-shrink-0 items-start">
+          {canDelete && onDelete && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <ConfirmDeleteButton
+                onConfirm={handleDelete}
+                itemName={unit.topic}
+              />
+            </div>
+          )}
+          {!unit.lessonPlanId && canGenerate && onGenerate && (
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onGenerate(unit.id);
+              }}
+              className="text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
+            >
+              🤖 Gerar Plano
+            </Button>
+          )}
+          {unit.lessonPlanId && isProfessor && (
+            <Link href={`/professor/unidades/${unit.id}/resultados`}>
+              <Button
+                variant="secondary"
+                className="text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100"
+              >
+                <span className="mr-2">📊</span>
+                Resultados
+              </Button>
+            </Link>
+          )}
+          {unit.lessonPlanId && (
+            <div className="flex flex-col gap-2">
+              <Link href={planHref}>
+                <Button
+                  variant="success"
+                  className="w-full text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
+                >
+                  <span className="mr-2">📖</span>
+                  Ver Plano
+                </Button>
+              </Link>
+              {isAluno && (
+                <Link href={`/aluno/quiz/${unit.lessonPlanId}`}>
+                  <Button
+                    className="w-full text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all bg-indigo-600 hover:bg-indigo-700 border-indigo-700"
+                  >
+                    <span className="mr-2">✏️</span>
+                    Fazer Quiz
+                  </Button>
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
