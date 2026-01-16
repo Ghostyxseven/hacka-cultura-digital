@@ -78,16 +78,16 @@ export function AIAgent() {
       // Ex: "criar disciplina Matemática para 6º ano" -> "Matemática", "6º ano"
       // Ex: "adicionar matéria de ciências para 7º e 8º ano" -> "ciências", "7º e 8º ano"
       
-      // Tenta múltiplos padrões
-      // Padrão 1: "crie uma disciplina de historia" ou "criar disciplina Matemática para 6º ano"
+      // Tenta múltiplos padrões para extrair nome e anos
+      // Padrão 1: "crie uma disciplina de historia" -> captura "historia"
       let match = lowerText.match(/(?:crie|criar|adicionar)(?:\s+uma|\s+um)?\s+(?:disciplina|matéria)(?:\s+de)?\s+([^,\n]+?)(?:\s+para\s+([^\n]+))?$/);
       
-      // Padrão 2: "criar disciplina X" (sem "de")
+      // Padrão 2: "criar disciplina Matemática" (sem "de")
       if (!match) {
         match = lowerText.match(/(?:crie|criar|adicionar)(?:\s+uma|\s+um)?\s+(?:disciplina|matéria)\s+([^,\n]+?)(?:\s+para\s+([^\n]+))?$/);
       }
       
-      // Padrão 3: "disciplina de X" (mais simples)
+      // Padrão 3: Apenas "disciplina de X" (mais permissivo)
       if (!match) {
         match = lowerText.match(/(?:disciplina|matéria)(?:\s+de)?\s+([a-záàâãéêíóôõúç\s]+?)(?:\s+para\s+([^\n]+))?$/i);
       }
@@ -95,11 +95,16 @@ export function AIAgent() {
       let subjectName = match?.[1]?.trim() || '';
       const schoolYears = match?.[2]?.trim() || '';
       
-      // Remove palavras desnecessárias do nome (artigos e preposições)
+      // Remove palavras desnecessárias do início do nome
       subjectName = subjectName.replace(/^(de|da|do|para|com|sobre|em)\s+/i, '').trim();
       
-      // Limpa o final também
+      // Remove palavras desnecessárias do final do nome
       subjectName = subjectName.replace(/\s+(de|da|do|para|com|sobre|em)$/i, '').trim();
+      
+      // Debug: log para verificar o que foi extraído
+      if (process.env.NODE_ENV === 'development') {
+        console.log('AIAgent - Parse:', { text: lowerText, subjectName, schoolYears, match });
+      }
 
       // Se encontrou algum nome de disciplina, executa a ação
       if (subjectName && subjectName.length >= 2) {
