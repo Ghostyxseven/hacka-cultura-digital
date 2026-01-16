@@ -78,24 +78,28 @@ export function AIAgent() {
       // Ex: "criar disciplina Matemática para 6º ano" -> "Matemática", "6º ano"
       // Ex: "adicionar matéria de ciências para 7º e 8º ano" -> "ciências", "7º e 8º ano"
       
-      let match = lowerText.match(/(?:crie|criar|adicionar)(?:\s+uma|\s+um)?\s+(?:disciplina|matéria|matéria)(?:\s+de)?\s+([^,\n]+?)(?:\s+para\s+([^\n]+))?$/);
+      // Tenta múltiplos padrões
+      // Padrão 1: "crie uma disciplina de historia" ou "criar disciplina Matemática para 6º ano"
+      let match = lowerText.match(/(?:crie|criar|adicionar)(?:\s+uma|\s+um)?\s+(?:disciplina|matéria)(?:\s+de)?\s+([^,\n]+?)(?:\s+para\s+([^\n]+))?$/);
       
-      // Se não encontrou, tenta padrão alternativo: "criar disciplina X"
+      // Padrão 2: "criar disciplina X" (sem "de")
       if (!match) {
-        match = lowerText.match(/(?:crie|criar|adicionar)(?:\s+uma|\s+um)?\s+(?:disciplina|matéria|matéria)(?:\s+de|\s+)?(.+?)$/);
+        match = lowerText.match(/(?:crie|criar|adicionar)(?:\s+uma|\s+um)?\s+(?:disciplina|matéria)\s+([^,\n]+?)(?:\s+para\s+([^\n]+))?$/);
+      }
+      
+      // Padrão 3: "disciplina de X" (mais simples)
+      if (!match) {
+        match = lowerText.match(/(?:disciplina|matéria)(?:\s+de)?\s+([a-záàâãéêíóôõúç\s]+?)(?:\s+para\s+([^\n]+))?$/i);
       }
       
       let subjectName = match?.[1]?.trim() || '';
       const schoolYears = match?.[2]?.trim() || '';
       
-      // Remove palavras desnecessárias do nome
-      subjectName = subjectName.replace(/^(de|da|do|para)\s+/i, '').trim();
+      // Remove palavras desnecessárias do nome (artigos e preposições)
+      subjectName = subjectName.replace(/^(de|da|do|para|com|sobre|em)\s+/i, '').trim();
       
-      // Se ainda não tem nome, tenta pegar após "disciplina"
-      if (!subjectName || subjectName.length < 2) {
-        const fallbackMatch = lowerText.match(/(?:disciplina|matéria)(?:\s+de|\s+)?\s+([a-záàâãéêíóôõúç\s]+?)(?:\s+para|$)/i);
-        subjectName = fallbackMatch?.[1]?.trim() || '';
-      }
+      // Limpa o final também
+      subjectName = subjectName.replace(/\s+(de|da|do|para|com|sobre|em)$/i, '').trim();
 
       // Se encontrou algum nome de disciplina, executa a ação
       if (subjectName && subjectName.length >= 2) {
