@@ -14,10 +14,7 @@ export class UpdateUserUseCase {
    * Atualiza um usuário existente
    * 
    * @param id - ID do usuário
-   * @param name - Novo nome (opcional)
-   * @param email - Novo email (opcional)
-   * @param password - Nova senha (opcional)
-   * @param professorId - Novo professorId (opcional, para alunos)
+   * @param updates - Objeto com campos a atualizar
    * @returns O usuário atualizado
    * @throws Error se o usuário não existir ou os dados forem inválidos
    */
@@ -27,7 +24,10 @@ export class UpdateUserUseCase {
       name?: string;
       email?: string;
       password?: string;
-      professorId?: string;
+      professorId?: string; // DEPRECADO - usar classId
+      classId?: string; // Para alunos
+      classes?: string[]; // Para professores
+      subjects?: string[]; // Para professores
     }
   ): User {
     // Busca o usuário
@@ -69,12 +69,24 @@ export class UpdateUserUseCase {
       }
     }
 
-    // Valida professorId para alunos
+    // Valida professorId para alunos (sistema antigo)
     if (updates.professorId !== undefined && user.role === 'aluno') {
       const professor = this.userRepository.getUserById(updates.professorId);
       if (!professor || professor.role !== 'professor') {
         throw new Error("Professor não encontrado");
       }
+    }
+
+    // Valida classId para alunos (sistema novo)
+    if (updates.classId !== undefined && user.role === 'aluno') {
+      // Validação básica - pode ser expandida para verificar se a turma existe
+      // Por enquanto, apenas aceita
+    }
+
+    // Valida classes para professores
+    if (updates.classes !== undefined && user.role === 'professor') {
+      // Validação básica - pode ser expandida para verificar se as turmas existem
+      // Por enquanto, apenas aceita
     }
 
     // Cria o usuário atualizado
@@ -83,7 +95,12 @@ export class UpdateUserUseCase {
       name: updates.name !== undefined ? updates.name.trim() : user.name,
       email: updates.email !== undefined ? updates.email.trim().toLowerCase() : user.email,
       password: updates.password !== undefined ? updates.password : user.password,
+      // Sistema antigo (compatibilidade)
       professorId: updates.professorId !== undefined ? updates.professorId : user.professorId,
+      // Sistema novo (turmas)
+      classId: updates.classId !== undefined ? updates.classId : user.classId,
+      classes: updates.classes !== undefined ? updates.classes : user.classes,
+      subjects: updates.subjects !== undefined ? updates.subjects : user.subjects,
       updatedAt: new Date(),
     };
 

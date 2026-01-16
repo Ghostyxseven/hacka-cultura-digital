@@ -16,4 +16,5 @@ export const StorageKeys = {
     SHARED_LESSON_PLANS: '@hacka-cultura:shared-lesson-plans',
     ALERTS: '@hacka-cultura:alerts',
     AUDIT_LOGS: '@hacka-cultura:audit-logs',
+    CLASSES: '@hacka-cultura:classes',
 } as const;

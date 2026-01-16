@@ -19,7 +19,10 @@ export class CreateUserUseCase {
    * @param email - Email do usuário (único)
    * @param password - Senha do usuário (em produção seria hash)
    * @param role - Role do usuário (admin, professor, aluno)
-   * @param professorId - ID do professor (apenas para alunos)
+   * @param professorId - ID do professor (apenas para alunos - DEPRECADO, usar classId)
+   * @param classId - ID da turma (apenas para alunos)
+   * @param classes - IDs das turmas (apenas para professores)
+   * @param subjects - IDs das disciplinas (apenas para professores)
    * @returns O usuário criado
    * @throws Error se os dados forem inválidos ou o email já existir
    */
@@ -28,7 +31,10 @@ export class CreateUserUseCase {
     email: string,
     password: string,
     role: UserRole,
-    professorId?: string
+    professorId?: string,
+    classId?: string,
+    classes?: string[],
+    subjects?: string[]
   ): User {
     // Validações
     if (!name || name.trim().length === 0) {
@@ -54,9 +60,18 @@ export class CreateUserUseCase {
       throw new Error("Email já cadastrado");
     }
 
-    // Valida professorId para alunos
-    if (role === 'aluno' && !professorId) {
-      throw new Error("Aluno deve estar associado a um professor");
+    // Validações específicas por role
+    if (role === 'aluno') {
+      // Aluno pode ter classId (novo sistema) ou professorId (sistema antigo)
+      // Se ambos forem fornecidos, classId tem prioridade
+      if (!classId && !professorId) {
+        throw new Error("Aluno deve estar associado a uma turma (classId) ou professor (professorId)");
+      }
+    }
+
+    if (role === 'professor' && classes && classes.length > 0) {
+      // Valida se as turmas existem (opcional, pode ser feito depois)
+      // Por enquanto, apenas aceita
     }
 
     // Cria o usuário
@@ -66,8 +81,12 @@ export class CreateUserUseCase {
       email: email.trim().toLowerCase(),
       password: password, // Em produção seria hash
       role,
-      professorId: role === 'aluno' ? professorId : undefined,
-      subjects: role === 'professor' ? [] : undefined,
+      // Sistema antigo (compatibilidade)
+      professorId: role === 'aluno' && !classId ? professorId : undefined,
+      // Sistema novo (turmas)
+      classId: role === 'aluno' ? classId : undefined,
+      classes: role === 'professor' ? (classes || []) : undefined,
+      subjects: role === 'professor' ? (subjects || []) : undefined,
       createdAt: new Date(),
     };
 
