@@ -1,52 +1,64 @@
 'use client';
 
-import type { Subject } from '@/application/viewmodels';
-
 interface DashboardStatsProps {
-  subjects: Subject[];
+  stats: {
+    totalSubjects: number;
+    totalUnits: number;
+    totalPlans: number;
+  };
   loading?: boolean;
 }
 
 /**
  * Componente de estatísticas do dashboard
  * Exibe informações resumidas das disciplinas, unidades e planos
+ * 
+ * Características:
+ * - Cards visuais com ícones intuitivos
+ * - Estatísticas em tempo real
+ * - Layout responsivo e minimalista
  */
-export function DashboardStats({ subjects, loading }: DashboardStatsProps) {
-  // TODO: Calcular unidades e planos reais quando houver acesso aos dados
-  const totalSubjects = subjects.length;
-  const totalUnits = 0; // Será calculado quando houver acesso aos dados
-  const totalPlans = 0; // Será calculado quando houver acesso aos dados
-
-  const stats = [
+export function DashboardStats({ stats, loading }: DashboardStatsProps) {
+  const statCards = [
     {
       label: 'Disciplinas',
-      value: totalSubjects,
+      value: stats.totalSubjects,
       icon: '📚',
+      color: 'indigo',
+      description: 'Cadastradas',
     },
     {
-      label: 'Unidades',
-      value: totalUnits,
+      label: 'Unidades/Aulas',
+      value: stats.totalUnits,
       icon: '📖',
+      color: 'blue',
+      description: 'Criadas',
     },
     {
       label: 'Planos de Aula',
-      value: totalPlans,
+      value: stats.totalPlans,
       icon: '📋',
+      color: 'purple',
+      description: 'Gerados',
     },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      {stats.map((stat) => (
-        <div key={stat.label} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-gray-600 text-sm font-medium mb-2">{stat.label}</h3>
+      {statCards.map((stat) => (
+        <div
+          key={stat.label}
+          className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-all border border-gray-100 hover:border-indigo-200"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-4xl">{stat.icon}</span>
+            <div className="text-right">
+              <h3 className="text-gray-600 text-sm font-medium mb-1">{stat.label}</h3>
               <p className="text-3xl font-bold text-indigo-600">
                 {loading ? '...' : stat.value}
               </p>
+              <p className="text-xs text-gray-500 mt-1">{stat.description}</p>
             </div>
-            <span className="text-4xl">{stat.icon}</span>
           </div>
         </div>
       ))}
