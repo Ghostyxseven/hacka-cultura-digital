@@ -82,17 +82,17 @@ export function AIAgent() {
       // Ex: "adicionar matéria de ciências para 7º e 8º ano" -> "ciências", "7º e 8º ano"
       
       // Tenta múltiplos padrões para extrair nome e anos
-      // Padrão 1: "crie uma disciplina de historia" -> captura "historia"
-      let match = lowerText.match(/(?:crie|criar|adicionar)(?:\s+uma|\s+um)?\s+(?:disciplina|matéria)(?:\s+de)?\s+([^,\n]+?)(?:\s+para\s+([^\n]+))?$/);
+      // Padrão 1: "crie uma disciplina de historia" ou "crie uma diciplina de historia"
+      let match = lowerText.match(/(?:crie|criar|adicionar)(?:\s+uma|\s+um)?\s+(?:disciplina|diciplina|matéria)(?:\s+de)?\s+([^,\n]+?)(?:\s+para\s+([^\n]+))?$/);
       
       // Padrão 2: "criar disciplina Matemática" (sem "de")
       if (!match) {
-        match = lowerText.match(/(?:crie|criar|adicionar)(?:\s+uma|\s+um)?\s+(?:disciplina|matéria)\s+([^,\n]+?)(?:\s+para\s+([^\n]+))?$/);
+        match = lowerText.match(/(?:crie|criar|adicionar)(?:\s+uma|\s+um)?\s+(?:disciplina|diciplina|matéria)\s+([^,\n]+?)(?:\s+para\s+([^\n]+))?$/);
       }
       
       // Padrão 3: Apenas "disciplina de X" (mais permissivo)
       if (!match) {
-        match = lowerText.match(/(?:disciplina|matéria)(?:\s+de)?\s+([a-záàâãéêíóôõúç\s]+?)(?:\s+para\s+([^\n]+))?$/i);
+        match = lowerText.match(/(?:disciplina|diciplina|matéria)(?:\s+de)?\s+([a-záàâãéêíóôõúç\s]+?)(?:\s+para\s+([^\n]+))?$/i);
       }
       
       let subjectName = match?.[1]?.trim() || '';
@@ -104,13 +104,34 @@ export function AIAgent() {
       // Remove palavras desnecessárias do final do nome
       subjectName = subjectName.replace(/\s+(de|da|do|para|com|sobre|em)$/i, '').trim();
       
-      // Debug: log para verificar o que foi extraído
-      if (process.env.NODE_ENV === 'development') {
-        console.log('AIAgent - Parse:', { text: lowerText, subjectName, schoolYears, match });
+      // Se não encontrou pelo regex, tenta extração manual mais agressiva
+      if (!subjectName || subjectName.length < 2) {
+        // Procura por palavras comuns de disciplinas
+        const commonSubjects = ['historia', 'história', 'matematica', 'matemática', 'ciencias', 'ciências', 'portugues', 'português', 'geografia', 'ingles', 'inglês', 'fisica', 'física', 'quimica', 'química', 'biologia', 'artes', 'educacao fisica', 'educação física'];
+        for (const subj of commonSubjects) {
+          if (lowerText.includes(subj)) {
+            subjectName = subj;
+            break;
+          }
+        }
       }
+      
+      // Debug: log para verificar o que foi extraído
+      console.log('AIAgent - Parse Command:', { 
+        originalText: text,
+        lowerText, 
+        hasCreateWord,
+        hasSubjectWord,
+        match: match ? match[0] : null,
+        subjectName, 
+        schoolYears,
+        willExecute: subjectName && subjectName.length >= 2
+      });
 
       // Se encontrou algum nome de disciplina, executa a ação
       if (subjectName && subjectName.length >= 2) {
+        // Capitaliza primeira letra
+        subjectName = subjectName.charAt(0).toUpperCase() + subjectName.slice(1);
         return {
           action: 'create_subject',
           params: {
