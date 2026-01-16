@@ -17,6 +17,16 @@ import { SuggestUnitsUseCase } from "../usecases/SuggestUnitsUseCase";
 import { GetUnitsUseCase } from "../usecases/GetUnitsUseCase";
 import { GetUnitByIdUseCase } from "../usecases/GetUnitByIdUseCase";
 import { GenerateLessonPlanForUnitUseCase } from "../usecases/GenerateLessonPlanForUnitUseCase";
+import { AnalyzePerformanceUseCase } from "../usecases/AnalyzePerformanceUseCase";
+import { GenerateSupportMaterialsUseCase } from "../usecases/GenerateSupportMaterialsUseCase";
+import { GetQuizResultsByLessonPlanUseCase } from "../usecases/GetQuizResultsByLessonPlanUseCase";
+import { AddTeacherCommentUseCase } from "../usecases/AddTeacherCommentUseCase";
+import { UploadMaterialUseCase } from "../usecases/UploadMaterialUseCase";
+import { GetMaterialsByUnitUseCase } from "../usecases/GetMaterialsByUnitUseCase";
+import { RefineLessonPlanUseCase } from "../usecases/RefineLessonPlanUseCase";
+import { GetClassTrendsUseCase } from "../usecases/GetClassTrendsUseCase";
+import { QuizResult } from "../../core/entities/QuizResult";
+import { Material } from "../../core/entities/Material";
 
 
 /**
@@ -47,7 +57,15 @@ export class LessonPlanService {
     private getUnitsUseCase: GetUnitsUseCase,
     private getUnitByIdUseCase: GetUnitByIdUseCase,
     private generateLessonPlanForUnitUseCase: GenerateLessonPlanForUnitUseCase,
-    private deleteUnitUseCase: DeleteUnitUseCase
+    private deleteUnitUseCase: DeleteUnitUseCase,
+    private analyzePerformanceUseCase: AnalyzePerformanceUseCase,
+    private generateSupportMaterialsUseCase: GenerateSupportMaterialsUseCase,
+    private getQuizResultsByLessonPlanUseCase: GetQuizResultsByLessonPlanUseCase,
+    private addTeacherCommentUseCase: AddTeacherCommentUseCase,
+    private uploadMaterialUseCase: UploadMaterialUseCase,
+    private getMaterialsByUnitUseCase: GetMaterialsByUnitUseCase,
+    private refineLessonPlanUseCase: RefineLessonPlanUseCase,
+    private getClassTrendsUseCase: GetClassTrendsUseCase
   ) { }
 
   // ========== MÉTODOS DE PLANOS DE AULA ==========
@@ -202,15 +220,57 @@ export class LessonPlanService {
     return this.generateLessonPlanForUnitUseCase.execute(unitId);
   }
 
+  /**
+   * Analisa o desempenho de um aluno e gera feedback de IA
+   * RF06 - Inteligência Pedagógica (Feedback IA)
+   */
+  async analyzePerformance(quizResultId: string): Promise<QuizResult> {
+    return this.analyzePerformanceUseCase.execute({ quizResultId });
+  }
 
+  /**
+   * Gera materiais de apoio extras (slides, links, vídeos) via IA
+   * Fase 4 - Materiais Estendidos
+   */
+  async generateSupportMaterials(lessonPlanId: string): Promise<LessonPlan> {
+    return this.generateSupportMaterialsUseCase.execute({ lessonPlanId });
+  }
 
+  /**
+   * Busca resultados de quiz de um plano de aula
+   */
+  getQuizResults(lessonPlanId: string): QuizResult[] {
+    return this.getQuizResultsByLessonPlanUseCase.execute({ lessonPlanId });
+  }
 
+  /**
+   * Adiciona comentário do professor a um resultado
+   */
+  addTeacherComment(quizResultId: string, comment: string): QuizResult {
+    return this.addTeacherCommentUseCase.execute({ quizResultId, comment });
+  }
 
+  // ========== MÉTODOS DE MATERIAIS RAG ==========
 
+  uploadMaterial(data: { unitId: string; fileName: string; fileType: string; content: string }): Material {
+    return this.uploadMaterialUseCase.execute(data);
+  }
 
+  getMaterialsByUnit(unitId: string): Material[] {
+    return this.getMaterialsByUnitUseCase.execute(unitId);
+  }
 
+  /**
+   * Refina o plano de aula com IA
+   */
+  async refineLessonPlan(lessonPlanId: string, command: string): Promise<LessonPlan> {
+    return this.refineLessonPlanUseCase.execute(lessonPlanId, command);
+  }
 
-
-
-
+  /**
+   * Obtém análise de tendências da turma
+   */
+  async getClassTrends(lessonPlanId: string): Promise<string> {
+    return this.getClassTrendsUseCase.execute(lessonPlanId);
+  }
 }

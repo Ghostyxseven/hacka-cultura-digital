@@ -21,3 +21,90 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Estilos de Acessibilidade */
+.high-contrast {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+}
+
+.high-contrast body {
+  color: #000000;
+  background: #ffffff;
+}
+
+.high-contrast * {
+  border-color: #000000 !important;
+}
+
+/* Tamanhos de fonte */
+.font-normal {
+  font-size: 1rem;
+}
+
+.font-large {
+  font-size: 1.25rem;
+}
+
+.font-large * {
+  font-size: 1.25rem;
+}
+
+.font-extra-large {
+  font-size: 1.5rem;
+}
+
+.font-extra-large * {
+  font-size: 1.5rem;
+}
+
+/* Redução de movimento */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Temas do Sistema */
+.theme-light {
+  --theme-bg: 248, 250, 252;
+  --theme-foreground: 30, 41, 59;
+  --theme-primary: 59, 130, 246;
+  --theme-accent: 139, 92, 246;
+}
+
+.theme-dark {
+  --theme-bg: 15, 23, 42;
+  --theme-foreground: 241, 245, 249;
+  --theme-primary: 96, 165, 250;
+  --theme-accent: 167, 139, 250;
+}
+
+.theme-playful {
+  --theme-bg: 255, 251, 235;
+  --theme-foreground: 30, 41, 59;
+  --theme-primary: 251, 146, 60;
+  --theme-accent: 236, 72, 153;
+}
+
+body {
+  background-color: rgb(var(--theme-bg));
+  color: rgb(var(--theme-foreground));
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Cores vibrantes para tema lúdico */
+.theme-playful .bg-blue-500 {
+  background-color: rgb(251, 146, 60) !important;
+}
+
+.theme-playful .text-blue-600 {
+  color: rgb(236, 72, 153) !important;
+}
+
+.theme-playful .border-blue-300 {
+  border-color: rgb(251, 146, 60) !important;
+}

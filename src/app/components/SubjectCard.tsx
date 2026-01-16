@@ -3,10 +3,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import type { SubjectViewModel } from '@/application/viewmodels';
-import { Button } from '@/components/ui/Button';
+import { ConfirmDeleteButton } from '@/components';
 
 interface SubjectCardProps {
   subject: SubjectViewModel;
@@ -25,91 +24,75 @@ export function SubjectCard({
 }: SubjectCardProps) {
   const { isProfessor, isAdmin } = useAuth();
   const isAluno = !isProfessor && !isAdmin;
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   
   // Define a rota baseada no tipo de usuário
   const subjectHref = isAluno ? `/aluno/disciplinas/${subject.id}` : `/professor/disciplinas/${subject.id}`;
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (showConfirm && onDelete) {
-      setIsDeleting(true);
+  const handleDelete = () => {
+    if (onDelete) {
       onDelete(subject.id);
-      setTimeout(() => {
-        setIsDeleting(false);
-        setShowConfirm(false);
-      }, 500);
-    } else {
-      setShowConfirm(true);
     }
   };
 
-  const handleCancelDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setShowConfirm(false);
-  };
-
   return (
-    <div className="group relative bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:border-primary-300 transition-all duration-200">
-      <Link href={subjectHref} className="block">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1">
-            <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
-              {subject.name}
-            </h3>
-            {subject.description && (
-              <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                {subject.description}
-              </p>
-            )}
-            {showUnitCount && unitCount !== undefined && (
-              <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-medium">
-                {unitCount} {unitCount === 1 ? 'unidade' : 'unidades'}
-              </div>
-            )}
-          </div>
-          {canDelete && onDelete && (
-            <div className="ml-3 flex-shrink-0">
-              {!showConfirm ? (
-                <button
-                  onClick={handleDelete}
-                  className="opacity-0 group-hover:opacity-100 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all"
-                  title="Excluir disciplina"
+    <article 
+      className="group relative bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 transition-all duration-300 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
+      aria-label={`Disciplina: ${subject.name}`}
+    >
+      {/* Gradiente sutil no hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-indigo-50/0 group-hover:from-blue-50/50 group-hover:to-indigo-50/50 transition-all duration-300 pointer-events-none" aria-hidden="true" />
+      
+      <div className="relative flex items-start justify-between">
+        <Link 
+          href={subjectHref} 
+          className="flex-1 block focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg"
+          aria-label={`Ver detalhes da disciplina ${subject.name}`}
+        >
+          <div className="flex items-start gap-4">
+            {/* Ícone da disciplina */}
+            <div 
+              className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-md group-hover:scale-110 transition-transform duration-300"
+              aria-hidden="true"
+            >
+              {subject.name.charAt(0).toUpperCase()}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-xl text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                {subject.name}
+              </h3>
+              {subject.description && (
+                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                  {subject.description}
+                </p>
+              )}
+              {showUnitCount && unitCount !== undefined && (
+                <div 
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-sm font-semibold border border-blue-200 shadow-sm"
+                  aria-label={`${unitCount} ${unitCount === 1 ? 'unidade' : 'unidades'}`}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              ) : (
-                <div className="flex gap-2 opacity-100">
-                  <button
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
-                    title="Confirmar exclusão"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={handleCancelDelete}
-                    className="p-1.5 text-gray-600 hover:bg-gray-50 rounded-lg transition-all"
-                    title="Cancelar"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+                  <span className="text-blue-600" aria-hidden="true">📚</span>
+                  <span>{unitCount} {unitCount === 1 ? 'unidade' : 'unidades'}</span>
                 </div>
               )}
             </div>
-          )}
-        </div>
-      </Link>
-    </div>
+          </div>
+        </Link>
+        {canDelete && onDelete && (
+          <div 
+            className="ml-3 flex-shrink-0" 
+            onClick={(e) => e.stopPropagation()}
+            role="group"
+            aria-label={`Ações para disciplina ${subject.name}`}
+          >
+            <ConfirmDeleteButton
+              onConfirm={handleDelete}
+              itemName={subject.name}
+              ariaLabel={`Excluir disciplina ${subject.name}`}
+            />
+          </div>
+        )}
+      </div>
+    </article>
   );
 }

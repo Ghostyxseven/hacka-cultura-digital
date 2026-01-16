@@ -2,6 +2,9 @@ import type { Metadata } from 'next'
 import { Toaster } from 'react-hot-toast'
 import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
+import { ErrorBoundaryWrapper } from '@/components'
+import { PWARegister } from './components/PWARegister'
 
 export const metadata: Metadata = {
   title: 'Hacka Cultura Digital - Sistema de Materiais Didáticos',
@@ -16,9 +19,14 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className="antialiased bg-gray-50">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <PWARegister />
+        <ErrorBoundaryWrapper>
+          <ThemeProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </ThemeProvider>
+        </ErrorBoundaryWrapper>
         <Toaster 
           position="top-right"
           toastOptions={{

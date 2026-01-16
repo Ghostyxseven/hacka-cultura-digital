@@ -1,0 +1,5 @@
+# Ignorar arquivos de configuração e estilos nas estatísticas de linguagem do GitHub
+*.json linguist-generated
+*.css linguist-generated
+*.md linguist-documentation
+*.js linguist-generated

@@ -3,9 +3,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/Button';
+import { Button, ConfirmDeleteButton } from '@/components';
+import { LazyMaterialRAGManager } from '@/components/lazy';
 import type { UnitViewModel } from '@/application/viewmodels';
 
 interface UnitCardProps {
@@ -16,120 +16,106 @@ interface UnitCardProps {
   showSubject?: boolean;
   onDelete?: (id: string) => void;
   canDelete?: boolean;
+  quizResult?: { score: number; completedAt: Date };
 }
 
-export function UnitCard({ 
-  unit, 
-  subjectName, 
-  canGenerate = false, 
+export function UnitCard({
+  unit,
+  subjectName,
+  canGenerate = false,
   onGenerate,
   showSubject = false,
   onDelete,
-  canDelete = false
+  canDelete = false,
+  quizResult
 }: UnitCardProps) {
   const { isProfessor, isAdmin } = useAuth();
   const isAluno = !isProfessor && !isAdmin;
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  
+
   // Define a rota baseada no tipo de usuário
-  const planHref = isAluno 
-    ? `/aluno/unidades/${unit.id}/plano` 
+  const planHref = isAluno
+    ? `/aluno/unidades/${unit.id}/plano`
     : `/professor/unidades/${unit.id}/plano`;
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (showConfirm && onDelete) {
-      setIsDeleting(true);
+  const handleDelete = () => {
+    if (onDelete) {
       onDelete(unit.id);
-      setTimeout(() => {
-        setIsDeleting(false);
-        setShowConfirm(false);
-      }, 500);
-    } else {
-      setShowConfirm(true);
     }
   };
 
-  const handleCancelDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setShowConfirm(false);
-  };
-
   return (
-    <div className="group bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:border-primary-300 transition-all duration-200">
-      <div className="flex justify-between items-start gap-4">
+    <div className="group relative bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl hover:border-purple-300 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+      {/* Gradiente sutil no hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/0 to-pink-50/0 group-hover:from-purple-50/50 group-hover:to-pink-50/50 transition-all duration-300 pointer-events-none" />
+
+      <div className="relative flex justify-between items-start gap-4">
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
-            {unit.topic}
-          </h3>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-800 font-medium">
-              {unit.gradeYear}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              {unit.isSuggestedByAI ? (
-                <>
-                  <span className="text-purple-500">🤖</span>
-                  <span className="text-purple-600 font-medium">Sugerida por IA</span>
-                </>
-              ) : (
-                <>
-                  <span className="text-blue-500">✍️</span>
-                  <span className="text-blue-600 font-medium">Criada manualmente</span>
-                </>
+          <div className="flex items-start gap-4 mb-3">
+            {/* Ícone do plano */}
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-md group-hover:scale-110 transition-transform duration-300">
+              📖
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">
+                {unit.topic}
+              </h3>
+
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 text-gray-800 font-semibold text-sm border border-gray-200 shadow-sm">
+                  {unit.gradeYear}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-sm shadow-sm">
+                  {unit.isSuggestedByAI ? (
+                    <>
+                      <span className="text-lg">🤖</span>
+                      <span className="text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full">Sugerida por IA</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg">✍️</span>
+                      <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">Criada manualmente</span>
+                    </>
+                  )}
+                </span>
+                {quizResult && (
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-sm shadow-sm ${quizResult.score >= 70 ? 'bg-green-100 text-green-700' :
+                    quizResult.score >= 50 ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                    <span className="text-lg">📊</span>
+                    Nota: {quizResult.score}%
+                  </span>
+                )}
+              </div>
+
+              {unit.description && (
+                <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                  {unit.description}
+                </p>
               )}
-            </span>
-          </div>
-          {unit.description && (
-            <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-              {unit.description}
-            </p>
-          )}
-          {showSubject && subjectName && (
-            <p className="text-xs text-gray-400 mt-2">
-              Disciplina: <span className="font-medium text-gray-600">{subjectName}</span>
-            </p>
-          )}
-        </div>
-        <div className="flex gap-2 flex-shrink-0">
-          {canDelete && onDelete && (
-            <div>
-              {!showConfirm ? (
-                <button
-                  onClick={handleDelete}
-                  className="opacity-0 group-hover:opacity-100 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all"
-                  title="Excluir unidade"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              ) : (
-                <div className="flex gap-1 opacity-100">
-                  <button
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
-                    title="Confirmar exclusão"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={handleCancelDelete}
-                    className="p-1.5 text-gray-600 hover:bg-gray-50 rounded-lg transition-all"
-                    title="Cancelar"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+
+              {showSubject && subjectName && (
+                <div className="flex items-center gap-2 text-xs text-gray-500 mt-3">
+                  <span className="font-semibold">Disciplina:</span>
+                  <span className="px-2 py-1 rounded-md bg-gray-100 font-medium text-gray-700">{subjectName}</span>
                 </div>
               )}
+
+              {isProfessor && !unit.lessonPlanId && (
+                <LazyMaterialRAGManager unitId={unit.id} />
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-2 flex-shrink-0 items-start">
+          {canDelete && onDelete && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <ConfirmDeleteButton
+                onConfirm={handleDelete}
+                itemName={unit.topic}
+              />
             </div>
           )}
           {!unit.lessonPlanId && canGenerate && onGenerate && (
@@ -139,17 +125,44 @@ export function UnitCard({
                 e.stopPropagation();
                 onGenerate(unit.id);
               }}
-              className="text-sm whitespace-nowrap"
+              className="text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
             >
-              Gerar Plano
+              🤖 Gerar Plano
             </Button>
           )}
-          {unit.lessonPlanId && (
-            <Link href={planHref}>
-              <Button variant="success" className="text-sm whitespace-nowrap">
-                Ver Plano
+          {unit.lessonPlanId && isProfessor && (
+            <Link href={`/professor/unidades/${unit.id}/resultados`}>
+              <Button
+                variant="secondary"
+                className="text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100"
+              >
+                <span className="mr-2">📊</span>
+                Resultados
               </Button>
             </Link>
+          )}
+          {unit.lessonPlanId && (
+            <div className="flex flex-col gap-2">
+              <Link href={planHref}>
+                <Button
+                  variant="success"
+                  className="w-full text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
+                >
+                  <span className="mr-2">📖</span>
+                  Ver Plano
+                </Button>
+              </Link>
+              {isAluno && (
+                <Link href={`/aluno/quiz/${unit.lessonPlanId}`}>
+                  <Button
+                    className="w-full text-sm whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 transition-all bg-indigo-600 hover:bg-indigo-700 border-indigo-700"
+                  >
+                    <span className="mr-2">✏️</span>
+                    Fazer Quiz
+                  </Button>
+                </Link>
+              )}
+            </div>
           )}
         </div>
       </div>

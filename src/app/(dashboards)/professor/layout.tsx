@@ -38,25 +38,28 @@ export default function ProfessorLayout({
         </div>
 
         <nav className="p-4 space-y-1">
-          <Link href="/professor">
-            <button className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-medium transition-all duration-200 flex items-center gap-2">
-              <span>📊</span>
-              <span>Dashboard</span>
-            </button>
+          <Link 
+            href="/professor"
+            className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-medium transition-all duration-200 flex items-center gap-2 block"
+          >
+            <span>📊</span>
+            <span>Dashboard</span>
           </Link>
 
-          <Link href="/professor/disciplinas/new">
-            <button className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-medium transition-all duration-200 flex items-center gap-2">
-              <span>➕</span>
-              <span>Nova Disciplina</span>
-            </button>
+          <Link 
+            href="/professor/disciplinas/new"
+            className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-medium transition-all duration-200 flex items-center gap-2 block"
+          >
+            <span>➕</span>
+            <span>Nova Disciplina</span>
           </Link>
 
-          <Link href="/professor/planos">
-            <button className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-medium transition-all duration-200 flex items-center gap-2">
-              <span>📚</span>
-              <span>Meus Planos</span>
-            </button>
+          <Link 
+            href="/professor/planos"
+            className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-medium transition-all duration-200 flex items-center gap-2 block"
+          >
+            <span>📚</span>
+            <span>Meus Planos</span>
           </Link>
         </nav>
 
