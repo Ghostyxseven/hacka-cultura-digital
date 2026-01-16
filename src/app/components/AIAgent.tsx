@@ -257,9 +257,10 @@ export function AIAgent() {
       if (command.action === 'unknown') {
         // Usa IA para gerar resposta geral
         const aiService = new AIService();
-        response = await aiService.generateText(
-          `Você é um assistente educacional. O usuário disse: "${userMessage}". Responda de forma amigável e ofereça ajuda para criar disciplinas, gerar atividades, criar unidades ou gerar PDFs.`
-        );
+        const aiResponse = await aiService.generateText({
+          prompt: `Você é um assistente educacional. O usuário disse: "${userMessage}". Responda de forma amigável e ofereça ajuda para criar disciplinas, gerar atividades, criar unidades ou gerar PDFs.`,
+        });
+        response = aiResponse.content;
       } else {
         response = await executeAction(command.action, command.params);
       }
