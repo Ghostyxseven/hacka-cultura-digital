@@ -15,4 +15,5 @@ export const StorageKeys = {
     ACHIEVEMENT_PROGRESS: '@hacka-cultura:achievement-progress',
     SHARED_LESSON_PLANS: '@hacka-cultura:shared-lesson-plans',
     ALERTS: '@hacka-cultura:alerts',
+    AUDIT_LOGS: '@hacka-cultura:audit-logs',
 } as const;
