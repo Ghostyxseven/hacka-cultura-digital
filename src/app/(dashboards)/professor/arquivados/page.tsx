@@ -4,12 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/app/hooks';
 import { LoadingSpinner, EmptyState, ToastContainer, ActionButton } from '@/app/components';
-import type { Unit, LessonPlan, Activity } from '@/application/viewmodels';
+import type { Unit, LessonPlan, Activity, Subject } from '@/application/viewmodels';
 
 /**
  * Página de Conteúdos Arquivados
  * 
  * Exibe todos os materiais arquivados organizados por tipo:
+ * - Disciplinas arquivadas
  * - Unidades arquivadas
  * - Planos de aula arquivados
  * - Atividades arquivadas
@@ -17,24 +18,41 @@ import type { Unit, LessonPlan, Activity } from '@/application/viewmodels';
  * Permite restaurar (desarquivar) materiais
  */
 export default function ArquivadosPage() {
+  const [archivedSubjects, setArchivedSubjects] = useState<Subject[]>([]);
   const [archivedUnits, setArchivedUnits] = useState<Unit[]>([]);
   const [archivedPlans, setArchivedPlans] = useState<LessonPlan[]>([]);
   const [archivedActivities, setArchivedActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'unidades' | 'planos' | 'atividades'>('unidades');
+  const [activeTab, setActiveTab] = useState<'disciplinas' | 'unidades' | 'planos' | 'atividades'>('disciplinas');
   const { toasts, showToast, removeToast } = useToast();
 
   const loadArchivedContent = useCallback(async () => {
     try {
       setLoading(true);
 
+      const { LocalStorageSubjectRepository } = await import('@/repository/implementations/LocalStorageSubjectRepository');
       const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
       const { LocalStorageLessonPlanRepository } = await import('@/repository/implementations/LocalStorageLessonPlanRepository');
       const { LocalStorageActivityRepository } = await import('@/repository/implementations/LocalStorageActivityRepository');
 
+      const subjectRepository = new LocalStorageSubjectRepository();
       const unitRepository = new LocalStorageUnitRepository();
       const planRepository = new LocalStorageLessonPlanRepository();
       const activityRepository = new LocalStorageActivityRepository();
+
+      // Para buscar todas as disciplinas (incluindo arquivadas), precisamos acessar o storage diretamente
+      // Como findAll() filtra arquivadas, vamos usar uma abordagem alternativa
+      const storageKey = 'subjects';
+      let allSubjects: Subject[] = [];
+      if (typeof window !== 'undefined' && localStorage.getItem(storageKey)) {
+        const data = localStorage.getItem(storageKey);
+        if (data) {
+          const parsed = JSON.parse(data);
+          if (Array.isArray(parsed)) {
+            allSubjects = parsed;
+          }
+        }
+      }
 
       const [allUnits, allPlans, allActivities] = await Promise.all([
         unitRepository.findAll(),
@@ -42,6 +60,7 @@ export default function ArquivadosPage() {
         activityRepository.findAll(),
       ]);
 
+      setArchivedSubjects(allSubjects.filter((s) => s.archived === true));
       setArchivedUnits(allUnits.filter((u) => u.archived === true));
       setArchivedPlans(allPlans.filter((p) => p.archived === true));
       setArchivedActivities(allActivities.filter((a) => a.archived === true));
@@ -107,6 +126,23 @@ export default function ArquivadosPage() {
     }
   };
 
+  const handleUnarchiveSubject = async (subjectId: string) => {
+    try {
+      const { LocalStorageSubjectRepository } = await import('@/repository/implementations/LocalStorageSubjectRepository');
+      const subjectRepository = new LocalStorageSubjectRepository();
+
+      await subjectRepository.update(subjectId, {
+        archived: false,
+        archivedAt: undefined,
+      });
+
+      showToast('Disciplina restaurada com sucesso!', 'success');
+      await loadArchivedContent();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao restaurar disciplina', 'error');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -115,7 +151,7 @@ export default function ArquivadosPage() {
     );
   }
 
-  const totalArchived = archivedUnits.length + archivedPlans.length + archivedActivities.length;
+  const totalArchived = archivedSubjects.length + archivedUnits.length + archivedPlans.length + archivedActivities.length;
 
   if (totalArchived === 0) {
     return (
@@ -191,6 +227,24 @@ export default function ArquivadosPage() {
 
           {/* Tabs */}
           <div className="mb-6 flex gap-4 border-b-2 border-gray-200">
+            <button
+              onClick={() => setActiveTab('disciplinas')}
+              className={`px-6 py-3 font-semibold transition-all border-b-2 relative ${
+                activeTab === 'disciplinas'
+                  ? 'text-indigo-600 border-indigo-600'
+                  : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <span>📚</span>
+                <span>Disciplinas</span>
+                <span className={`px-2 py-0.5 rounded-full text-xs ${
+                  activeTab === 'disciplinas' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {archivedSubjects.length}
+                </span>
+              </span>
+            </button>
             <button
               onClick={() => setActiveTab('unidades')}
               className={`px-6 py-3 font-semibold transition-all border-b-2 relative ${
