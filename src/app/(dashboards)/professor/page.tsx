@@ -1,16 +1,21 @@
 // src/app/(dashboards)/professor/page.tsx
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubjects, useUnits, useRecentUnits } from '@/hooks';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading, PageSkeleton } from '@/components';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { StatsSection, SubjectsList, UnitsList } from '@/app/components';
+import { StatsSection, SubjectsList, UnitsList, ClassCard } from '@/app/components';
 import { LazyTeacherMural } from '@/components/lazy';
 import { getLessonPlanService } from '@/lib/service';
 import { showError, showSuccess } from '@/utils/notifications';
+import { GetTeacherClassesUseCase } from '@/application/usecases/GetTeacherClassesUseCase';
+import { LocalStorageClassRepository } from '@/repository/implementations/LocalStorageClassRepository';
+import { LocalStorageUserRepository } from '@/repository/implementations/LocalStorageUserRepository';
+import { Class } from '@/core/entities/Class';
 import Link from 'next/link';
 
 export default function ProfessorPage() {
@@ -20,7 +25,30 @@ export default function ProfessorPage() {
   const recentUnits = useRecentUnits(allUnits, 5);
   const lessonPlanService = getLessonPlanService();
 
-  const loading = subjectsLoading || unitsLoading;
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [classesLoading, setClassesLoading] = useState(true);
+
+  const loading = subjectsLoading || unitsLoading || classesLoading;
+
+  useEffect(() => {
+    if (isProfessor && user?.id) {
+      loadClasses();
+    }
+  }, [isProfessor, user]);
+
+  const loadClasses = () => {
+    try {
+      const classRepository = LocalStorageClassRepository.getInstance();
+      const userRepository = LocalStorageUserRepository.getInstance();
+      const getTeacherClassesUseCase = new GetTeacherClassesUseCase(classRepository, userRepository);
+      const teacherClasses = getTeacherClassesUseCase.execute(user!.id);
+      setClasses(teacherClasses);
+    } catch (error) {
+      console.error('Erro ao carregar turmas:', error);
+    } finally {
+      setClassesLoading(false);
+    }
+  };
 
   if (!isProfessor) {
     return (
@@ -63,6 +91,7 @@ export default function ProfessorPage() {
   };
 
   const stats = [
+    { title: 'Turmas', value: classes.length },
     { title: 'Disciplinas', value: subjects.length },
     { title: 'Unidades', value: allUnits.length },
     { title: 'Planos de Aula', value: allUnits.filter(u => u.lessonPlanId).length },
@@ -88,6 +117,51 @@ export default function ProfessorPage() {
         <div className="mb-8">
           <StatsSection stats={stats} />
         </div>
+
+        {/* Seção de Turmas */}
+        {classes.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl border border-gray-200 mb-8 transition-all duration-300 overflow-hidden">
+            <div className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 px-6 py-5 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🏫</span>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Minhas Turmas</h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {classes.length} {classes.length === 1 ? 'turma' : 'turmas'} em que você leciona
+                    </p>
+                  </div>
+                </div>
+                <Link href="/professor/turmas">
+                  <Button variant="secondary" size="sm">
+                    Ver Todas
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {classes.slice(0, 6).map((classEntity) => (
+                  <Link key={classEntity.id} href={`/professor/turmas/${classEntity.id}`}>
+                    <ClassCard
+                      classEntity={classEntity}
+                      showActions={false}
+                    />
+                  </Link>
+                ))}
+              </div>
+              {classes.length > 6 && (
+                <div className="mt-4 text-center">
+                  <Link href="/professor/turmas">
+                    <Button variant="secondary">
+                      Ver todas as {classes.length} turmas
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Mural de Avisos (Fase 4) */}
         <div className="mb-8">
