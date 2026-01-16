@@ -303,6 +303,64 @@ export default function ArquivadosPage() {
 
           {/* Conteúdo das Tabs */}
           <div className="mt-6">
+            {activeTab === 'disciplinas' && (
+              <div>
+                {archivedSubjects.length === 0 ? (
+                  <EmptyState
+                    icon="📚"
+                    title="Nenhuma disciplina arquivada"
+                    description="As disciplinas arquivadas aparecerão aqui."
+                  />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {archivedSubjects.map((subject) => (
+                      <div
+                        key={subject.id}
+                        className="bg-gradient-to-br from-white to-orange-50 rounded-xl shadow-lg p-6 border-2 border-gray-200 hover:border-orange-300 transition-all hover:shadow-xl group"
+                      >
+                        <div className="mb-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <h3 className="text-xl font-bold text-gray-900 group-hover:text-orange-700 transition-colors">
+                              {subject.name}
+                            </h3>
+                            <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-lg border border-orange-200">
+                              📚
+                            </span>
+                          </div>
+                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                            {subject.description || 'Sem descrição'}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {subject.schoolYears.map((year) => (
+                              <span
+                                key={year}
+                                className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-lg border border-blue-200"
+                              >
+                                {year}
+                              </span>
+                            ))}
+                          </div>
+                          {subject.archivedAt && (
+                            <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+                              <span>📅</span>
+                              <span>Arquivado em {new Date(subject.archivedAt).toLocaleDateString('pt-BR')}</span>
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleUnarchiveSubject(subject.id)}
+                          className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl hover:from-green-700 hover:to-emerald-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                        >
+                          <span className="mr-2">📦</span>
+                          Restaurar Disciplina
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {activeTab === 'unidades' && (
               <div>
                 {archivedUnits.length === 0 ? (
