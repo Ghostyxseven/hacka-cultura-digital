@@ -35,15 +35,24 @@ export default function NewSubjectPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <Link href="/" className="text-indigo-600 hover:text-indigo-700 mb-4 inline-block">
-            ← Voltar para Dashboard
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-8 py-8">
+        <div className="max-w-3xl mx-auto">
+          <Link
+            href="/"
+            className="text-gray-600 hover:text-gray-900 mb-6 inline-flex items-center gap-2 text-sm font-medium transition-colors"
+          >
+            <span>←</span>
+            <span>Voltar para Dashboard</span>
           </Link>
 
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">Nova Disciplina</h1>
+          <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+            <div className="mb-6 pb-6 border-b border-gray-200">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Nova Disciplina</h1>
+              <p className="text-gray-600">
+                Cadastre uma disciplina para organizar seus conteúdos didáticos (ex: Matemática, Ciências, História)
+              </p>
+            </div>
 
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -65,6 +74,9 @@ export default function NewSubjectPage() {
                   placeholder="Ex: Matemática, Ciências, História..."
                   required
                 />
+                <p className="mt-2 text-xs text-gray-500">
+                  Nome da disciplina que será usada para organizar suas aulas
+                </p>
               </div>
 
               <div className="mb-6">
@@ -72,7 +84,7 @@ export default function NewSubjectPage() {
                   htmlFor="description"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Descrição
+                  Descrição (opcional)
                 </label>
                 <textarea
                   id="description"
@@ -85,9 +97,12 @@ export default function NewSubjectPage() {
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Anos Escolares * (selecione pelo menos um)
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Anos Escolares * <span className="text-gray-500 font-normal">(selecione pelo menos um)</span>
                 </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Selecione os anos escolares para os quais esta disciplina será utilizada
+                </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {SCHOOL_YEARS.map((year) => (
                     <button
