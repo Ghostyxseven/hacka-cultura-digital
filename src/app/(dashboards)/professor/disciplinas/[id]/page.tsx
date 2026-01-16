@@ -122,29 +122,69 @@ export default function SubjectDetailPage() {
 
 /**
  * Card de unidade reutilizável
+ * 
+ * Exibe informações da unidade com botões de ação rápida
+ * - Plano de aula
+ * - Atividade
+ * - Slides (futuro)
  */
 function UnitCard({ unit }: { unit: Unit }) {
+  const baseUrl = `/professor/unidades/${unit.id}/plano`;
+
   return (
-    <Link
-      href={`/professor/unidades/${unit.id}/plano`}
-      className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all hover:scale-105 cursor-pointer group"
-    >
-      <div className="flex items-start justify-between mb-3">
-        <h3 className="text-xl font-bold text-gray-800 group-hover:text-indigo-600 transition-colors flex-1">
-          {unit.title}
-        </h3>
-        <span className="text-2xl opacity-50 group-hover:opacity-100 transition-opacity ml-2">→</span>
+    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-all border border-gray-100 hover:border-indigo-200 group">
+      {/* Header */}
+      <div className="mb-4">
+        <div className="flex items-start justify-between mb-2">
+          <h3 className="text-xl font-bold text-gray-800 group-hover:text-indigo-600 transition-colors flex-1">
+            {unit.title}
+          </h3>
+          {unit.isAIGenerated && (
+            <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium flex items-center whitespace-nowrap ml-2">
+              <span className="mr-1">✨</span>
+              IA
+            </span>
+          )}
+        </div>
+        <p className="text-gray-600 text-sm line-clamp-2">{unit.theme}</p>
       </div>
-      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{unit.theme}</p>
-      <div className="flex items-center justify-between">
-        {unit.isAIGenerated && (
-          <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium flex items-center">
-            <span className="mr-1">✨</span>
-            Sugerida por IA
-          </span>
-        )}
-        <span className="text-gray-400 text-xs">Clique para ver materiais →</span>
+
+      {/* Status Badge */}
+      <div className="mb-4 pb-4 border-b border-gray-100">
+        <span className={`px-2 py-1 rounded text-xs font-medium ${
+          unit.isAIGenerated 
+            ? 'bg-blue-100 text-blue-700' 
+            : 'bg-gray-100 text-gray-700'
+        }`}>
+          {unit.isAIGenerated ? 'Sugerida pela IA' : 'Criada Manualmente'}
+        </span>
       </div>
-    </Link>
+
+      {/* Botões de Ação */}
+      <div className="flex flex-col gap-2">
+        <Link
+          href={baseUrl}
+          className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium shadow-sm"
+        >
+          <span className="mr-2">📋</span>
+          Plano de Aula
+        </Link>
+        <Link
+          href={`${baseUrl}#atividade`}
+          className="flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium border border-blue-200"
+        >
+          <span className="mr-2">📝</span>
+          Atividade
+        </Link>
+        <button
+          disabled
+          className="flex items-center justify-center px-4 py-2 bg-gray-50 text-gray-400 rounded-lg text-sm font-medium border border-gray-200 cursor-not-allowed opacity-60"
+          title="Em breve"
+        >
+          <span className="mr-2">🖼️</span>
+          Slides (Em breve)
+        </button>
+      </div>
+    </div>
   );
 }
