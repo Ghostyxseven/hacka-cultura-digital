@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ApplicationServiceFactory } from '@/application';
+import { useSubjectForm } from '@/app/hooks';
 
 const SCHOOL_YEARS = [
   '6º ano',
@@ -15,51 +14,23 @@ const SCHOOL_YEARS = [
   '3º ano EM',
 ];
 
+/**
+ * Página de criação de disciplina
+ * Lógica de negócio separada em hook customizado (Clean Architecture)
+ */
 export default function NewSubjectPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    schoolYears: [] as string[],
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleToggleYear = (year: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      schoolYears: prev.schoolYears.includes(year)
-        ? prev.schoolYears.filter((y) => y !== year)
-        : [...prev.schoolYears, year],
-    }));
-  };
+  const { formData, setFormData, loading, error, toggleSchoolYear, createSubject } =
+    useSubjectForm();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
 
     try {
-      if (!formData.name.trim()) {
-        throw new Error('Nome da disciplina é obrigatório');
-      }
-
-      if (formData.schoolYears.length === 0) {
-        throw new Error('Selecione pelo menos um ano escolar');
-      }
-
-      const subjectService = ApplicationServiceFactory.createSubjectService();
-      const subject = await subjectService.create({
-        name: formData.name.trim(),
-        description: formData.description.trim(),
-        schoolYears: formData.schoolYears,
-      });
-
+      const subject = await createSubject(formData);
       router.push(`/professor/disciplinas/${subject.id}`);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao criar disciplina');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      // Erro já está sendo tratado no hook
     }
   };
 
@@ -122,7 +93,7 @@ export default function NewSubjectPage() {
                     <button
                       key={year}
                       type="button"
-                      onClick={() => handleToggleYear(year)}
+                      onClick={() => toggleSchoolYear(year)}
                       className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                         formData.schoolYears.includes(year)
                           ? 'bg-indigo-600 text-white border-indigo-600'

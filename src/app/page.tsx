@@ -1,37 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ApplicationServiceFactory } from '@/application';
-import type { Subject } from '@/application/viewmodels';
+import { useDashboard } from './hooks';
 
 /**
  * Dashboard Principal - Single User Application
  * Acesso direto sem autenticação
+ * 
+ * Lógica de negócio separada em hook customizado (Clean Architecture)
  */
 export default function Home() {
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadSubjects();
-  }, []);
-
-  const loadSubjects = async () => {
-    try {
-      setLoading(true);
-      const subjectService = ApplicationServiceFactory.createSubjectService();
-      const allSubjects = await subjectService.findAll();
-      setSubjects(allSubjects);
-    } catch (error) {
-      console.error('Erro ao carregar disciplinas:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const totalUnits = subjects.reduce((acc, subject) => acc + (subject as any).unitsCount || 0, 0);
-  const totalPlans = subjects.reduce((acc, subject) => acc + (subject as any).plansCount || 0, 0);
+  const { subjects, loading, stats } = useDashboard();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -51,19 +30,19 @@ export default function Home() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-gray-600 text-sm font-medium mb-2">Disciplinas</h3>
             <p className="text-3xl font-bold text-indigo-600">
-              {loading ? '...' : subjects.length}
+              {loading ? '...' : stats.totalSubjects}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-gray-600 text-sm font-medium mb-2">Unidades</h3>
             <p className="text-3xl font-bold text-indigo-600">
-              {loading ? '...' : totalUnits}
+              {loading ? '...' : stats.totalUnits}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-gray-600 text-sm font-medium mb-2">Planos de Aula</h3>
             <p className="text-3xl font-bold text-indigo-600">
-              {loading ? '...' : totalPlans}
+              {loading ? '...' : stats.totalPlans}
             </p>
           </div>
         </div>

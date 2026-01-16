@@ -1,116 +1,42 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ApplicationServiceFactory } from '@/application';
-import type { Subject } from '@/application/viewmodels';
+import { useUnitForm } from '@/app/hooks';
 
+/**
+ * Página de criação de unidade
+ * Lógica de negócio separada em hook customizado (Clean Architecture)
+ */
 export default function NewUnitPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const subjectId = searchParams.get('subjectId') || '';
 
-  const [formData, setFormData] = useState({
-    subjectId: subjectId,
-    title: '',
-    theme: '',
-    isAIGenerated: false,
-  });
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingSubjects, setLoadingSubjects] = useState(true);
-  const [error, setError] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<Array<{ title: string; theme: string }>>([]);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-
-  useEffect(() => {
-    loadSubjects();
-  }, []);
-
-  useEffect(() => {
-    if (subjectId && subjects.length > 0) {
-      const subject = subjects.find((s) => s.id === subjectId);
-      if (subject) {
-        loadSuggestions(subject.id);
-      }
-    }
-  }, [subjectId, subjects]);
-
-  const loadSubjects = async () => {
-    try {
-      const subjectService = ApplicationServiceFactory.createSubjectService();
-      const allSubjects = await subjectService.findAll();
-      setSubjects(allSubjects);
-      if (allSubjects.length > 0 && !subjectId) {
-        setFormData((prev) => ({ ...prev, subjectId: allSubjects[0].id }));
-      }
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar disciplinas');
-    } finally {
-      setLoadingSubjects(false);
-    }
-  };
-
-  const loadSuggestions = async (sid: string) => {
-    try {
-      setLoadingSuggestions(true);
-      const unitService = ApplicationServiceFactory.createUnitService();
-      const suggested = await unitService.suggest({
-        subjectId: sid,
-        numberOfSuggestions: 5,
-      });
-      setSuggestions(suggested);
-    } catch (err: any) {
-      console.error('Erro ao carregar sugestões:', err);
-    } finally {
-      setLoadingSuggestions(false);
-    }
-  };
+  const {
+    formData,
+    setFormData,
+    subjects,
+    suggestions,
+    loading,
+    loadingSubjects,
+    loadingSuggestions,
+    error,
+    selectSuggestion,
+    createUnit,
+  } = useUnitForm(subjectId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
 
     try {
-      if (!formData.subjectId) {
-        throw new Error('Selecione uma disciplina');
-      }
-
-      if (!formData.title.trim()) {
-        throw new Error('Título da unidade é obrigatório');
-      }
-
-      if (!formData.theme.trim()) {
-        throw new Error('Tema da unidade é obrigatório');
-      }
-
-      const unitService = ApplicationServiceFactory.createUnitService();
-      const unit = await unitService.create({
-        subjectId: formData.subjectId,
-        title: formData.title.trim(),
-        theme: formData.theme.trim(),
-        isAIGenerated: formData.isAIGenerated,
-      });
-
+      const unit = await createUnit(formData);
       router.push(`/professor/unidades/${unit.id}/plano`);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao criar unidade');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      // Erro já está sendo tratado no hook
     }
-  };
-
-  const handleSelectSuggestion = (suggestion: { title: string; theme: string }) => {
-    setFormData({
-      ...formData,
-      title: suggestion.title,
-      theme: suggestion.theme,
-      isAIGenerated: true,
-    });
-    setShowSuggestions(false);
   };
 
   const selectedSubject = subjects.find((s) => s.id === formData.subjectId);
@@ -145,9 +71,6 @@ export default function NewUnitPage() {
                   value={formData.subjectId}
                   onChange={(e) => {
                     setFormData({ ...formData, subjectId: e.target.value });
-                    if (e.target.value) {
-                      loadSuggestions(e.target.value);
-                    }
                   }}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   required
@@ -185,7 +108,10 @@ export default function NewUnitPage() {
                             <button
                               key={index}
                               type="button"
-                              onClick={() => handleSelectSuggestion(suggestion)}
+                              onClick={() => {
+                                selectSuggestion(suggestion);
+                                setShowSuggestions(false);
+                              }}
                               className="w-full text-left p-3 bg-white rounded-lg hover:shadow-md transition-shadow border-2 border-transparent hover:border-indigo-400"
                             >
                               <h4 className="font-semibold text-gray-800 mb-1">

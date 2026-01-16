@@ -1,56 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ApplicationServiceFactory } from '@/application';
-import type { Subject, Unit } from '@/application/viewmodels';
+import { useSubjectDetail } from '@/app/hooks';
 
+/**
+ * Página de detalhes da disciplina
+ * Lógica de negócio separada em hook customizado (Clean Architecture)
+ */
 export default function SubjectDetailPage() {
   const params = useParams();
   const router = useRouter();
   const subjectId = params.id as string;
 
-  const [subject, setSubject] = useState<Subject | null>(null);
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    loadData();
-  }, [subjectId]);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const subjectService = ApplicationServiceFactory.createSubjectService();
-      const unitService = ApplicationServiceFactory.createUnitService();
-
-      const [subjectData, unitsData] = await Promise.all([
-        subjectService.findById(subjectId),
-        unitService.findBySubject(subjectId),
-      ]);
-
-      setSubject(subjectData);
-      setUnits(unitsData);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar dados');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { subject, units, loading, error, deleteSubject } = useSubjectDetail(subjectId);
 
   const handleDelete = async () => {
     if (!confirm('Tem certeza que deseja deletar esta disciplina?')) {
       return;
     }
 
-    try {
-      const subjectService = ApplicationServiceFactory.createSubjectService();
-      await subjectService.delete(subjectId);
+    const success = await deleteSubject();
+    if (success) {
       router.push('/');
-    } catch (err: any) {
-      setError(err.message || 'Erro ao deletar disciplina');
     }
   };
 

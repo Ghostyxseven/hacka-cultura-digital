@@ -1,86 +1,53 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ApplicationServiceFactory } from '@/application';
-import type { Unit, LessonPlan, Activity, Subject } from '@/application/viewmodels';
+import { useMaterialGeneration } from '@/app/hooks';
+import type { LessonPlan, Activity } from '@/application/viewmodels';
 
+/**
+ * Página de geração de plano de aula
+ * Lógica de negócio separada em hook customizado (Clean Architecture)
+ */
 export default function GenerateLessonPlanPage() {
   const params = useParams();
-  const router = useRouter();
   const unitId = params.unitId as string;
 
-  const [unit, setUnit] = useState<Unit | null>(null);
-  const [subject, setSubject] = useState<Subject | null>(null);
-  const [lessonPlan, setLessonPlan] = useState<LessonPlan | null>(null);
-  const [activity, setActivity] = useState<Activity | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
-  const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     year: '',
     additionalContext: '',
   });
 
+  const {
+    lessonPlan,
+    activity,
+    loading,
+    generating,
+    error,
+    loadMaterials,
+    generateMaterials,
+  } = useMaterialGeneration(unitId);
+
   useEffect(() => {
-    loadData();
-  }, [unitId]);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const subjectService = ApplicationServiceFactory.createSubjectService();
-      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
-
-      // Busca unidade e disciplina
-      const unitRepo = ApplicationServiceFactory.createUnitService();
-      // Para buscar unidade, precisamos do repositório diretamente por enquanto
-      // Isso será melhorado quando refatorarmos os hooks
-
-      // Tenta buscar plano e atividade existentes
-      try {
-        const [plan, act] = await Promise.all([
-          materialService.getLessonPlanByUnit(unitId),
-          materialService.getActivityByUnit(unitId),
-        ]);
-        setLessonPlan(plan);
-        setActivity(act);
-      } catch {
-        // Plano/atividade não existem ainda
+    loadMaterials().then((result) => {
+      if (!result) {
         setShowForm(true);
       }
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar dados');
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
+  }, [unitId, loadMaterials]);
 
   const handleGenerate = async () => {
-    setGenerating(true);
-    setError('');
-
     try {
-      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
-
-      // Gera plano de aula e atividade
-      const result = await materialService.generateAllMaterials({
+      await generateMaterials({
         unitId,
         year: formData.year || undefined,
         additionalContext: formData.additionalContext || undefined,
       });
-
-      setLessonPlan(result.lessonPlan);
-      setActivity(result.activity);
       setShowForm(false);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao gerar materiais');
-    } finally {
-      setGenerating(false);
+    } catch (err) {
+      // Erro já está sendo tratado no hook
     }
   };
 
