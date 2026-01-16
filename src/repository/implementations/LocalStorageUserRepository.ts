@@ -58,4 +58,27 @@ export class LocalStorageUserRepository implements IUserRepository {
   userExists(email: string): boolean {
     return !!this.getUserByEmail(email);
   }
+
+  /**
+   * Busca alunos de uma turma específica
+   */
+  getStudentsByClassId(classId: string): User[] {
+    return this.getUsersByRole('aluno').filter(u => u.classId === classId);
+  }
+
+  /**
+   * Busca professores de uma turma específica
+   */
+  getTeachersByClassId(classId: string): User[] {
+    return this.getUsersByRole('professor').filter(u => 
+      u.classes?.includes(classId)
+    );
+  }
+
+  /**
+   * Busca alunos por professor (compatibilidade com sistema antigo)
+   */
+  getAlunosByProfessorId(professorId: string): User[] {
+    return this.getUsersByRole('aluno').filter(u => u.professorId === professorId);
+  }
 }
