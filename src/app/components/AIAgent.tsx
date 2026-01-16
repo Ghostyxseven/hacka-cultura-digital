@@ -182,7 +182,6 @@ export function AIAgent() {
           const materialService = ApplicationServiceFactory.createMaterialGenerationService();
           const activity = await materialService.generateActivity({
             unitId: unit.id,
-            difficulty: 'medium',
           });
 
           showToast(`Atividade gerada com sucesso para "${unit.title}"!`, 'success');
