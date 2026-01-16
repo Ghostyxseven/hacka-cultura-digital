@@ -43,12 +43,15 @@ export default function AdminPage() {
           />
         </Link>
 
-        <StatCard
-          title="Sistema"
-          value="Configurações"
-          description="Configurações gerais do sistema"
-          icon="⚙️"
-        />
+        <Link href="/admin/turmas">
+          <StatCard
+            title="Turmas"
+            value="Gerenciar"
+            description="Gerencie turmas do sistema"
+            icon="🏫"
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+          />
+        </Link>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -62,6 +65,11 @@ export default function AdminPage() {
           <Link href="/admin/usuarios">
             <Button variant="secondary">
               👥 Gerenciar Usuários
+            </Button>
+          </Link>
+          <Link href="/admin/turmas">
+            <Button variant="secondary">
+              🏫 Gerenciar Turmas
             </Button>
           </Link>
         </div>

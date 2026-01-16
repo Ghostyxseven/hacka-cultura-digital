@@ -11,3 +11,7 @@ export { UnitCard } from './UnitCard';
 export { StatsSection } from './StatsSection';
 export { SubjectsList } from './SubjectsList';
 export { UnitsList } from './UnitsList';
+export { ClassCard } from './ClassCard';
+export { ClassSelector } from './ClassSelector';
+export { ClassTeacherList } from './ClassTeacherList';
+export { ClassStudentList } from './ClassStudentList';

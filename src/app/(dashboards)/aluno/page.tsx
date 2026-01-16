@@ -9,26 +9,38 @@ import { getGetQuizResultsUseCase } from '@/lib/quizService';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { SubjectsList, UnitsList, StatsSection } from '@/app/components';
+import { Button } from '@/components/ui/Button';
+import { SubjectsList, UnitsList, StatsSection, ClassTeacherList } from '@/app/components';
 import { LazyTeacherMural } from '@/components/lazy';
 import { PresentationMapper } from '@/application';
+import { GetClassByIdUseCase } from '@/application/usecases/GetClassByIdUseCase';
+import { GetClassTeachersUseCase, ClassTeacherInfo } from '@/application/usecases/GetClassTeachersUseCase';
+import { LocalStorageClassRepository } from '@/repository/implementations/LocalStorageClassRepository';
+import { LocalStorageUserRepository } from '@/repository/implementations/LocalStorageUserRepository';
 import type { SubjectViewModel, UnitViewModel } from '@/application/viewmodels';
 import type { QuizResult } from '@/core/entities/QuizResult';
 import type { User } from '@/core/entities/User';
+import type { Class } from '@/core/entities/Class';
+import Link from 'next/link';
 
 export default function AlunoPage() {
   const { user, isAluno } = useAuth();
   const authService = getAuthService();
   const lessonPlanService = getLessonPlanService();
 
+  const [classEntity, setClassEntity] = useState<Class | null>(null);
+  const [teachers, setTeachers] = useState<ClassTeacherInfo[]>([]);
   const [professor, setProfessor] = useState<User | null>(null);
   const [subjects, setSubjects] = useState<SubjectViewModel[]>([]);
   const [units, setUnits] = useState<UnitViewModel[]>([]);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const classRepository = LocalStorageClassRepository.getInstance();
+  const userRepository = LocalStorageUserRepository.getInstance();
+
   useEffect(() => {
-    if (isAluno && user?.professorId) {
+    if (isAluno && user) {
       loadData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -36,8 +48,24 @@ export default function AlunoPage() {
 
   const loadData = () => {
     try {
-      const professorData = authService.getUserById(user!.professorId!);
-      setProfessor(professorData || null);
+      // Busca turma do aluno (sistema novo)
+      if (user!.classId) {
+        const getClassUseCase = new GetClassByIdUseCase(classRepository);
+        const classData = getClassUseCase.execute(user!.classId);
+        setClassEntity(classData || null);
+
+        if (classData) {
+          const getTeachersUseCase = new GetClassTeachersUseCase(classRepository, userRepository);
+          const teachersData = getTeachersUseCase.execute(user!.classId);
+          setTeachers(teachersData);
+        }
+      }
+
+      // Sistema antigo (compatibilidade) - busca professor direto
+      if (user!.professorId && !user!.classId) {
+        const professorData = authService.getUserById(user!.professorId);
+        setProfessor(professorData || null);
+      }
 
       const allSubjects = lessonPlanService.getSubjects().map(s => PresentationMapper.toSubjectViewModel(s));
       const allUnits = lessonPlanService.getUnits().map(u => PresentationMapper.toUnitViewModel(u));
@@ -93,8 +121,48 @@ export default function AlunoPage() {
       </div>
 
       <PageContainer>
-        {/* Card do Professor - Destaque */}
-        {professor && (
+        {/* Card da Turma - Destaque */}
+        {classEntity && (
+          <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-2xl shadow-2xl p-6 mb-8 text-white transform hover:scale-[1.02] transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-6 flex-1">
+                <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm border-4 border-white/30 flex items-center justify-center text-white font-bold text-3xl flex-shrink-0 shadow-lg">
+                  🏫
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">🏫</span>
+                    <h3 className="font-bold text-2xl">Minha Turma</h3>
+                  </div>
+                  <p className="text-xl font-semibold mb-1">{classEntity.name}</p>
+                  <div className="flex items-center gap-4 text-blue-100 text-sm">
+                    <span>📚 {classEntity.gradeYear}</span>
+                    <span>📅 {classEntity.schoolYear}</span>
+                  </div>
+                </div>
+              </div>
+              <Link href={`/aluno/turma`}>
+                <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+                  Ver Detalhes
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Professores da Turma */}
+        {classEntity && teachers.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Professores da Turma</h2>
+            <ClassTeacherList
+              teachers={teachers}
+              subjects={lessonPlanService.getSubjects()}
+            />
+          </div>
+        )}
+
+        {/* Card do Professor - Sistema Antigo (compatibilidade) */}
+        {!classEntity && professor && (
           <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-2xl shadow-2xl p-6 mb-8 text-white transform hover:scale-[1.02] transition-all duration-300">
             <div className="flex items-center gap-6">
               <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm border-4 border-white/30 flex items-center justify-center text-white font-bold text-3xl flex-shrink-0 shadow-lg">
