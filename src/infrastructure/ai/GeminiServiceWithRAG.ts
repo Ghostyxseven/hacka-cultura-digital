@@ -10,16 +10,18 @@ import { QuizResult } from "../../core/entities/QuizResult";
 import { IAIService } from "./IAIService";
 import { IRAGService } from "../rag/IRAGService";
 import { SimpleRAGService } from "../rag/SimpleRAGService";
+import { ExplainabilityService, AIExplanation } from "./ExplainabilityService";
 
 /**
  * Implementação do serviço de IA usando Google Gemini com RAG (Retrieval Augmented Generation).
  * Enriquece os prompts com contexto recuperado da BNCC e diretrizes do MEC.
  * Segue o padrão de Clean Architecture, implementando a interface IAIService.
  */
-export class GeminiServiceWithRAG implements IAIService {
+export class GeminiServiceWithRAG implements IAIService, IAIServiceWithExplanation {
   private model: GenerativeModel;
   private readonly API_KEY: string;
   private ragService: IRAGService;
+  private explainabilityService: ExplainabilityService;
 
   // Valores válidos de SchoolYear conforme definido na entidade
   private readonly VALID_SCHOOL_YEARS: readonly SchoolYear[] = [
@@ -41,6 +43,9 @@ export class GeminiServiceWithRAG implements IAIService {
 
     // Usa o RAGService fornecido ou cria um novo
     this.ragService = ragService || new SimpleRAGService();
+    
+    // Inicializa serviço de explicabilidade
+    this.explainabilityService = new ExplainabilityService();
 
     const genAI = new GoogleGenerativeAI(this.API_KEY);
 
@@ -155,6 +160,15 @@ IMPORTANTE:
 
       // Validação e construção do LessonPlan completo
       const lessonPlan = this.validateAndBuildLessonPlan(parsedData, subject, grade as SchoolYear);
+
+      // Registra explicação da geração
+      const explanation = this.explainabilityService.createExplanationFromRAG(
+        relevantContext,
+        parsedData.bnccCompetencies || [],
+        'gemini-1.5-flash',
+        '2.0-rag'
+      );
+      this.explainabilityService.registerExplanation(lessonPlan.id, explanation);
 
       return lessonPlan;
     } catch (error: any) {
@@ -416,5 +430,34 @@ FORMATO JSON OBRIGATÓRIO:
   ]
 }
 `;
+  }
+
+  /**
+   * Gera um plano de aula com explicação detalhada
+   */
+  async generateWithExplanation(
+    subject: string,
+    topic: string,
+    grade: string,
+    context?: string
+  ): Promise<GenerationResult> {
+    const lessonPlan = await this.generate(subject, topic, grade, context);
+    const explanation = this.explainabilityService.getExplanation(lessonPlan.id);
+
+    if (!explanation) {
+      throw new Error('Explicação não encontrada para o plano gerado');
+    }
+
+    return {
+      lessonPlan,
+      explanation,
+    };
+  }
+
+  /**
+   * Busca explicação de um plano já gerado
+   */
+  getExplanation(lessonPlanId: string): AIExplanation | undefined {
+    return this.explainabilityService.getExplanation(lessonPlanId);
   }
 }
