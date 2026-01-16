@@ -13,6 +13,7 @@ import { LazyTeacherMural } from '@/components/lazy';
 import { getClassService, getLessonPlanService } from '@/lib/service';
 import { showError, showSuccess } from '@/utils/notifications';
 import { Class } from '@/core/entities/Class';
+import { ClassHealthWidget } from '@/app/components/ClassHealthWidget';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -146,8 +147,13 @@ export default function ProfessorPage() {
         </div>
 
         {/* Estatísticas */}
-        <div className="mb-8">
-          <StatsSection stats={stats} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          <div className="lg:col-span-2">
+            <StatsSection stats={stats} />
+          </div>
+          <div>
+            <ClassHealthWidget classes={classes} />
+          </div>
         </div>
 
         {/* Seção de Turmas */}
