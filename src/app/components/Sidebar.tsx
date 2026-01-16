@@ -17,8 +17,9 @@ export function Sidebar() {
   const pathname = usePathname();
 
   const menuItems: SidebarItem[] = [
-    { label: 'Início', href: '/', icon: '🏠' },
+    { label: 'Início', href: '/professor', icon: '🏠' },
     { label: 'Criar Disciplina', href: '/professor/disciplinas/new', icon: '➕' },
+    { label: 'Arquivados', href: '/professor/arquivados', icon: '📦' },
   ];
 
   const isActive = (href: string) => {
