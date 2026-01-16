@@ -9,6 +9,12 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { showError, showSuccess } from '@/utils/notifications';
+import { GetClassesUseCase } from '@/application/usecases/GetClassesUseCase';
+import { CreateUserUseCase } from '@/application/usecases/CreateUserUseCase';
+import { AssignStudentToClassUseCase } from '@/application/usecases/AssignStudentToClassUseCase';
+import { LocalStorageClassRepository } from '@/repository/implementations/LocalStorageClassRepository';
+import { LocalStorageUserRepository } from '@/repository/implementations/LocalStorageUserRepository';
+import { Class } from '@/core/entities/Class';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -17,28 +23,49 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [professorId, setProfessorId] = useState('');
+  const [classId, setClassId] = useState('');
+  const [professorId, setProfessorId] = useState(''); // Sistema antigo (compatibilidade)
   const [loading, setLoading] = useState(false);
+  const [classes, setClasses] = useState<Class[]>([]);
   const [professores, setProfessores] = useState<Array<{ id: string; name: string; email: string }>>([]);
+  const [useClassSystem, setUseClassSystem] = useState(true); // Toggle entre sistema novo e antigo
   const [errors, setErrors] = useState<{
     name?: string;
     email?: string;
     password?: string;
     confirmPassword?: string;
+    classId?: string;
     professorId?: string;
   }>({});
 
-  // Carrega lista de professores
+  const classRepository = LocalStorageClassRepository.getInstance();
+
+  // Carrega lista de turmas e professores
   useEffect(() => {
-    const professoresList = authService.getAllProfessores();
-    setProfessores(
-      professoresList.map((p) => ({
-        id: p.id,
-        name: p.name,
-        email: p.email,
-      }))
-    );
-  }, [authService]);
+    try {
+      // Sistema novo: carrega turmas
+      const getClassesUseCase = new GetClassesUseCase(classRepository);
+      const allClasses = getClassesUseCase.execute();
+      setClasses(allClasses);
+
+      // Sistema antigo (compatibilidade): carrega professores
+      const professoresList = authService.getAllProfessores();
+      setProfessores(
+        professoresList.map((p) => ({
+          id: p.id,
+          name: p.name,
+          email: p.email,
+        }))
+      );
+
+      // Se não há turmas, usa sistema antigo
+      if (allClasses.length === 0) {
+        setUseClassSystem(false);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+    }
+  }, [authService, classRepository]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -69,8 +96,14 @@ export default function RegisterPage() {
       newErrors.confirmPassword = 'Senhas não coincidem';
     }
 
-    if (!professorId) {
-      newErrors.professorId = 'Selecione um professor';
+    if (useClassSystem) {
+      if (!classId) {
+        newErrors.classId = 'Selecione uma turma';
+      }
+    } else {
+      if (!professorId) {
+        newErrors.professorId = 'Selecione um professor';
+      }
     }
 
     setErrors(newErrors);
@@ -86,7 +119,35 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      authService.registerAluno(name.trim(), email.trim(), password, professorId);
+      if (useClassSystem && classId) {
+        // Sistema novo: cadastra aluno com turma
+        const userRepository = LocalStorageUserRepository.getInstance();
+        const createUserUseCase = new CreateUserUseCase(userRepository);
+        const aluno = createUserUseCase.execute(
+          name.trim(),
+          email.trim(),
+          password,
+          'aluno',
+          undefined, // professorId (não usado no sistema novo)
+          classId, // classId
+          undefined, // classes
+          undefined // subjects
+        );
+
+        // Associa aluno à turma (já feito pelo CreateUserUseCase, mas garantimos)
+        if (aluno && classId) {
+          const assignUseCase = new AssignStudentToClassUseCase(classRepository, userRepository);
+          try {
+            assignUseCase.execute(classId, aluno.id);
+          } catch (e) {
+            // Aluno já está na turma (ok)
+            console.log('Aluno já associado à turma');
+          }
+        }
+      } else {
+        // Sistema antigo: cadastra aluno com professor
+        authService.registerAluno(name.trim(), email.trim(), password, professorId);
+      }
       showSuccess('Cadastro realizado com sucesso! Faça login para continuar.');
       router.push('/login');
     } catch (error) {
@@ -110,7 +171,16 @@ export default function RegisterPage() {
             <p className="text-gray-600">Crie sua conta para acessar os materiais</p>
           </div>
 
-          {professores.length === 0 && (
+          {useClassSystem && classes.length === 0 && (
+            <div className="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl shadow-sm">
+              <p className="text-sm text-yellow-800 flex items-center gap-2 font-medium">
+                <span className="text-lg">⚠️</span>
+                <span>Nenhuma turma cadastrada ainda. Peça ao administrador para cadastrar turmas primeiro.</span>
+              </p>
+            </div>
+          )}
+
+          {!useClassSystem && professores.length === 0 && (
             <div className="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl shadow-sm">
               <p className="text-sm text-yellow-800 flex items-center gap-2 font-medium">
                 <span className="text-lg">⚠️</span>
@@ -177,24 +247,47 @@ export default function RegisterPage() {
               placeholder="••••••••"
             />
 
-            <Select
-              id="professorId"
-              label="Professor"
-              value={professorId}
-              onChange={(e) => {
-                setProfessorId(e.target.value);
-                if (errors.professorId) setErrors({ ...errors, professorId: undefined });
-              }}
-              error={errors.professorId}
-              required
-              placeholder="Selecione seu professor"
-              options={professores.map((p) => ({
-                value: p.id,
-                label: `${p.name} (${p.email})`,
-              }))}
-            />
+            {useClassSystem ? (
+              <Select
+                id="classId"
+                label="Turma"
+                value={classId}
+                onChange={(e) => {
+                  setClassId(e.target.value);
+                  if (errors.classId) setErrors({ ...errors, classId: undefined });
+                }}
+                error={errors.classId}
+                required
+                placeholder="Selecione sua turma"
+                options={classes.map((c) => ({
+                  value: c.id,
+                  label: `${c.name} (${c.gradeYear} - ${c.schoolYear})`,
+                }))}
+              />
+            ) : (
+              <Select
+                id="professorId"
+                label="Professor"
+                value={professorId}
+                onChange={(e) => {
+                  setProfessorId(e.target.value);
+                  if (errors.professorId) setErrors({ ...errors, professorId: undefined });
+                }}
+                error={errors.professorId}
+                required
+                placeholder="Selecione seu professor"
+                options={professores.map((p) => ({
+                  value: p.id,
+                  label: `${p.name} (${p.email})`,
+                }))}
+              />
+            )}
 
-            <Button type="submit" className="w-full" disabled={loading || professores.length === 0}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || (useClassSystem ? classes.length === 0 : professores.length === 0)}
+            >
               {loading ? 'Cadastrando...' : 'Cadastrar'}
             </Button>
           </form>
