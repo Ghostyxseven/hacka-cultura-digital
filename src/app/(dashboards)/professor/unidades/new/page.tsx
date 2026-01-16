@@ -81,7 +81,7 @@ export default function NewUnitPage() {
                   onChange={(e) => {
                     setFormData({ ...formData, subjectId: e.target.value });
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-300"
                   required
                   disabled={loadingSubjects}
                 >
@@ -174,7 +174,7 @@ export default function NewUnitPage() {
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-gray-400 transition-colors"
                   placeholder="Ex: Introdução à Cultura Digital"
                   required
                 />
@@ -192,7 +192,7 @@ export default function NewUnitPage() {
                   value={formData.theme}
                   onChange={(e) => setFormData({ ...formData, theme: e.target.value })}
                   rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-gray-400 transition-colors"
                   placeholder="Descreva o tema detalhadamente. Ex: Conceitos básicos de cultura digital, uso responsável das tecnologias, ética na internet..."
                   required
                 />
