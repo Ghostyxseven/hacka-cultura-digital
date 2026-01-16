@@ -19,4 +19,4 @@ export * from './usecases';
 export * from './services';
 export * from './factories/ApplicationServiceFactory';
 export * from './viewmodels';
-export * from './viewmodels';
+export * from './errors';
