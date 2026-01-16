@@ -11,3 +11,6 @@
  * - BNCCCompetency: Competências da Base Nacional Comum Curricular
  */
 export * from './entities';
+
+export * from './types';
+export * from './utils';
