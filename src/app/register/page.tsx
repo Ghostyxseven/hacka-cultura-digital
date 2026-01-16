@@ -123,7 +123,7 @@ export default function RegisterPage() {
         // Sistema novo: cadastra aluno com turma
         const userRepository = LocalStorageUserRepository.getInstance();
         const createUserUseCase = new CreateUserUseCase(userRepository);
-        const aluno = createUserUseCase.execute(
+        createUserUseCase.execute(
           name.trim(),
           email.trim(),
           password,
@@ -134,9 +134,10 @@ export default function RegisterPage() {
           undefined // subjects
         );
 
-        // Associa aluno à turma (já feito pelo CreateUserUseCase, mas garantimos)
-        if (aluno && classId) {
-          const assignUseCase = new AssignStudentToClassUseCase(classRepository, userRepository);
+        // Associa aluno à turma
+        const assignUseCase = new AssignStudentToClassUseCase(classRepository, userRepository);
+        const aluno = userRepository.getUserByEmail(email.trim());
+        if (aluno) {
           try {
             assignUseCase.execute(classId, aluno.id);
           } catch (e) {
