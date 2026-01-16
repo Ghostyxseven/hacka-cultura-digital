@@ -5,9 +5,19 @@
  */
 
 /**
- * Anos escolares do Ensino Fundamental e Médio
+ * Anos escolares do Ensino Fundamental e Ensino Médio
+ * 
+ * Cobre do 1º ano do Ensino Fundamental ao 3º ano do Ensino Médio
+ * Total: 12 anos escolares (9 do EF + 3 do EM)
+ * 
+ * @example
+ * ```typescript
+ * const schoolYear: SchoolYear = '6º ano'; // Ensino Fundamental
+ * const highSchoolYear: SchoolYear = '2º ano EM'; // Ensino Médio
+ * ```
  */
 export type SchoolYear =
+  // Ensino Fundamental (1º ao 9º ano)
   | '1º ano'
   | '2º ano'
   | '3º ano'
@@ -17,9 +27,80 @@ export type SchoolYear =
   | '7º ano'
   | '8º ano'
   | '9º ano'
+  // Ensino Médio (1º ao 3º ano)
   | '1º ano EM'
   | '2º ano EM'
   | '3º ano EM';
+
+/**
+ * Array com todos os anos escolares do Ensino Fundamental (1º ao 9º ano)
+ */
+export const ELEMENTARY_SCHOOL_YEARS: SchoolYear[] = [
+  '1º ano',
+  '2º ano',
+  '3º ano',
+  '4º ano',
+  '5º ano',
+  '6º ano',
+  '7º ano',
+  '8º ano',
+  '9º ano',
+] as const;
+
+/**
+ * Array com todos os anos escolares do Ensino Médio (1º ao 3º ano)
+ */
+export const HIGH_SCHOOL_YEARS: SchoolYear[] = [
+  '1º ano EM',
+  '2º ano EM',
+  '3º ano EM',
+] as const;
+
+/**
+ * Array com todos os anos escolares (do 1º ano EF ao 3º ano EM)
+ * Total: 12 anos
+ */
+export const ALL_SCHOOL_YEARS: SchoolYear[] = [
+  ...ELEMENTARY_SCHOOL_YEARS,
+  ...HIGH_SCHOOL_YEARS,
+] as const;
+
+/**
+ * Verifica se uma string é um ano escolar válido
+ * 
+ * @param year - String a ser verificada
+ * @returns `true` se for um ano escolar válido
+ * 
+ * @example
+ * ```typescript
+ * isValidSchoolYear('6º ano'); // true
+ * isValidSchoolYear('2º ano EM'); // true
+ * isValidSchoolYear('10º ano'); // false
+ * ```
+ */
+export function isValidSchoolYear(year: string): year is SchoolYear {
+  return ALL_SCHOOL_YEARS.includes(year as SchoolYear);
+}
+
+/**
+ * Retorna se um ano escolar pertence ao Ensino Fundamental
+ * 
+ * @param year - Ano escolar
+ * @returns `true` se for do Ensino Fundamental
+ */
+export function isElementarySchool(year: SchoolYear): boolean {
+  return ELEMENTARY_SCHOOL_YEARS.includes(year);
+}
+
+/**
+ * Retorna se um ano escolar pertence ao Ensino Médio
+ * 
+ * @param year - Ano escolar
+ * @returns `true` se for do Ensino Médio
+ */
+export function isHighSchool(year: SchoolYear): boolean {
+  return HIGH_SCHOOL_YEARS.includes(year);
+}
 
 /**
  * Tipos de atividade avaliativa
