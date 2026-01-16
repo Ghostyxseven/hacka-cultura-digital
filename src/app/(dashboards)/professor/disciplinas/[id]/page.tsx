@@ -113,7 +113,7 @@ export default function SubjectDetailPage() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">Unidades de Ensino</h2>
           <Link
-            href={`/professor/disciplinas/${subjectId}/unidades/new`}
+            href={`/professor/unidades/new?subjectId=${subjectId}`}
             className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
           >
             + Nova Unidade
@@ -124,7 +124,7 @@ export default function SubjectDetailPage() {
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <p className="text-gray-600 mb-4">Nenhuma unidade cadastrada</p>
             <Link
-              href={`/professor/disciplinas/${subjectId}/unidades/new`}
+              href={`/professor/unidades/new?subjectId=${subjectId}`}
               className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
             >
               Criar Primeira Unidade
