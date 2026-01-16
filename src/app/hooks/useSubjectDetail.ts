@@ -65,16 +65,13 @@ export function useSubjectDetail(subjectId: string) {
     try {
       // Usa update do repositório para arquivar a unidade
       const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
-      const { archiveUnit } = await import('@/core/entities/Unit');
       const unitRepository = new LocalStorageUnitRepository();
       
-      const unit = await unitRepository.findById(unitId);
-      if (!unit) {
-        throw new Error('Unidade não encontrada');
-      }
+      await unitRepository.update(unitId, {
+        archived: true,
+        archivedAt: new Date().toISOString(),
+      });
       
-      const archivedUnit = archiveUnit(unit);
-      await unitRepository.update(unitId, archivedUnit);
       await loadData(); // Recarrega dados
       return true;
     } catch (err: any) {
@@ -87,16 +84,13 @@ export function useSubjectDetail(subjectId: string) {
     try {
       // Usa update do repositório para desarquivar a unidade
       const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
-      const { unarchiveUnit } = await import('@/core/entities/Unit');
       const unitRepository = new LocalStorageUnitRepository();
       
-      const unit = await unitRepository.findById(unitId);
-      if (!unit) {
-        throw new Error('Unidade não encontrada');
-      }
+      await unitRepository.update(unitId, {
+        archived: false,
+        archivedAt: undefined,
+      });
       
-      const unarchivedUnit = unarchiveUnit(unit);
-      await unitRepository.update(unitId, unarchivedUnit);
       await loadData(); // Recarrega dados
       return true;
     } catch (err: any) {
