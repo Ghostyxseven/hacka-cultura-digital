@@ -4,7 +4,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubjects, useUnits, useRecentUnits } from '@/hooks';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { Loading } from '@/components/ui/Loading';
+import { Loading, PageSkeleton } from '@/components';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { StatsSection, SubjectsList, UnitsList, TeacherMural } from '@/app/components';
@@ -33,7 +33,11 @@ export default function ProfessorPage() {
   }
 
   if (loading) {
-    return <Loading />;
+    return (
+      <PageContainer>
+        <PageSkeleton />
+      </PageContainer>
+    );
   }
 
   const handleDeleteSubject = (id: string) => {
