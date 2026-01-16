@@ -29,15 +29,7 @@ import {
  * Lógica de negócio separada em hook customizado (Clean Architecture)
  */
 export default function ProfessorDashboard() {
-  const router = useRouter();
   const { subjects, subjectsWithStats, loading, error, stats, archivedStats } = useDashboard();
-
-  const handleGenerateContent = (data: { year: string; subjectId: string; topic: string }) => {
-    // Navega para criar unidade com os dados preenchidos
-    router.push(
-      `/professor/unidades/new?subjectId=${data.subjectId}&year=${encodeURIComponent(data.year)}&topic=${encodeURIComponent(data.topic)}`
-    );
-  };
 
   if (loading) {
     return (
