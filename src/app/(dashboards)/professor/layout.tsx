@@ -17,6 +17,7 @@ export default function ProfessorLayout({
       <main className="flex-1 ml-64">
         {children}
       </main>
+      <AIAgent />
     </div>
   );
 }
