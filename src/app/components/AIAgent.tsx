@@ -7,6 +7,9 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/app/hooks';
 import { LoadingSpinner } from './LoadingSpinner';
 
+// Evento customizado para atualizar dashboard
+const DASHBOARD_UPDATE_EVENT = 'dashboard:update';
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -209,9 +212,20 @@ export function AIAgent() {
           });
 
           showToast(`Disciplina "${subject.name}" criada com sucesso!`, 'success');
-          router.refresh();
+          
+          // Dispara evento para atualizar dashboard instantaneamente
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent(DASHBOARD_UPDATE_EVENT, { 
+              detail: { type: 'subject_created', subject } 
+            }));
+          }
+          
+          // Também recarrega a página após um pequeno delay para garantir
+          setTimeout(() => {
+            router.refresh();
+          }, 500);
 
-          return `✅ Disciplina "${subject.name}" criada com sucesso para ${years.join(', ')}!`;
+          return `✅ Disciplina "${subject.name}" criada com sucesso para ${years.join(', ')}!\n\nA disciplina já está disponível no seu dashboard!`;
         }
 
         case 'generate_activity': {
@@ -243,9 +257,19 @@ export function AIAgent() {
           });
 
           showToast(`Atividade gerada com sucesso para "${unit.title}"!`, 'success');
-          router.refresh();
+          
+          // Dispara evento para atualizar dashboard instantaneamente
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent(DASHBOARD_UPDATE_EVENT, { 
+              detail: { type: 'activity_created', activity } 
+            }));
+          }
+          
+          setTimeout(() => {
+            router.refresh();
+          }, 500);
 
-          return `✅ Atividade gerada com sucesso para a unidade "${unit.title}" da disciplina "${subject.name}"!`;
+          return `✅ Atividade gerada com sucesso para a unidade "${unit.title}" da disciplina "${subject.name}"!\n\nA atividade já está disponível!`;
         }
 
         case 'create_unit': {
@@ -274,9 +298,19 @@ export function AIAgent() {
           });
 
           showToast(`Unidade "${unit.title}" criada com sucesso!`, 'success');
-          router.refresh();
+          
+          // Dispara evento para atualizar dashboard instantaneamente
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent(DASHBOARD_UPDATE_EVENT, { 
+              detail: { type: 'unit_created', unit } 
+            }));
+          }
+          
+          setTimeout(() => {
+            router.refresh();
+          }, 500);
 
-          return `✅ Unidade "${unit.title}" criada com sucesso na disciplina "${subject.name}"!`;
+          return `✅ Unidade "${unit.title}" criada com sucesso na disciplina "${subject.name}"!\n\nA unidade já está disponível!`;
         }
 
         case 'generate_pdf': {

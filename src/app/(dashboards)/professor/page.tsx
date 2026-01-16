@@ -28,7 +28,21 @@ import {
  * Lógica de negócio separada em hook customizado (Clean Architecture)
  */
 export default function ProfessorDashboard() {
-  const { subjects, subjectsWithStats, loading, error, stats, archivedStats } = useDashboard();
+  const { subjects, subjectsWithStats, loading, error, stats, archivedStats, reload } = useDashboard();
+
+  // Escuta eventos de atualização do AIAgent
+  useEffect(() => {
+    const handleUpdate = () => {
+      reload();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('dashboard:update', handleUpdate);
+      return () => {
+        window.removeEventListener('dashboard:update', handleUpdate);
+      };
+    }
+  }, [reload]);
 
   if (loading) {
     return (
