@@ -14,8 +14,10 @@ import { getClassService, getLessonPlanService } from '@/lib/service';
 import { showError, showSuccess } from '@/utils/notifications';
 import { Class } from '@/core/entities/Class';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function ProfessorPage() {
+  const router = useRouter();
   const { user, isProfessor } = useAuth();
   const { subjects, loading: subjectsLoading, refresh: refreshSubjects } = useSubjects();
   const { units: allUnits, loading: unitsLoading, refresh: refreshUnits } = useUnits();
@@ -108,6 +110,41 @@ export default function ProfessorPage() {
       </div>
 
       <PageContainer>
+        {/* Ações Rápidas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Button
+            className="h-auto py-6 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg transform hover:scale-105 transition-all"
+            onClick={() => window.location.href = '/professor/disciplinas/new'}
+          >
+            <span className="text-3xl">✨</span>
+            <span className="font-bold">Planejar Aula</span>
+          </Button>
+
+          <Button
+            className="h-auto py-6 flex flex-col items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
+            onClick={() => window.location.href = '/professor/turmas'}
+          >
+            <span className="text-3xl">📝</span>
+            <span className="font-bold">Diário de Classe</span>
+          </Button>
+
+          <Button
+            className="h-auto py-6 flex flex-col items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
+            onClick={() => router.push('/professor/disciplinas')}
+          >
+            <span className="text-3xl">📚</span>
+            <span className="font-bold">Conteúdos</span>
+          </Button>
+
+          <Button
+            className="h-auto py-6 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg transform hover:scale-105 transition-all"
+            onClick={() => showSuccess('Funcionalidade de Correção Assistida em breve!')}
+          >
+            <span className="text-3xl">✅</span>
+            <span className="font-bold">Corrigir Atividades</span>
+          </Button>
+        </div>
+
         {/* Estatísticas */}
         <div className="mb-8">
           <StatsSection stats={stats} />
@@ -163,15 +200,7 @@ export default function ProfessorPage() {
           <LazyTeacherMural />
         </div>
 
-        {/* Botão Nova Disciplina */}
-        <div className="mb-8">
-          <Link href="/professor/disciplinas/new">
-            <Button className="shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
-              <span className="mr-2">➕</span>
-              Nova Disciplina
-            </Button>
-          </Link>
-        </div>
+
 
         {/* Seção de Disciplinas */}
         {subjects.length === 0 ? (
