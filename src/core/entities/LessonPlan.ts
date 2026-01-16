@@ -44,6 +44,10 @@ export interface LessonPlan {
   createdAt: string;
   /** Data da última atualização no formato ISO 8601 (opcional) */
   updatedAt?: string;
+  /** Indica se o plano está arquivado (padrão: false) */
+  archived?: boolean;
+  /** Data de arquivamento no formato ISO 8601 (opcional) */
+  archivedAt?: string;
 }
 
 /** Constantes para validação */
@@ -172,6 +176,7 @@ export function createLessonPlan(data: Omit<LessonPlan, 'id' | 'createdAt'>): Le
     evaluation: data.evaluation || '',
     bnccAlignment: data.bnccAlignment || '',
     duration: data.duration || 50,
+    archived: data.archived ?? false,
   };
 
   if (!validateLessonPlan(plan)) {
@@ -189,6 +194,7 @@ export function createLessonPlan(data: Omit<LessonPlan, 'id' | 'createdAt'>): Le
     evaluation: data.evaluation?.trim() || '',
     bnccAlignment: data.bnccAlignment?.trim() || '',
     duration: data.duration || 50,
+    archived: data.archived ?? false,
     createdAt: new Date().toISOString(),
   };
 }

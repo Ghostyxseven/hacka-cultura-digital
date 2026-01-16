@@ -46,6 +46,7 @@ export default function GenerateLessonPlanPage() {
     error,
     loadMaterials,
     generateMaterials,
+    archiveAllMaterials,
   } = useMaterialGeneration(unitId);
   const { toasts, showToast, removeToast } = useToast();
 
@@ -84,6 +85,24 @@ export default function GenerateLessonPlanPage() {
 
   const handleRegenerate = () => {
     setShowForm(true);
+  };
+
+  const handleArchive = async () => {
+    if (!confirm('Tem certeza que deseja arquivar todos os materiais desta unidade?')) {
+      return;
+    }
+
+    try {
+      const success = await archiveAllMaterials();
+      if (success) {
+        showToast('Materiais arquivados com sucesso!', 'success');
+        setShowForm(true);
+      } else {
+        showToast(error || 'Erro ao arquivar materiais', 'error');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao arquivar materiais', 'error');
+    }
   };
 
   const handleExportPDF = () => {
@@ -223,6 +242,14 @@ export default function GenerateLessonPlanPage() {
                     className="shadow-md hover:shadow-lg transition-shadow"
                   >
                     Editar/Regenerar
+                  </ActionButton>
+                  <ActionButton
+                    onClick={handleArchive}
+                    icon="📦"
+                    variant="secondary"
+                    className="shadow-md hover:shadow-lg transition-shadow bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300"
+                  >
+                    Arquivar Materiais
                   </ActionButton>
                   <ExportButton onExport={handleExportPDF} />
                 </div>

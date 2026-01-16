@@ -44,7 +44,8 @@ export class LocalStorageActivityRepository implements IActivityRepository {
 
   async findByUnitId(unitId: string): Promise<Activity | null> {
     const activities = await this.getAllFromStorage();
-    return activities.find((a) => a.unitId === unitId) || null;
+    // Retorna apenas atividades não arquivadas por padrão
+    return activities.find((a) => a.unitId === unitId && !a.archived) || null;
   }
 
   async findById(id: string): Promise<Activity | null> {
