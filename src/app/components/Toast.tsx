@@ -44,14 +44,17 @@ export function Toast({ message, type = 'info', duration = 4000, onClose }: Toas
   return (
     <div
       className={`
-        fixed top-4 right-4 z-50 min-w-[300px] max-w-md
+        min-w-[320px] max-w-md
         ${typeStyles[type]}
         rounded-xl shadow-2xl p-4
         flex items-center gap-3
-        animate-in slide-in-from-right
         border-2
+        transform transition-all duration-300 ease-out
       `}
       role="alert"
+      style={{
+        animation: 'slide-in-from-right 0.3s ease-out',
+      }}
     >
       <span className="text-2xl flex-shrink-0">{typeIcons[type]}</span>
       <p className="flex-1 font-semibold text-sm leading-relaxed">{message}</p>
@@ -73,12 +76,21 @@ interface ToastContainerProps {
 
 /**
  * Container para gerenciar múltiplos toasts
+ * Organiza toasts em coluna vertical no canto superior direito
  */
 export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
+  if (toasts.length === 0) return null;
+
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
-      {toasts.map((toast) => (
-        <div key={toast.id} className="pointer-events-auto">
+    <div className="fixed top-4 right-4 z-50 flex flex-col gap-3 pointer-events-none max-w-md">
+      {toasts.map((toast, index) => (
+        <div
+          key={toast.id}
+          className="pointer-events-auto"
+          style={{
+            animationDelay: `${index * 0.1}s`,
+          }}
+        >
           <Toast
             message={toast.message}
             type={toast.type}
