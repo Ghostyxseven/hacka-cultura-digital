@@ -1,53 +1,30 @@
 'use client';
 
-import Link from 'next/link';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDashboard } from './hooks';
-import {
-  DashboardStats,
-  SubjectGrid,
-  ActionButton,
-  LoadingSpinner,
-  ContentSelectionCard,
-} from './components';
 
 /**
- * Dashboard Principal - Single User Application
- * Acesso direto sem autenticação
- * 
- * 🏠 Tela Inicial (Dashboard) - Baseado no design de referência
- * 
- * Características do design:
- * - Header com ícone azul (livro) + "Cultura Digital" + "Plataforma Educacional"
- * - Título "Painel do Professor"
- * - Botões: "Criar conteúdo" e "Meus conteúdos"
- * - Card de seleção com dropdowns (Ano, Disciplina, Assunto)
- * 
- * Fluxo do Professor - Passo 1: Acesso Inicial
- * 
- * Lógica de negócio separada em hook customizado (Clean Architecture)
+ * Página inicial - Redireciona para o dashboard do professor
+ * Mantém consistência com layout de sidebar em todas as páginas
  */
 export default function Home() {
   const router = useRouter();
-  const { subjects, subjectsWithStats, loading, error, stats, archivedStats } = useDashboard();
 
-  const handleGenerateContent = (data: { year: string; subjectId: string; topic: string }) => {
-    // Navega para criar unidade com os dados preenchidos
-    router.push(
-      `/professor/unidades/new?subjectId=${data.subjectId}&year=${encodeURIComponent(data.year)}&topic=${encodeURIComponent(data.topic)}`
-    );
-  };
+  useEffect(() => {
+    // Redireciona automaticamente para o dashboard do professor (com sidebar)
+    router.replace('/professor');
+  }, [router]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <LoadingSpinner message="Carregando dashboard..." size="lg" />
-      </div>
-    );
-  }
-
+  // Mostra loading enquanto redireciona
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Carregando dashboard...</p>
+      </div>
+    </div>
+  );
+}
       <div className="px-8 py-8">
         {/* Saudação e Calendário - Design moderno */}
         <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
