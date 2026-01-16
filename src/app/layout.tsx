@@ -4,6 +4,7 @@ import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { ErrorBoundaryWrapper } from '@/components'
+import { PWARegister } from './components/PWARegister'
 
 export const metadata: Metadata = {
   title: 'Hacka Cultura Digital - Sistema de Materiais Didáticos',
@@ -18,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className="antialiased bg-gray-50">
+        <PWARegister />
         <ErrorBoundaryWrapper>
           <ThemeProvider>
             <AuthProvider>
