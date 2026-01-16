@@ -156,12 +156,13 @@ export default function NewUnitPage() {
                                 </div>
                               </button>
                             ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-600">Nenhuma sugestão disponível</p>
-                      )}
-                    </div>
-                  )}
+                          </div>
+                        ) : (
+                          <p className="text-gray-600">Nenhuma sugestão disponível</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
