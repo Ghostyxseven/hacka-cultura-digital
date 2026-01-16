@@ -70,8 +70,11 @@ export function AIAgent() {
     const lowerText = text.toLowerCase();
 
     // Criar disciplina - Melhorado para aceitar variações: "crie", "criar", "adicionar", "criar uma", etc.
-    if ((lowerText.includes('crie') || lowerText.includes('criar') || lowerText.includes('adicionar')) && 
-        (lowerText.includes('disciplina') || lowerText.includes('matéria') || lowerText.includes('matéria'))) {
+    // Também aceita erros de digitação como "diciplina" (sem "s")
+    const hasCreateWord = lowerText.includes('crie') || lowerText.includes('criar') || lowerText.includes('adicionar');
+    const hasSubjectWord = lowerText.includes('disciplina') || lowerText.includes('diciplina') || lowerText.includes('matéria');
+    
+    if (hasCreateWord && hasSubjectWord) {
       
       // Padrões mais flexíveis para extrair nome e anos
       // Ex: "crie uma disciplina de historia" -> "historia"
