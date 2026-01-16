@@ -7,7 +7,8 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading, PageSkeleton } from '@/components';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { StatsSection, SubjectsList, UnitsList, TeacherMural } from '@/app/components';
+import { StatsSection, SubjectsList, UnitsList } from '@/app/components';
+import { LazyTeacherMural } from '@/components/lazy';
 import { getLessonPlanService } from '@/lib/service';
 import { showError, showSuccess } from '@/utils/notifications';
 import Link from 'next/link';
@@ -90,7 +91,7 @@ export default function ProfessorPage() {
 
         {/* Mural de Avisos (Fase 4) */}
         <div className="mb-8">
-          <TeacherMural />
+          <LazyTeacherMural />
         </div>
 
         {/* Botão Nova Disciplina */}

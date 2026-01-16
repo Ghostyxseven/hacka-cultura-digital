@@ -9,7 +9,8 @@ import { getGetQuizResultsUseCase } from '@/lib/quizService';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Loading } from '@/components/ui/Loading';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { SubjectsList, UnitsList, StatsSection, TeacherMural } from '@/app/components';
+import { SubjectsList, UnitsList, StatsSection } from '@/app/components';
+import { LazyTeacherMural } from '@/components/lazy';
 import { PresentationMapper } from '@/application';
 import type { SubjectViewModel, UnitViewModel } from '@/application/viewmodels';
 import type { QuizResult } from '@/core/entities/QuizResult';
@@ -116,7 +117,7 @@ export default function AlunoPage() {
 
         {/* Mural de Avisos do Professor */}
         <div className="mb-8">
-          <TeacherMural />
+          <LazyTeacherMural />
         </div>
 
         {/* Estatísticas */}
