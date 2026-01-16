@@ -84,37 +84,29 @@ A estrutura do projeto segue os princípios de Clean Architecture com apenas peq
 
 ---
 
-### 5. **Presentation (UI/Next.js)** ⚠️ PEQUENA VIOLAÇÃO ACEITÁVEL
+### 5. **Presentation (UI/Next.js)** ✅ PERFEITO
 
 **Localização:** `src/app/`
 
 **Dependências:**
 - ✅ Importa de `@/application` (serviços) - ✅ Correto
-- ⚠️ Importa de `@/core` (apenas tipos TypeScript) - ⚠️ Violação menor
+- ✅ Importa de `@/application/viewmodels` (tipos) - ✅ Correto
+- ✅ Não importa mais de `@/core` - ✅ Correto após refatoração
 
 **Arquivos analisados:**
-- `page.tsx` - ⚠️ Importa `Subject` de `@/core` para tipagem
+- `page.tsx` - ✅ Importa `Subject` de `@/application/viewmodels`
 - `(dashboards)/professor/disciplinas/new/page.tsx` - ✅ Usa apenas `ApplicationServiceFactory`
-- `(dashboards)/professor/disciplinas/[id]/page.tsx` - ⚠️ Importa `Subject`, `Unit` para tipagem
-- `(dashboards)/professor/unidades/new/page.tsx` - ⚠️ Importa `Subject` para tipagem
-- `(dashboards)/professor/unidades/[unitId]/plano/page.tsx` - ⚠️ Importa `Unit`, `LessonPlan`, `Activity`, `Subject` para tipagem
+- `(dashboards)/professor/disciplinas/[id]/page.tsx` - ✅ Importa `Subject`, `Unit` de ViewModels
+- `(dashboards)/professor/unidades/new/page.tsx` - ✅ Importa `Subject` de ViewModels
+- `(dashboards)/professor/unidades/[unitId]/plano/page.tsx` - ✅ Importa `Unit`, `LessonPlan`, `Activity`, `Subject` de ViewModels
 
-**Violação Identificada:**
+**Implementação Correta:**
 ```typescript
-// ❌ Violação menor (aceitável para tipos)
-import { Subject } from '@/core/entities/Subject';
+// ✅ Clean Architecture estrita
+import type { Subject } from '@/application/viewmodels';
 ```
 
-**Impacto:** Mínimo - Apenas para tipagem TypeScript, não usa lógica de negócio do Core.
-
-**Recomendação (Opcional):**
-Para Clean Architecture estrita, criar ViewModels na Application:
-```typescript
-// application/viewmodels/SubjectViewModel.ts
-export type SubjectViewModel = Subject; // Re-export apenas tipos
-```
-
-**Conclusão:** Violação menor e aceitável. A Presentation usa entidades apenas para tipos, não para lógica.
+**Conclusão:** ✅ Clean Architecture 100% - Presentation depende apenas de Application (via ViewModels).
 
 ---
 
@@ -127,10 +119,10 @@ export type SubjectViewModel = Subject; // Re-export apenas tipos
 ✅ Repository → Core
 ✅ Infrastructure → Core
 ✅ Application → Core, Repository (interfaces), Infrastructure
-⚠️ Presentation → Application, Core (apenas tipos)
+✅ Presentation → Application (incluindo ViewModels)
 ```
 
-**Status:** **95% correto** - Apenas importação de tipos TypeScript da Presentation para Core (violação aceitável).
+**Status:** **100% correto** - Presentation depende apenas de Application (ViewModels incluídos). Clean Architecture estrita implementada.
 
 ### ✅ Separation of Concerns
 
@@ -161,24 +153,26 @@ export type SubjectViewModel = Subject; // Re-export apenas tipos
 | Dependency Inversion | ✅ 95% | Usa interfaces corretamente |
 | Separation of Concerns | ✅ 100% | Cada camada bem definida |
 | Single Responsibility | ✅ 100% | Cada classe/função tem uma responsabilidade |
-| Clean Dependencies | ⚠️ 95% | Pequena violação de tipos na Presentation |
+| Clean Dependencies | ✅ 100% | Clean Architecture estrita implementada |
 
 ---
 
-## 🔧 Melhorias Sugeridas (Opcionais)
+## ✅ Melhorias Implementadas
 
-### 1. Criar ViewModels para tipos (Melhoria de Clean Architecture)
+### 1. ViewModels Criados ✅
 
 **Arquivo:** `src/application/viewmodels/index.ts`
 ```typescript
-// Re-export tipos para Presentation usar
+// Re-export tipos do Core para Presentation usar
 export type { Subject } from '@/core/entities/Subject';
 export type { Unit } from '@/core/entities/Unit';
 export type { LessonPlan } from '@/core/entities/LessonPlan';
 export type { Activity } from '@/core/entities/Activity';
+export type { ActivityQuestion } from '@/core/entities/Activity';
+export type { BNCCCompetency } from '@/core/entities/BNCCCompetency';
 ```
 
-**Mudança na Presentation:**
+**Mudança na Presentation (APLICADA):**
 ```typescript
 // Antes:
 import { Subject } from '@/core/entities/Subject';
@@ -187,29 +181,29 @@ import { Subject } from '@/core/entities/Subject';
 import type { Subject } from '@/application/viewmodels';
 ```
 
-**Prioridade:** Baixa - Melhoria opcional para Clean Architecture estrita.
+**Status:** ✅ **IMPLEMENTADO** - Clean Architecture estrita agora aplicada.
 
 ---
 
 ## ✅ Conclusão Final
 
-### **Status: EXCELENTE ✅**
+### **Status: PERFEITO ✅**
 
-O projeto segue **Clean Architecture** de forma muito bem implementada:
+O projeto segue **Clean Architecture** de forma **estrita e completa**:
 
 1. ✅ **Core** completamente isolado
 2. ✅ **Repository** usando Dependency Inversion
 3. ✅ **Infrastructure** isolada
-4. ✅ **Application** bem estruturada com Use Cases e Services
-5. ⚠️ **Presentation** com violação menor aceitável (apenas tipos TypeScript)
+4. ✅ **Application** bem estruturada com Use Cases, Services e ViewModels
+5. ✅ **Presentation** depende apenas de Application (via ViewModels)
 
-### **Pontuação: 95/100**
+### **Pontuação: 100/100**
 
-A única "violação" é o uso de tipos TypeScript do Core na Presentation, o que é **aceitável na prática** e comum em projetos TypeScript/Next.js.
+**Clean Architecture 100% implementada** - Todas as camadas seguem o princípio de dependência corretamente.
 
 ### **Recomendação**
 
-O projeto está **pronto para produção** e segue Clean Architecture de forma adequada. A violação de tipos é mínima e não afeta a arquitetura geral.
+O projeto está **pronto para produção** e segue Clean Architecture de forma **estrita e completa**. Todas as melhorias foram implementadas.
 
 ---
 
