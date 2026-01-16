@@ -15,6 +15,7 @@ export * from './Tabs';
 export * from './ExportButton';
 export * from './Sidebar';
 export * from './Toast';
+export * from './FormField';
 export * from './StatsSection';
 export * from './SubjectCard';
 export * from './SubjectsList';
