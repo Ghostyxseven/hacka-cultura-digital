@@ -154,47 +154,30 @@ export default function ProfessorDashboard() {
           </div>
         )}
 
-        {/* Seção de Arquivos Arquivados */}
+        {/* Link para Arquivos Arquivados */}
         {(archivedStats.archivedUnits > 0 || archivedStats.archivedPlans > 0 || archivedStats.archivedActivities > 0) && (
-          <div className="mt-12 pt-8 border-t border-gray-300">
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <span>📦</span>
-                Conteúdos Arquivados
-              </h3>
-              <p className="text-gray-600">
-                Materiais arquivados que podem ser restaurados a qualquer momento
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-6 border-2 border-gray-300">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-3xl">📖</span>
-                  <span className="text-2xl font-bold text-gray-700">{archivedStats.archivedUnits}</span>
+          <div className="mt-8">
+            <Link
+              href="/professor/arquivados"
+              className="block bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-6 border-2 border-gray-300 hover:border-indigo-400 hover:shadow-lg transition-all group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                    <span className="text-2xl">📦</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">
+                      Ver Conteúdos Arquivados
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {archivedStats.archivedUnits + archivedStats.archivedPlans + archivedStats.archivedActivities} item(s) arquivado(s)
+                    </p>
+                  </div>
                 </div>
-                <h4 className="font-semibold text-gray-800 mb-1">Unidades Arquivadas</h4>
-                <p className="text-sm text-gray-600">Aulas que foram arquivadas</p>
+                <span className="text-gray-400 group-hover:text-indigo-600 transition-colors">→</span>
               </div>
-              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-6 border-2 border-gray-300">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-3xl">📋</span>
-                  <span className="text-2xl font-bold text-gray-700">{archivedStats.archivedPlans}</span>
-                </div>
-                <h4 className="font-semibold text-gray-800 mb-1">Planos Arquivados</h4>
-                <p className="text-sm text-gray-600">Planos de aula arquivados</p>
-              </div>
-              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-6 border-2 border-gray-300">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-3xl">📝</span>
-                  <span className="text-2xl font-bold text-gray-700">{archivedStats.archivedActivities}</span>
-                </div>
-                <h4 className="font-semibold text-gray-800 mb-1">Atividades Arquivadas</h4>
-                <p className="text-sm text-gray-600">Atividades avaliativas arquivadas</p>
-              </div>
-            </div>
-            <div className="mt-4 text-sm text-gray-500 italic">
-              💡 Dica: Os materiais arquivados são removidos da visualização ativa, mas permanecem salvos para uso futuro.
-            </div>
+            </Link>
           </div>
         )}
       </div>
