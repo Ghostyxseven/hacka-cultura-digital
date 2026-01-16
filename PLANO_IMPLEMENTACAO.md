@@ -347,6 +347,21 @@ Para cada funcionalidade implementada:
 
 ---
 
+## 📚 Sistema de Turmas (NOVO)
+
+> **Ver**: [`PLANO_TURMAS.md`](./PLANO_TURMAS.md) para detalhes completos da implementação do sistema de turmas.
+
+### Resumo
+Implementação de sistema onde professores se associam a turmas (6º ano ao 3º ano EM) e disciplinas, e alunos entram em turmas específicas. Conteúdos são organizados por turma/série.
+
+### Status: 📋 PLANEJADO
+- [ ] Fase 1: Fundação (Core + Repository)
+- [ ] Fase 2: Lógica de Negócio (Application)
+- [ ] Fase 3: Interface (Presentation)
+- [ ] Fase 4: Integração e Testes
+
+---
+
 ## ✅ Status de Implementação
 
 ### Fase 1: Fundação - ✅ CONCLUÍDA
