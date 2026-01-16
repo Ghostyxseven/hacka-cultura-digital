@@ -29,7 +29,7 @@ import {
  */
 export default function Home() {
   const router = useRouter();
-  const { subjects, subjectsWithStats, loading, error, stats } = useDashboard();
+  const { subjects, subjectsWithStats, loading, error, stats, archivedStats } = useDashboard();
 
   const handleGenerateContent = (data: { year: string; subjectId: string; topic: string }) => {
     // Navega para criar unidade com os dados preenchidos
@@ -149,6 +149,50 @@ export default function Home() {
               subjects={subjectsWithStats.length > 0 ? subjectsWithStats : subjects}
               loading={loading}
             />
+          </div>
+        )}
+
+        {/* Seção de Arquivos Arquivados */}
+        {(archivedStats.archivedUnits > 0 || archivedStats.archivedPlans > 0 || archivedStats.archivedActivities > 0) && (
+          <div className="mt-12 pt-8 border-t border-gray-300">
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <span>📦</span>
+                Conteúdos Arquivados
+              </h3>
+              <p className="text-gray-600">
+                Materiais arquivados que podem ser restaurados a qualquer momento
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-6 border-2 border-gray-300">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-3xl">📖</span>
+                  <span className="text-2xl font-bold text-gray-700">{archivedStats.archivedUnits}</span>
+                </div>
+                <h4 className="font-semibold text-gray-800 mb-1">Unidades Arquivadas</h4>
+                <p className="text-sm text-gray-600">Aulas que foram arquivadas</p>
+              </div>
+              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-6 border-2 border-gray-300">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-3xl">📋</span>
+                  <span className="text-2xl font-bold text-gray-700">{archivedStats.archivedPlans}</span>
+                </div>
+                <h4 className="font-semibold text-gray-800 mb-1">Planos Arquivados</h4>
+                <p className="text-sm text-gray-600">Planos de aula arquivados</p>
+              </div>
+              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-6 border-2 border-gray-300">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-3xl">📝</span>
+                  <span className="text-2xl font-bold text-gray-700">{archivedStats.archivedActivities}</span>
+                </div>
+                <h4 className="font-semibold text-gray-800 mb-1">Atividades Arquivadas</h4>
+                <p className="text-sm text-gray-600">Atividades avaliativas arquivadas</p>
+              </div>
+            </div>
+            <div className="mt-4 text-sm text-gray-500 italic">
+              💡 Dica: Os materiais arquivados são removidos da visualização ativa, mas permanecem salvos para uso futuro.
+            </div>
           </div>
         )}
       </div>

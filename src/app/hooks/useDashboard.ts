@@ -127,6 +127,7 @@ export function useDashboard() {
     loading,
     error,
     stats,
+    archivedStats,
     reload: loadDashboard,
   };
 }
