@@ -7,7 +7,7 @@ import {
 } from "@google/generative-ai";
 import { LessonPlan, SchoolYear, QuizQuestion, SupportMaterial } from "../../core/entities/LessonPlan";
 import { QuizResult } from "../../core/entities/QuizResult";
-import { IAIService } from "./IAIService";
+import { IAIService } from "../../core/interfaces/services/IAIService";
 
 /**
  * Implementação do serviço de IA usando Google Gemini.

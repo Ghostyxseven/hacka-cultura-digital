@@ -1,5 +1,5 @@
 // src/infrastructure/rag/SimpleRAGService.ts
-import { IRAGService } from './IRAGService';
+import { IRAGService } from "../../core/interfaces/services/IRAGService";
 import { BNCC_KNOWLEDGE } from './knowledge/BNCCKnowledge';
 import { MEC_GUIDELINES } from './knowledge/MECGuidelines';
 
@@ -64,19 +64,19 @@ export class SimpleRAGService implements IRAGService {
    */
   private extractQueryTerms(subject: string, topic: string, grade: string): string[] {
     const terms: string[] = [];
-    
+
     // Adiciona termos do tema
     terms.push(...topic.toLowerCase().split(/\s+/));
-    
+
     // Adiciona termos da disciplina
     terms.push(...subject.toLowerCase().split(/\s+/));
-    
+
     // Adiciona série/ano
     terms.push(grade.toLowerCase());
-    
+
     // Termos relacionados a Cultura Digital
     terms.push('cultura digital', 'tecnologias digitais', 'competência 5', 'bncc');
-    
+
     return terms;
   }
 
@@ -95,7 +95,7 @@ export class SimpleRAGService implements IRAGService {
     // Busca por termos e séries/anos relevantes
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].toLowerCase();
-      
+
       // Verifica se a linha contém termos relevantes
       const hasRelevantTerms = queryTerms.some(term => line.includes(term));
       const hasRelevantGrade = gradePattern.test(line);
@@ -105,7 +105,7 @@ export class SimpleRAGService implements IRAGService {
         const start = Math.max(0, i - 2);
         const end = Math.min(lines.length, i + 3);
         const snippet = lines.slice(start, end).join('\n').trim();
-        
+
         if (snippet.length > 50) { // Ignora snippets muito pequenos
           snippets.push(snippet);
         }
@@ -132,7 +132,7 @@ export class SimpleRAGService implements IRAGService {
 
     const gradeLower = grade.toLowerCase();
     const patterns = gradeMappings[gradeLower] || [gradeLower];
-    
+
     return new RegExp(`(${patterns.join('|')})`, 'i');
   }
 }

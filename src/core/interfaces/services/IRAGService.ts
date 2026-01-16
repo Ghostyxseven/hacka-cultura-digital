@@ -1,4 +1,4 @@
-// src/infrastructure/rag/IRAGService.ts
+// src/core/interfaces/services/IRAGService.ts
 
 /**
  * Interface para serviços de RAG (Retrieval Augmented Generation).

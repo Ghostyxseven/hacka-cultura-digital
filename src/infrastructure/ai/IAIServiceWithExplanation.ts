@@ -1,4 +1,4 @@
-// src/infrastructure/ai/IAIServiceWithExplanation.ts
+// src/core/interfaces/services/IAIServiceWithExplanation.ts
 import { LessonPlan } from '../../core/entities/LessonPlan';
 import { AIExplanation } from './ExplainabilityService';
 

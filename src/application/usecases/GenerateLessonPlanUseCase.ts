@@ -1,6 +1,6 @@
 // src/application/usecases/GenerateLessonPlanUseCase.ts
 import { LessonPlan, SchoolYear } from "../../core/entities/LessonPlan";
-import { IAIService } from "../../infrastructure/ai/IAIService";
+import { IAIService } from "../../core/interfaces/services/IAIService";
 
 /**
  * Caso de uso: Geração de Plano de Aula via IA

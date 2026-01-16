@@ -1,5 +1,5 @@
 // src/application/usecases/RefineLessonPlanUseCase.ts
-import { IAIService } from '../../infrastructure/ai/IAIService';
+import { IAIService } from '../../core/interfaces/services/IAIService';
 import { ILessonRepository } from '../../core/repositories/ILessonRepository';
 import { LessonPlan } from '../../core/entities/LessonPlan';
 

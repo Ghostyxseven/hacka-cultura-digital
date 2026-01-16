@@ -1,5 +1,5 @@
 // src/application/usecases/GenerateFormativeFeedbackUseCase.ts
-import { IAIService } from '../../infrastructure/ai/IAIService';
+import { IAIService } from '../../core/interfaces/services/IAIService';
 import { IQuizRepository } from '../../core/repositories/IQuizRepository';
 import { ILessonRepository } from '../../core/repositories/ILessonRepository';
 import { QuizResult } from '../../core/entities/QuizResult';
@@ -36,7 +36,7 @@ export class GenerateFormativeFeedbackUseCase {
     private aiService: IAIService,
     private quizRepository: IQuizRepository,
     private lessonRepository: ILessonRepository
-  ) {}
+  ) { }
 
   async execute(request: GenerateFormativeFeedbackRequest): Promise<FormativeFeedback> {
     const { quizResultId } = request;
@@ -126,18 +126,18 @@ RETORNE APENAS UM JSON NO SEGUINTE FORMATO:
       const response = await this.aiService.ask(prompt);
       const cleanedText = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       const parsed = JSON.parse(cleanedText);
-      
+
       return parsed as FormativeFeedback;
     } catch (error) {
       console.error('Erro ao gerar feedback formativo:', error);
-      
+
       // Fallback: feedback básico
       return {
-        overallFeedback: result.score >= 70 
+        overallFeedback: result.score >= 70
           ? 'Parabéns! Você demonstrou bom domínio do conteúdo.'
           : result.score >= 50
-          ? 'Continue estudando! Você está no caminho certo.'
-          : 'Não desista! Revise o conteúdo e tente novamente.',
+            ? 'Continue estudando! Você está no caminho certo.'
+            : 'Não desista! Revise o conteúdo e tente novamente.',
         competencyFeedback: [],
         strengths: [],
         weaknesses: wrongQuestions.map((_, i) => `Questão ${i + 1}`),

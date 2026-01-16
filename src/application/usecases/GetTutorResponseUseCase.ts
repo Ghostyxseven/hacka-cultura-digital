@@ -1,5 +1,5 @@
 // src/application/usecases/GetTutorResponseUseCase.ts
-import { IAIService } from '../../infrastructure/ai/IAIService';
+import { IAIService } from '../../core/interfaces/services/IAIService';
 import { LessonPlan } from '../../core/entities/LessonPlan';
 
 export interface TutorChatRequest {

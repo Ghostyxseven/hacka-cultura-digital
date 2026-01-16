@@ -3,7 +3,7 @@ import { LessonPlan } from "../../core/entities/LessonPlan";
 import { Unit } from "../../core/entities/Unit";
 import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 import { IMaterialRepository } from "../../core/repositories/IMaterialRepository";
-import { IAIService } from "../../infrastructure/ai/IAIService";
+import { IAIService } from "../../core/interfaces/services/IAIService";
 import { GenerateLessonPlanUseCase } from "./GenerateLessonPlanUseCase";
 
 /**

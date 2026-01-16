@@ -1,5 +1,5 @@
 // src/application/usecases/AnalyzePerformanceUseCase.ts
-import { IAIService } from "@/infrastructure/ai/IAIService";
+import { IAIService } from "@/core/interfaces/services/IAIService";
 import { IQuizRepository } from "@/core/repositories/IQuizRepository";
 import { ILessonRepository } from "@/core/repositories/ILessonRepository";
 import { QuizResult } from "@/core/entities/QuizResult";

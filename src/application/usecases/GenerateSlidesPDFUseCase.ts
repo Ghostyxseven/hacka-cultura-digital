@@ -1,7 +1,7 @@
 // src/application/usecases/GenerateSlidesPDFUseCase.ts
 import { LessonPlan } from '@/core/entities/LessonPlan';
 import { ILessonRepository } from '@/core/repositories/ILessonRepository';
-import { IPDFGeneratorService, SlidesPDFOptions } from '@/infrastructure/pdf/IPDFGeneratorService';
+import { IPDFGeneratorService, SlidesPDFOptions } from '@/core/interfaces/services/IPDFGeneratorService';
 
 /**
  * Use Case para gerar PDF de slides
@@ -10,7 +10,7 @@ export class GenerateSlidesPDFUseCase {
   constructor(
     private lessonRepository: ILessonRepository,
     private pdfGenerator: IPDFGeneratorService
-  ) {}
+  ) { }
 
   async execute(
     lessonPlanId: string,

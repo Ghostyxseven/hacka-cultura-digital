@@ -1,7 +1,7 @@
 // src/infrastructure/pdf/ReactPDFGenerator.ts
 import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
 import { LessonPlan } from '@/core/entities/LessonPlan';
-import { IPDFGeneratorService, ProvaPDFOptions, SlidesPDFOptions } from './IPDFGeneratorService';
+import { IPDFGeneratorService, ProvaPDFOptions, SlidesPDFOptions } from '../../core/interfaces/services/IPDFGeneratorService';
 
 /**
  * Limpeza completa de texto: remove hífens órfãos, quebras e caracteres não suportados
@@ -9,7 +9,7 @@ import { IPDFGeneratorService, ProvaPDFOptions, SlidesPDFOptions } from './IPDFG
  */
 const cleanText = (text: string): string => {
   if (!text || typeof text !== 'string') return '';
-  
+
   let cleaned = text
     // 1. Remove hifens seguidos de quebra de linha (hifenização artificial) - preserva palavra completa
     .replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])-\s*\n\s*/gi, '$1 ')
@@ -17,11 +17,11 @@ const cleanText = (text: string): string => {
     .replace(/\r\n/g, ' ')
     .replace(/\n/g, ' ')
     .replace(/\r/g, ' ');
-  
+
   // 3. Remove apenas caracteres de controle realmente problemáticos (mantém caracteres acentuados válidos)
   // Permite: espaço, ASCII visível, acentos latinos comuns, pontuação
   cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
-  
+
   // 4. Remove hífens órfãos (palavras quebradas no meio) - múltiplas passadas para pegar todos os casos
   // Exemplos: "atualiza-ção" -> "atualização", "exclu-sivamente" -> "exclusivamente"
   for (let i = 0; i < 3; i++) {
@@ -30,18 +30,18 @@ const cleanText = (text: string): string => {
       // Só remove se houver espaço entre o hífen e a próxima letra
       .replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])-\s+([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])/gi, '$1$2');
   }
-  
+
   // 5. Garante espaço após palavras maiúsculas seguidas de minúsculas (ex: "CONTEÚDOonline" -> "CONTEÚDO online")
   cleaned = cleaned.replace(/([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ]{2,})([a-záàâãéèêíïóôõöúç])/g, '$1 $2');
-  
+
   // 6. Remove hífens órfãos no final de palavras (só se houver espaço depois)
   cleaned = cleaned.replace(/([a-záàâãéèêíïóôõöúçA-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑñ\d])-\s+/g, '$1 ');
-  
+
   // 7. Limpa espaços duplos e normaliza (mantém caracteres especiais válidos)
   cleaned = cleaned
     .replace(/\s+/g, ' ')
     .trim();
-  
+
   return cleaned;
 };
 
@@ -51,14 +51,14 @@ const cleanText = (text: string): string => {
  */
 const getParagraphChunks = (text: string, limit: number = 700): string[] => {
   if (!text || typeof text !== 'string') return [];
-  
+
   const sanitized = cleanText(text);
   const chunks: string[] = [];
   let currentPos = 0;
 
   while (currentPos < sanitized.length) {
     let endPos = currentPos + limit;
-    
+
     if (endPos >= sanitized.length) {
       // Último chunk - pega o restante
       const remaining = sanitized.substring(currentPos).trim();
@@ -67,21 +67,21 @@ const getParagraphChunks = (text: string, limit: number = 700): string[] => {
       }
       break;
     }
-    
+
     // Busca por pontos de quebra ideais (em ordem de preferência)
     // 1. Ponto final seguido de espaço (quebra ideal)
     let breakPoint = sanitized.lastIndexOf('. ', endPos);
-    
+
     // 2. Dois pontos seguidos de espaço
     if (breakPoint === -1 || breakPoint <= currentPos) {
       breakPoint = sanitized.lastIndexOf(': ', endPos);
     }
-    
+
     // 3. Ponto e vírgula seguido de espaço
     if (breakPoint === -1 || breakPoint <= currentPos) {
       breakPoint = sanitized.lastIndexOf('; ', endPos);
     }
-    
+
     // 4. Vírgula seguida de espaço (mas só se não ficar muito curto)
     if (breakPoint === -1 || breakPoint <= currentPos) {
       const commaPos = sanitized.lastIndexOf(', ', endPos);
@@ -90,28 +90,28 @@ const getParagraphChunks = (text: string, limit: number = 700): string[] => {
         breakPoint = commaPos;
       }
     }
-    
+
     // 5. Espaço (garante que não corte no meio de palavra)
     if (breakPoint === -1 || breakPoint <= currentPos) {
       breakPoint = sanitized.lastIndexOf(' ', endPos);
     }
-    
+
     // 6. Se ainda não encontrou, tenta reduzir o limite em 20% e procurar novamente
     if (breakPoint === -1 || breakPoint <= currentPos) {
       const reducedLimit = Math.floor(limit * 0.8);
       endPos = currentPos + reducedLimit;
       breakPoint = sanitized.lastIndexOf(' ', endPos);
     }
-    
+
     // 7. Último recurso: corta no limite mesmo (mas só se realmente necessário)
     if (breakPoint === -1 || breakPoint <= currentPos) {
       breakPoint = currentPos + limit;
     }
-    
+
     // Evita deixar palavras muito curtas sozinhas no final (mínimo 3 caracteres)
     const chunk = sanitized.substring(currentPos, breakPoint).trim();
     const remainingAfterBreak = sanitized.substring(breakPoint).trim();
-    
+
     // Se o próximo chunk começa com uma palavra muito curta, inclui no chunk atual
     if (remainingAfterBreak && remainingAfterBreak.length > 0) {
       const nextWordMatch = remainingAfterBreak.match(/^(\S{1,3})\s/);
@@ -123,25 +123,25 @@ const getParagraphChunks = (text: string, limit: number = 700): string[] => {
         }
       }
     }
-    
+
     const finalChunk = sanitized.substring(currentPos, breakPoint).trim();
     if (finalChunk) {
       chunks.push(finalChunk);
     }
-    
+
     currentPos = breakPoint;
-    
+
     // Pula espaços, pontos, vírgulas e outros caracteres de pontuação iniciais
-    while (currentPos < sanitized.length && 
-           (sanitized[currentPos] === ' ' || 
-            sanitized[currentPos] === '.' ||
-            sanitized[currentPos] === ',' ||
-            sanitized[currentPos] === ';' ||
-            sanitized[currentPos] === ':')) {
+    while (currentPos < sanitized.length &&
+      (sanitized[currentPos] === ' ' ||
+        sanitized[currentPos] === '.' ||
+        sanitized[currentPos] === ',' ||
+        sanitized[currentPos] === ';' ||
+        sanitized[currentPos] === ':')) {
       currentPos++;
     }
   }
-  
+
   return chunks.length > 0 ? chunks : [sanitized];
 };
 
@@ -203,7 +203,7 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
                   {question.options.map((option, optIndex) => {
                     const isCorrect = optIndex === question.correctAnswer;
                     const showAnswer = options.includeAnswers && isCorrect;
-                    
+
                     return (
                       <View
                         key={optIndex}
@@ -297,7 +297,7 @@ export class ReactPDFGenerator implements IPDFGeneratorService {
 
     contentSections.forEach(section => {
       if (!section.data) return;
-      
+
       const textChunks = getParagraphChunks(section.data, 650);
 
       textChunks.forEach((chunk: string, chunkIndex: number) => {

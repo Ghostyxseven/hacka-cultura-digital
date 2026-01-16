@@ -1,5 +1,5 @@
 // src/application/usecases/SuggestInterventionsUseCase.ts
-import { IAIService } from '../../infrastructure/ai/IAIService';
+import { IAIService } from '../../core/interfaces/services/IAIService';
 import { IQuizRepository } from '../../core/repositories/IQuizRepository';
 import { IStudentProfileRepository } from '../../core/repositories/IStudentProfileRepository';
 import { IUserRepository } from '../../core/repositories/IUserRepository';
@@ -36,7 +36,7 @@ export class SuggestInterventionsUseCase {
     private studentProfileRepository: IStudentProfileRepository,
     private userRepository: IUserRepository,
     private lessonRepository: ILessonRepository
-  ) {}
+  ) { }
 
   async execute(request: SuggestInterventionsRequest): Promise<InterventionSuggestion[]> {
     let context = request.context || '';
@@ -108,11 +108,11 @@ RETORNE APENAS UM JSON NO SEGUINTE FORMATO:
       const response = await this.aiService.ask(prompt);
       const cleanedText = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       const parsed = JSON.parse(cleanedText);
-      
+
       return parsed as InterventionSuggestion[];
     } catch (error) {
       console.error('Erro ao gerar sugestões de intervenção:', error);
-      
+
       // Fallback: sugestões básicas
       return [
         {

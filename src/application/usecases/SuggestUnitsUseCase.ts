@@ -1,7 +1,7 @@
 // src/application/usecases/SuggestUnitsUseCase.ts
 import { Unit } from "../../core/entities/Unit";
 import { SchoolYear } from "../../core/entities/LessonPlan";
-import { IAIService } from "../../infrastructure/ai/IAIService";
+import { IAIService } from "../../core/interfaces/services/IAIService";
 import { ILessonRepository } from "../../core/repositories/ILessonRepository";
 
 /**
@@ -15,7 +15,7 @@ export class SuggestUnitsUseCase {
   constructor(
     private repository: ILessonRepository,
     private aiService: IAIService
-  ) {}
+  ) { }
 
   /**
    * Sugere unidades de ensino automaticamente usando IA
@@ -54,7 +54,7 @@ export class SuggestUnitsUseCase {
       '6º Ano', '7º Ano', '8º Ano', '9º Ano',
       '1º Ano EM', '2º Ano EM', '3º Ano EM'
     ];
-    
+
     if (!validSchoolYears.includes(gradeYear)) {
       throw new Error(`Ano escolar inválido: "${gradeYear}"`);
     }
@@ -135,11 +135,11 @@ export class SuggestUnitsUseCase {
 
     // Seleciona temas baseado na quantidade solicitada
     const selected = baseTopics.slice(0, Math.min(quantity, baseTopics.length));
-    
+
     // Personaliza com o nome da disciplina quando apropriado
     return selected.map(topic => {
-      if (subjectName.toLowerCase().includes('cultura digital') || 
-          subjectName.toLowerCase().includes('informática')) {
+      if (subjectName.toLowerCase().includes('cultura digital') ||
+        subjectName.toLowerCase().includes('informática')) {
         return topic;
       }
       return `${topic} aplicado a ${subjectName}`;

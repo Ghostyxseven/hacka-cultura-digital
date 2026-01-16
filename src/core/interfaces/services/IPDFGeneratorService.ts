@@ -1,4 +1,4 @@
-// src/infrastructure/pdf/IPDFGeneratorService.ts
+// src/core/interfaces/services/IPDFGeneratorService.ts
 import { LessonPlan } from '@/core/entities/LessonPlan';
 
 /**

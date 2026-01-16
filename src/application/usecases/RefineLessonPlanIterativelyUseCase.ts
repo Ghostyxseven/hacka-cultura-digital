@@ -1,5 +1,5 @@
 // src/application/usecases/RefineLessonPlanIterativelyUseCase.ts
-import { IAIService } from '../../infrastructure/ai/IAIService';
+import { IAIService } from '../../core/interfaces/services/IAIService';
 import { ILessonRepository } from '../../core/repositories/ILessonRepository';
 import { LessonPlan } from '../../core/entities/LessonPlan';
 
@@ -39,7 +39,7 @@ export class RefineLessonPlanIterativelyUseCase {
   constructor(
     private aiService: IAIService,
     private lessonRepository: ILessonRepository
-  ) {}
+  ) { }
 
   async execute(request: RefineLessonPlanIterativelyRequest): Promise<RefinementResult> {
     const { lessonPlanId, command, previewOnly = false, maxIterations = 10 } = request;
