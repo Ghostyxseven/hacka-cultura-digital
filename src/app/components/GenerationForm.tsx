@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 
 interface GenerationFormProps {
   onSubmit: (data: { year?: string; additionalContext?: string }) => Promise<void>;
