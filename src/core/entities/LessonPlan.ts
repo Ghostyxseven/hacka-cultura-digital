@@ -54,11 +54,11 @@ export interface LessonPlan {
 const MIN_TITLE_LENGTH = 3;
 const MAX_TITLE_LENGTH = 200;
 const MIN_OBJECTIVE_LENGTH = 10;
-const MAX_OBJECTIVE_LENGTH = 500;
+const MAX_OBJECTIVE_LENGTH = 2000; // Aumentado de 500 para permitir objetivos mais detalhados
 const MIN_CONTENT_LENGTH = 20;
-const MAX_CONTENT_LENGTH = 2000;
+const MAX_CONTENT_LENGTH = 15000; // Aumentado de 2000 para permitir conteúdos muito detalhados
 const MIN_METHODOLOGY_LENGTH = 10;
-const MAX_METHODOLOGY_LENGTH = 1000;
+const MAX_METHODOLOGY_LENGTH = 5000; // Aumentado de 1000 para permitir metodologias detalhadas
 const MIN_DURATION = 15; // 15 minutos
 const MAX_DURATION = 180; // 3 horas
 

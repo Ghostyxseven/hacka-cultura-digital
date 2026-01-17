@@ -3,6 +3,8 @@ import { AIService, AIGenerationRequest } from './AIService';
 import { BNCCService } from './BNCCService';
 import { Subject } from '@/core/entities/Subject';
 import { Unit } from '@/core/entities/Unit';
+import { RobustJSONParser } from './RobustJSONParser';
+import { ContentValidator } from './ContentValidator';
 
 export interface GenerateLessonPlanParams {
   unit: Unit;
@@ -18,10 +20,14 @@ export interface GenerateLessonPlanParams {
 export class LessonPlanGenerator {
   private aiService: AIService;
   private bnccService: BNCCService;
+  private jsonParser: RobustJSONParser;
+  private contentValidator: ContentValidator;
 
   constructor(aiService?: AIService, bnccService?: BNCCService) {
     this.aiService = aiService || new AIService();
     this.bnccService = bnccService || new BNCCService();
+    this.jsonParser = new RobustJSONParser();
+    this.contentValidator = new ContentValidator();
   }
 
   /**
@@ -47,7 +53,8 @@ export class LessonPlanGenerator {
     const aiResponse = await this.aiService.generateText(aiRequest);
     const parsedContent = this.parseAIGeneratedContent(aiResponse.content);
 
-    return {
+    // Cria objeto do plano de aula
+    const lessonPlan: Omit<LessonPlan, 'id' | 'createdAt'> = {
       unitId: params.unit.id,
       title: parsedContent.title || `${params.unit.title} - Plano de Aula`,
       objective: parsedContent.objective || 'Desenvolver competências de Cultura Digital',
@@ -58,6 +65,21 @@ export class LessonPlanGenerator {
       bnccAlignment: parsedContent.bnccAlignment || this.bnccService.getCultureDigitalGuidelines(),
       duration: parsedContent.duration || 50,
     };
+
+    // Valida o conteúdo gerado
+    const validation = this.contentValidator.validateLessonPlan(lessonPlan);
+    if (!validation.valid) {
+      console.warn('Validação do plano de aula falhou:', validation.errors);
+      // Emite avisos mas não bloqueia (conteúdo pode ser editado pelo usuário)
+      if (validation.errors.length > 0) {
+        console.warn('Erros de validação:', validation.errors);
+      }
+    }
+    if (validation.warnings.length > 0) {
+      console.warn('Avisos de validação:', validation.warnings);
+    }
+
+    return lessonPlan;
   }
 
   /**
@@ -155,24 +177,34 @@ IMPORTANTE:
   }
 
   /**
-   * Faz parse do conteúdo JSON gerado pela IA
+   * Faz parse do conteúdo JSON gerado pela IA usando parser robusto
    */
   private parseAIGeneratedContent(content: string): Partial<LessonPlan> {
-    try {
-      // Tenta extrair JSON do conteúdo (pode vir com markdown ou texto adicional)
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
+    const parseResult = this.jsonParser.parse(content);
+    
+    if (parseResult.success) {
+      // Valida estrutura básica
+      const structureValidation = this.jsonParser.validateStructure(parseResult.data, [
+        'title',
+        'objective',
+        'content',
+      ]);
+      
+      if (structureValidation.valid) {
+        return parseResult.data;
+      } else {
+        console.warn('Estrutura JSON incompleta. Campos faltando:', structureValidation.missingFields);
+        // Retorna dados parcialmente válidos mesmo se faltarem alguns campos
+        return parseResult.data;
       }
-      return JSON.parse(content);
-    } catch (error) {
-      console.error('Erro ao fazer parse do conteúdo gerado pela IA:', error);
-      // Fallback: retorna estrutura básica
-      return {
-        title: 'Plano de Aula - Cultura Digital',
-        objective: 'Desenvolver competências de Cultura Digital',
-        content: content.substring(0, 500), // Primeiros 500 caracteres
-      };
     }
+
+    // Fallback em caso de falha completa
+    console.error('Erro ao fazer parse do conteúdo gerado pela IA:', parseResult.error);
+    return {
+      title: 'Plano de Aula - Cultura Digital',
+      objective: 'Desenvolver competências de Cultura Digital',
+      content: content.substring(0, 1000), // Primeiros 1000 caracteres como fallback
+    };
   }
 }

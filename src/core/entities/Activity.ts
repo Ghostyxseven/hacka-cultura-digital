@@ -29,15 +29,16 @@ export interface ActivityQuestion {
   options?: string[]; // Para questões de múltipla escolha
   correctAnswer?: string; // Resposta correta (se aplicável)
   points: number; // Pontuação da questão
+  bnccSkill?: string; // Código BNCC associado à questão (ex: EF04MA27)
 }
 
 /** Constantes para validação */
 const MIN_TITLE_LENGTH = 3;
 const MAX_TITLE_LENGTH = 200;
 const MIN_DESCRIPTION_LENGTH = 10;
-const MAX_DESCRIPTION_LENGTH = 2000;
+const MAX_DESCRIPTION_LENGTH = 5000; // Aumentado de 2000 para permitir descrições detalhadas
 const MIN_QUESTION_TEXT_LENGTH = 5;
-const MAX_QUESTION_TEXT_LENGTH = 1000;
+const MAX_QUESTION_TEXT_LENGTH = 2000; // Aumentado de 1000 para permitir questões mais detalhadas
 const MIN_POINTS = 1;
 const MAX_POINTS = 100;
 

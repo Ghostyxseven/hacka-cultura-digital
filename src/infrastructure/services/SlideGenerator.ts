@@ -4,6 +4,8 @@ import { Subject } from '@/core/entities/Subject';
 import { Unit } from '@/core/entities/Unit';
 import { LessonPlan } from '@/core/entities/LessonPlan';
 import type { Slide } from '@/application/viewmodels';
+import { RobustJSONParser } from './RobustJSONParser';
+import { ContentValidator } from './ContentValidator';
 
 export interface GenerateSlidesParams {
   unit: Unit;
@@ -20,10 +22,14 @@ export interface GenerateSlidesParams {
 export class SlideGenerator {
   private aiService: AIService;
   private bnccService: BNCCService;
+  private jsonParser: RobustJSONParser;
+  private contentValidator: ContentValidator;
 
   constructor(aiService?: AIService, bnccService?: BNCCService) {
     this.aiService = aiService || new AIService();
     this.bnccService = bnccService || new BNCCService();
+    this.jsonParser = new RobustJSONParser();
+    this.contentValidator = new ContentValidator();
   }
 
   /**
@@ -48,6 +54,19 @@ export class SlideGenerator {
 
     const aiResponse = await this.aiService.generateText(aiRequest);
     const slides = this.parseAIGeneratedContent(aiResponse.content, params.lessonPlan);
+
+    // Valida os slides gerados
+    const validation = this.contentValidator.validateSlides(slides);
+    if (!validation.valid) {
+      console.warn('Validação dos slides falhou:', validation.errors);
+      // Emite avisos mas não bloqueia (slides podem ser editados pelo usuário)
+      if (validation.errors.length > 0) {
+        console.warn('Erros de validação:', validation.errors);
+      }
+    }
+    if (validation.warnings.length > 0) {
+      console.warn('Avisos de validação:', validation.warnings);
+    }
 
     return slides;
   }
@@ -126,31 +145,26 @@ IMPORTANTE:
   }
 
   /**
-   * Faz parse do conteúdo JSON gerado pela IA
+   * Faz parse do conteúdo JSON gerado pela IA usando parser robusto
    */
   private parseAIGeneratedContent(content: string, lessonPlan: LessonPlan): Slide[] {
-    try {
-      // Tenta extrair JSON do conteúdo
-      const jsonMatch = content.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((slide, index) => ({
-            id: slide.id || `slide-${index + 1}`,
-            title: slide.title || `Slide ${index + 1}`,
-            content: slide.content || '',
-            type: slide.type || 'content',
-          }));
-        }
+    const parseResult = this.jsonParser.parse(content);
+    
+    if (parseResult.success && Array.isArray(parseResult.data)) {
+      // Valida que é um array de slides
+      if (parseResult.data.length > 0) {
+        return parseResult.data.map((slide: any, index: number) => ({
+          id: slide.id || `slide-${index + 1}`,
+          title: slide.title || `Slide ${index + 1}`,
+          content: slide.content || '',
+          type: slide.type || 'content',
+        }));
       }
-
-      // Fallback: gera slides básicos a partir do plano de aula
-      return this.generateFallbackSlides(lessonPlan);
-    } catch (error) {
-      console.error('Erro ao fazer parse dos slides gerados pela IA:', error);
-      // Fallback: gera slides básicos a partir do plano de aula
-      return this.generateFallbackSlides(lessonPlan);
     }
+
+    // Fallback em caso de falha
+    console.error('Erro ao fazer parse dos slides gerados pela IA:', parseResult.error);
+    return this.generateFallbackSlides(lessonPlan);
   }
 
   /**

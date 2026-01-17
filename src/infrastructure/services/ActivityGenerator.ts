@@ -20,10 +20,14 @@ export interface GenerateActivityParams {
 export class ActivityGenerator {
   private aiService: AIService;
   private bnccService: BNCCService;
+  private jsonParser: RobustJSONParser;
+  private contentValidator: ContentValidator;
 
   constructor(aiService?: AIService, bnccService?: BNCCService) {
     this.aiService = aiService || new AIService();
     this.bnccService = bnccService || new BNCCService();
+    this.jsonParser = new RobustJSONParser();
+    this.contentValidator = new ContentValidator();
   }
 
   /**
@@ -49,7 +53,8 @@ export class ActivityGenerator {
     const aiResponse = await this.aiService.generateText(aiRequest);
     const parsedContent = this.parseAIGeneratedContent(aiResponse.content);
 
-    return {
+    // Cria objeto da atividade
+    const activity: Omit<Activity, 'id' | 'createdAt'> = {
       unitId: params.unit.id,
       title: parsedContent.title || `Atividade - ${params.unit.title}`,
       description: parsedContent.description || 'Atividade avaliativa relacionada à unidade',
@@ -58,6 +63,21 @@ export class ActivityGenerator {
       instructions: parsedContent.instructions || 'Leia atentamente as questões e responda de forma clara e objetiva',
       evaluationCriteria: parsedContent.evaluationCriteria || 'Será avaliado: compreensão dos conceitos, clareza e adequação às diretrizes BNCC',
     };
+
+    // Valida o conteúdo gerado
+    const validation = this.contentValidator.validateActivity(activity);
+    if (!validation.valid) {
+      console.warn('Validação da atividade falhou:', validation.errors);
+      // Emite avisos mas não bloqueia (conteúdo pode ser editado pelo usuário)
+      if (validation.errors.length > 0) {
+        console.warn('Erros de validação:', validation.errors);
+      }
+    }
+    if (validation.warnings.length > 0) {
+      console.warn('Avisos de validação:', validation.warnings);
+    }
+
+    return activity;
   }
 
   /**
@@ -152,14 +172,22 @@ IMPORTANTE:
   }
 
   /**
-   * Faz parse do conteúdo JSON gerado pela IA
+   * Faz parse do conteúdo JSON gerado pela IA usando parser robusto
    */
   private parseAIGeneratedContent(content: string): Partial<Activity> {
-    try {
-      // Tenta extrair JSON do conteúdo
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
+    const parseResult = this.jsonParser.parse(content);
+    
+    if (parseResult.success) {
+      // Valida estrutura básica
+      const structureValidation = this.jsonParser.validateStructure(parseResult.data, [
+        'title',
+        'description',
+        'type',
+        'questions',
+      ]);
+      
+      if (structureValidation.valid) {
+        const parsed = parseResult.data;
         // Garante que questions seja um array válido
         if (parsed.questions && Array.isArray(parsed.questions)) {
           parsed.questions = parsed.questions.map((q: any, index: number) => ({
@@ -169,35 +197,39 @@ IMPORTANTE:
             options: q.options || undefined,
             correctAnswer: q.correctAnswer || undefined,
             points: q.points || 10,
+            bnccSkill: q.bnccSkill || undefined, // Salva código BNCC se fornecido
           }));
         }
         return parsed;
+      } else {
+        console.warn('Estrutura JSON incompleta. Campos faltando:', structureValidation.missingFields);
+        // Retorna dados parcialmente válidos mesmo se faltarem alguns campos
+        return parseResult.data;
       }
-      return JSON.parse(content);
-    } catch (error) {
-      console.error('Erro ao fazer parse do conteúdo gerado pela IA:', error);
-      // Fallback: retorna estrutura básica com questões padrão
-      return {
-        title: 'Atividade Avaliativa - Cultura Digital',
-        description: 'Atividade relacionada à unidade',
-        type: 'exercicio',
-        questions: [
-          {
-            id: 'q1',
-            question: 'Explique os conceitos abordados nesta unidade',
-            type: 'essay',
-            points: 50,
-          },
-          {
-            id: 'q2',
-            question: 'Como você relacionaria os conteúdos com a BNCC?',
-            type: 'open',
-            points: 50,
-          },
-        ],
-        instructions: 'Responda as questões de forma clara e objetiva',
-        evaluationCriteria: 'Será avaliado: compreensão dos conceitos e alinhamento com BNCC',
-      };
     }
+
+    // Fallback em caso de falha completa
+    console.error('Erro ao fazer parse do conteúdo gerado pela IA:', parseResult.error);
+    return {
+      title: 'Atividade Avaliativa - Cultura Digital',
+      description: 'Atividade relacionada à unidade',
+      type: 'exercicio',
+      questions: [
+        {
+          id: 'q1',
+          question: 'Explique os conceitos abordados nesta unidade',
+          type: 'essay',
+          points: 50,
+        },
+        {
+          id: 'q2',
+          question: 'Como você relacionaria os conteúdos com a BNCC?',
+          type: 'open',
+          points: 50,
+        },
+      ],
+      instructions: 'Responda as questões de forma clara e objetiva',
+      evaluationCriteria: 'Será avaliado: compreensão dos conceitos e alinhamento com BNCC',
+    };
   }
 }
