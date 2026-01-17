@@ -14,6 +14,7 @@ import {
   ExportButton,
   ActionButton,
   ToastContainer,
+  ProgressIndicator,
 } from '@/app/components';
 
 type TabType = 'plano' | 'atividade' | 'slides';
@@ -236,12 +237,29 @@ export default function GenerateLessonPlanPage() {
           <GenerationForm onSubmit={handleGenerate} loading={generating} />
         )}
 
-        {/* Estado de geração */}
+        {/* Estado de geração com progresso */}
         {generating && (
-          <div className="bg-white rounded-lg shadow-md p-8 mb-6 text-center max-w-2xl mx-auto">
-            <LoadingSpinner
-              message="Gerando materiais didáticos com IA... Isso pode levar alguns segundos."
-              size="lg"
+          <div className="mb-6">
+            <ProgressIndicator
+              currentStep="Gerando plano de aula e atividade..."
+              steps={[
+                'Conectando com IA...',
+                'Gerando plano de aula...',
+                'Gerando atividade avaliativa...',
+                'Finalizando materiais...',
+              ]}
+              message="Isso pode levar alguns segundos. Por favor, aguarde..."
+            />
+          </div>
+        )}
+
+        {/* Estado de geração de slides */}
+        {generatingSlides && !generating && (
+          <div className="mb-6">
+            <ProgressIndicator
+              currentStep="Gerando slides..."
+              steps={['Processando plano de aula...', 'Gerando slides...', 'Finalizando...']}
+              message="Gerando slides de apresentação com base no plano de aula..."
             />
           </div>
         )}

@@ -13,3 +13,14 @@ export type { LessonPlan } from '@/core/entities/LessonPlan';
 export type { Activity } from '@/core/entities/Activity';
 export type { ActivityQuestion } from '@/core/entities/Activity';
 export type { BNCCCompetency } from '@/core/entities/BNCCCompetency';
+
+/**
+ * Interface Slide - ViewModel para apresentação de slides
+ * Utilizado na camada Presentation para exibir slides gerados
+ */
+export interface Slide {
+  id: string;
+  title: string;
+  content: string;
+  type: 'title' | 'content' | 'summary';
+}

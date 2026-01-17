@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ApplicationServiceFactory } from '@/application';
-import type { LessonPlan, Activity } from '@/application/viewmodels';
-import type { Slide } from '@/infrastructure/services/SlideGenerator';
+import type { LessonPlan, Activity, Slide } from '@/application/viewmodels';
+import { getErrorMessage } from '@/app/utils/errorHandler';
 
 export interface GenerateMaterialParams {
   unitId: string;
@@ -42,7 +42,7 @@ export function useMaterialGeneration(unitId: string) {
         return null;
       }
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar materiais');
+      setError(getErrorMessage(err));
       return null;
     } finally {
       setLoading(false);
@@ -65,7 +65,8 @@ export function useMaterialGeneration(unitId: string) {
       setActivity(result.activity);
       return result;
     } catch (err: any) {
-      setError(err.message || 'Erro ao gerar materiais');
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
       throw err;
     } finally {
       setGenerating(false);
@@ -76,18 +77,13 @@ export function useMaterialGeneration(unitId: string) {
     try {
       if (!lessonPlan) return false;
 
-      const { LocalStorageLessonPlanRepository } = await import('@/repository/implementations/LocalStorageLessonPlanRepository');
-      const planRepository = new LocalStorageLessonPlanRepository();
-      
-      await planRepository.update(lessonPlan.id, {
-        archived: true,
-        archivedAt: new Date().toISOString(),
-      });
+      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+      await materialService.archiveLessonPlan(lessonPlan.id);
       
       setLessonPlan(null);
       return true;
     } catch (err: any) {
-      setError(err.message || 'Erro ao arquivar plano de aula');
+      setError(getErrorMessage(err));
       return false;
     }
   }, [lessonPlan]);
@@ -96,18 +92,13 @@ export function useMaterialGeneration(unitId: string) {
     try {
       if (!activity) return false;
 
-      const { LocalStorageActivityRepository } = await import('@/repository/implementations/LocalStorageActivityRepository');
-      const activityRepository = new LocalStorageActivityRepository();
-      
-      await activityRepository.update(activity.id, {
-        archived: true,
-        archivedAt: new Date().toISOString(),
-      });
+      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+      await materialService.archiveActivity(activity.id);
       
       setActivity(null);
       return true;
     } catch (err: any) {
-      setError(err.message || 'Erro ao arquivar atividade');
+      setError(getErrorMessage(err));
       return false;
     }
   }, [activity]);
@@ -121,7 +112,7 @@ export function useMaterialGeneration(unitId: string) {
       
       return results.every(r => r === true);
     } catch (err: any) {
-      setError(err.message || 'Erro ao arquivar materiais');
+      setError(getErrorMessage(err));
       return false;
     }
   }, [archiveLessonPlan, archiveActivity]);
@@ -146,7 +137,8 @@ export function useMaterialGeneration(unitId: string) {
       setSlides(generatedSlides);
       return generatedSlides;
     } catch (err: any) {
-      setError(err.message || 'Erro ao gerar slides');
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
       throw err;
     } finally {
       setGeneratingSlides(false);

@@ -3,9 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 
-export default function RegisterPage() {
+// Força renderização dinâmica para evitar erro de prerender
+export const dynamic = 'force-dynamic';
+
+function RegisterForm() {
   const router = useRouter();
   const { register } = useAuth();
   const [formData, setFormData] = useState({
@@ -129,5 +132,13 @@ export default function RegisterPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <AuthProvider>
+      <RegisterForm />
+    </AuthProvider>
   );
 }

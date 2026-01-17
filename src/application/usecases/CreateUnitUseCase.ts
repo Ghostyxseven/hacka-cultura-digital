@@ -1,7 +1,8 @@
 import { Unit } from '@/core/entities/Unit';
 import { ISubjectRepository } from '@/repository/interfaces/ISubjectRepository';
 import { IUnitRepository } from '@/repository/interfaces/IUnitRepository';
-import { CreateUnitDTO } from '../dto/CreateUnitDTO';
+import { CreateUnitDTO, validateCreateUnitDTO } from '../dto/CreateUnitDTO';
+import { NotFoundError, ValidationError } from '../errors';
 
 /**
  * Caso de uso: Criar unidade de ensino
@@ -14,30 +15,22 @@ export class CreateUnitUseCase {
   ) {}
 
   async execute(dto: CreateUnitDTO): Promise<Unit> {
-    // Validação de entrada
-    if (!dto.subjectId || dto.subjectId.trim().length === 0) {
-      throw new Error('ID da disciplina é obrigatório');
-    }
-
-    if (!dto.title || dto.title.trim().length === 0) {
-      throw new Error('Título da unidade é obrigatório');
-    }
-
-    if (!dto.theme || dto.theme.trim().length === 0) {
-      throw new Error('Tema da unidade é obrigatório');
+    // Validação de entrada usando função de validação do DTO
+    if (!validateCreateUnitDTO(dto)) {
+      throw new ValidationError('Dados da unidade inválidos');
     }
 
     // Valida se a disciplina existe
     const subject = await this.subjectRepository.findById(dto.subjectId);
     if (!subject) {
-      throw new Error('Disciplina não encontrada');
+      throw new NotFoundError('Disciplina', dto.subjectId);
     }
 
     // Cria a unidade através do repositório
     const unit = await this.unitRepository.create({
       subjectId: dto.subjectId,
-      title: dto.title,
-      theme: dto.theme,
+      title: dto.title.trim(),
+      theme: dto.theme.trim(),
       isAIGenerated: dto.isAIGenerated || false,
     });
 

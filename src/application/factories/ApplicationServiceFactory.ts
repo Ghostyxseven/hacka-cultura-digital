@@ -112,7 +112,8 @@ export class ApplicationServiceFactory {
       createSubjectUseCase,
       getAllSubjectsUseCase,
       getSubjectByIdUseCase,
-      deleteSubjectUseCase
+      deleteSubjectUseCase,
+      this.subjectRepository
     );
 
     return this.subjectService;
@@ -142,7 +143,8 @@ export class ApplicationServiceFactory {
     this.unitService = new UnitService(
       createUnitUseCase,
       getUnitsBySubjectUseCase,
-      suggestUnitsUseCase
+      suggestUnitsUseCase,
+      this.unitRepository
     );
 
     return this.unitService;
@@ -195,7 +197,9 @@ export class ApplicationServiceFactory {
       generateActivityUseCase,
       getLessonPlanByUnitUseCase,
       getActivityByUnitUseCase,
-      generateSlidesUseCase
+      generateSlidesUseCase,
+      this.lessonPlanRepository,
+      this.activityRepository
     );
 
     return this.materialGenerationService;

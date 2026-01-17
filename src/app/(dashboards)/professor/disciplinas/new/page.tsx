@@ -22,7 +22,7 @@ const SCHOOL_YEARS = [
  */
 export default function NewSubjectPage() {
   const router = useRouter();
-  const { formData, setFormData, loading, error, toggleSchoolYear, createSubject } =
+  const { formData, setFormData, loading, error, nameValidation, toggleSchoolYear, createSubject } =
     useSubjectForm();
   const { toasts, showToast, removeToast } = useToast();
 
@@ -68,24 +68,62 @@ export default function NewSubjectPage() {
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                   Nome da Disciplina *
                 </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-gray-400 transition-colors ${
-                    error && error.includes('nome') ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Ex: Matemática, Ciências, História..."
-                  required
-                  aria-required="true"
-                  aria-describedby="name-help name-error"
-                  aria-invalid={error && error.includes('nome') ? 'true' : 'false'}
-                  maxLength={100}
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className={`w-full px-4 py-3 pr-10 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-gray-400 transition-colors ${
+                      error && error.includes('nome')
+                        ? 'border-red-500'
+                        : nameValidation.isAvailable === false
+                        ? 'border-red-500'
+                        : nameValidation.isAvailable === true
+                        ? 'border-green-500'
+                        : 'border-gray-300'
+                    }`}
+                    placeholder="Ex: Matemática, Ciências, História..."
+                    required
+                    aria-required="true"
+                    aria-describedby="name-help name-error name-status"
+                    aria-invalid={
+                      error && error.includes('nome') ? 'true' : nameValidation.isAvailable === false ? 'true' : 'false'
+                    }
+                    maxLength={100}
+                    disabled={loading}
+                  />
+                  {nameValidation.isValidating && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                    </div>
+                  )}
+                  {nameValidation.isAvailable === true && !nameValidation.isValidating && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+                      ✓
+                    </div>
+                  )}
+                  {nameValidation.isAvailable === false && !nameValidation.isValidating && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500">
+                      ✗
+                    </div>
+                  )}
+                </div>
                 <p id="name-help" className="mt-2 text-xs text-gray-500">
                   Nome da disciplina que será usada para organizar suas aulas ({formData.name.length}/100 caracteres)
                 </p>
+                {nameValidation.message && (
+                  <p
+                    id="name-status"
+                    className={`mt-1 text-xs flex items-center gap-1 ${
+                      nameValidation.isAvailable ? 'text-green-600' : 'text-red-600'
+                    }`}
+                    role="status"
+                  >
+                    <span>{nameValidation.isAvailable ? '✓' : '⚠️'}</span>
+                    {nameValidation.message}
+                  </p>
+                )}
                 {error && error.includes('nome') && (
                   <p id="name-error" className="mt-1 text-xs text-red-600" role="alert">
                     {error}

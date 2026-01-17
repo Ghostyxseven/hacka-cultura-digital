@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/app/hooks';
 import { LoadingSpinner, EmptyState, ToastContainer, ActionButton } from '@/app/components';
+import { ApplicationServiceFactory } from '@/application';
 import type { Unit, LessonPlan, Activity, Subject } from '@/application/viewmodels';
 
 /**
@@ -30,34 +31,17 @@ export default function ArquivadosPage() {
     try {
       setLoading(true);
 
-      const { LocalStorageSubjectRepository } = await import('@/repository/implementations/LocalStorageSubjectRepository');
-      const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
-      const { LocalStorageLessonPlanRepository } = await import('@/repository/implementations/LocalStorageLessonPlanRepository');
-      const { LocalStorageActivityRepository } = await import('@/repository/implementations/LocalStorageActivityRepository');
+      const subjectService = ApplicationServiceFactory.createSubjectService();
+      const unitService = ApplicationServiceFactory.createUnitService();
+      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
 
-      const subjectRepository = new LocalStorageSubjectRepository();
-      const unitRepository = new LocalStorageUnitRepository();
-      const planRepository = new LocalStorageLessonPlanRepository();
-      const activityRepository = new LocalStorageActivityRepository();
-
-      // Para buscar todas as disciplinas (incluindo arquivadas), precisamos acessar o storage diretamente
-      // Como findAll() filtra arquivadas, vamos usar uma abordagem alternativa
-      const storageKey = 'subjects';
-      let allSubjects: Subject[] = [];
-      if (typeof window !== 'undefined' && localStorage.getItem(storageKey)) {
-        const data = localStorage.getItem(storageKey);
-        if (data) {
-          const parsed = JSON.parse(data);
-          if (Array.isArray(parsed)) {
-            allSubjects = parsed;
-          }
-        }
-      }
+      // Para buscar todas as disciplinas (incluindo arquivadas)
+      const allSubjects = await subjectService.findAllIncludingArchived();
 
       const [allUnits, allPlans, allActivities] = await Promise.all([
-        unitRepository.findAll(),
-        planRepository.findAll(),
-        activityRepository.findAll(),
+        unitService.findAllIncludingArchived(),
+        materialService.findAllLessonPlansIncludingArchived(),
+        materialService.findAllActivitiesIncludingArchived(),
       ]);
 
       setArchivedSubjects(allSubjects.filter((s) => s.archived === true));
@@ -77,14 +61,8 @@ export default function ArquivadosPage() {
 
   const handleUnarchiveUnit = async (unitId: string) => {
     try {
-      const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
-      const unitRepository = new LocalStorageUnitRepository();
-
-      await unitRepository.update(unitId, {
-        archived: false,
-        archivedAt: undefined,
-      });
-
+      const unitService = ApplicationServiceFactory.createUnitService();
+      await unitService.unarchive(unitId);
       showToast('Unidade restaurada com sucesso!', 'success');
       await loadArchivedContent();
     } catch (err: any) {
@@ -94,14 +72,8 @@ export default function ArquivadosPage() {
 
   const handleUnarchivePlan = async (planId: string) => {
     try {
-      const { LocalStorageLessonPlanRepository } = await import('@/repository/implementations/LocalStorageLessonPlanRepository');
-      const planRepository = new LocalStorageLessonPlanRepository();
-
-      await planRepository.update(planId, {
-        archived: false,
-        archivedAt: undefined,
-      });
-
+      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+      await materialService.unarchiveLessonPlan(planId);
       showToast('Plano de aula restaurado com sucesso!', 'success');
       await loadArchivedContent();
     } catch (err: any) {
@@ -111,14 +83,8 @@ export default function ArquivadosPage() {
 
   const handleUnarchiveActivity = async (activityId: string) => {
     try {
-      const { LocalStorageActivityRepository } = await import('@/repository/implementations/LocalStorageActivityRepository');
-      const activityRepository = new LocalStorageActivityRepository();
-
-      await activityRepository.update(activityId, {
-        archived: false,
-        archivedAt: undefined,
-      });
-
+      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+      await materialService.unarchiveActivity(activityId);
       showToast('Atividade restaurada com sucesso!', 'success');
       await loadArchivedContent();
     } catch (err: any) {
@@ -132,10 +98,8 @@ export default function ArquivadosPage() {
     }
 
     try {
-      const { LocalStorageSubjectRepository } = await import('@/repository/implementations/LocalStorageSubjectRepository');
-      const subjectRepository = new LocalStorageSubjectRepository();
-
-      await subjectRepository.delete(subjectId);
+      const subjectService = ApplicationServiceFactory.createSubjectService();
+      await subjectService.delete(subjectId);
       showToast('Disciplina deletada permanentemente!', 'success');
       await loadArchivedContent();
     } catch (err: any) {
@@ -149,10 +113,8 @@ export default function ArquivadosPage() {
     }
 
     try {
-      const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
-      const unitRepository = new LocalStorageUnitRepository();
-
-      await unitRepository.delete(unitId);
+      const unitService = ApplicationServiceFactory.createUnitService();
+      await unitService.delete(unitId);
       showToast('Unidade deletada permanentemente!', 'success');
       await loadArchivedContent();
     } catch (err: any) {
@@ -166,10 +128,8 @@ export default function ArquivadosPage() {
     }
 
     try {
-      const { LocalStorageLessonPlanRepository } = await import('@/repository/implementations/LocalStorageLessonPlanRepository');
-      const planRepository = new LocalStorageLessonPlanRepository();
-
-      await planRepository.delete(planId);
+      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+      await materialService.deleteLessonPlan(planId);
       showToast('Plano deletado permanentemente!', 'success');
       await loadArchivedContent();
     } catch (err: any) {
@@ -183,10 +143,8 @@ export default function ArquivadosPage() {
     }
 
     try {
-      const { LocalStorageActivityRepository } = await import('@/repository/implementations/LocalStorageActivityRepository');
-      const activityRepository = new LocalStorageActivityRepository();
-
-      await activityRepository.delete(activityId);
+      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+      await materialService.deleteActivity(activityId);
       showToast('Atividade deletada permanentemente!', 'success');
       await loadArchivedContent();
     } catch (err: any) {
@@ -196,14 +154,8 @@ export default function ArquivadosPage() {
 
   const handleUnarchiveSubject = async (subjectId: string) => {
     try {
-      const { LocalStorageSubjectRepository } = await import('@/repository/implementations/LocalStorageSubjectRepository');
-      const subjectRepository = new LocalStorageSubjectRepository();
-
-      await subjectRepository.update(subjectId, {
-        archived: false,
-        archivedAt: undefined,
-      });
-
+      const subjectService = ApplicationServiceFactory.createSubjectService();
+      await subjectService.unarchive(subjectId);
       showToast('Disciplina restaurada com sucesso!', 'success');
       await loadArchivedContent();
     } catch (err: any) {

@@ -4,6 +4,37 @@ import { IActivityRepository } from '../interfaces/IActivityRepository';
 const STORAGE_KEY = 'activities';
 
 /**
+ * Erros personalizados do repositório de atividades
+ */
+class RepositoryError extends Error {
+  constructor(message: string, public code: string) {
+    super(message);
+    this.name = 'RepositoryError';
+  }
+}
+
+class NotFoundError extends RepositoryError {
+  constructor(resource: string, id: string) {
+    super(`${resource} com ID "${id}" não encontrado(a)`, 'NOT_FOUND');
+    this.name = 'NotFoundError';
+  }
+}
+
+class ValidationError extends RepositoryError {
+  constructor(message: string) {
+    super(message, 'VALIDATION_ERROR');
+    this.name = 'ValidationError';
+  }
+}
+
+class StorageError extends RepositoryError {
+  constructor(message: string) {
+    super(message, 'STORAGE_ERROR');
+    this.name = 'StorageError';
+  }
+}
+
+/**
  * Implementação do repositório de atividades avaliativas usando localStorage
  */
 export class LocalStorageActivityRepository implements IActivityRepository {
@@ -34,7 +65,7 @@ export class LocalStorageActivityRepository implements IActivityRepository {
       localStorage.setItem(this.getStorageKey(), JSON.stringify(activities));
     } catch (error) {
       console.error('Erro ao salvar atividades no localStorage:', error);
-      throw new Error('Falha ao salvar atividade');
+      throw new StorageError(`Falha ao salvar atividade: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     }
   }
 
@@ -55,29 +86,40 @@ export class LocalStorageActivityRepository implements IActivityRepository {
 
   async create(activityData: Omit<Activity, 'id' | 'createdAt'>): Promise<Activity> {
     if (!validateActivity(activityData)) {
-      throw new Error('Dados da atividade inválidos');
+      throw new ValidationError('Dados da atividade inválidos');
     }
 
     // Verifica se já existe uma atividade para esta unidade
     const existingActivity = await this.findByUnitId(activityData.unitId);
     if (existingActivity) {
-      throw new Error('Já existe uma atividade para esta unidade');
+      throw new ValidationError('Já existe uma atividade para esta unidade');
     }
 
-    const activity = createActivity(activityData);
-    const activities = await this.getAllFromStorage();
-    activities.push(activity);
-    await this.saveToStorage(activities);
+    try {
+      const activity = createActivity(activityData);
+      const activities = await this.getAllFromStorage();
+      activities.push(activity);
+      await this.saveToStorage(activities);
 
-    return activity;
+      return activity;
+    } catch (error) {
+      if (error instanceof ValidationError || error instanceof StorageError) {
+        throw error;
+      }
+      throw new StorageError(`Erro ao criar atividade: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    }
   }
 
   async update(id: string, updates: Partial<Activity>): Promise<Activity> {
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+      throw new ValidationError('ID inválido para atualização de atividade');
+    }
+
     const activities = await this.getAllFromStorage();
     const index = activities.findIndex((a) => a.id === id);
 
     if (index === -1) {
-      throw new Error('Atividade não encontrada');
+      throw new NotFoundError('Atividade', id);
     }
 
     const updatedActivity: Activity = {
@@ -88,23 +130,41 @@ export class LocalStorageActivityRepository implements IActivityRepository {
     };
 
     if (!validateActivity(updatedActivity)) {
-      throw new Error('Dados atualizados da atividade são inválidos');
+      throw new ValidationError('Dados atualizados da atividade são inválidos');
     }
 
-    activities[index] = updatedActivity;
-    await this.saveToStorage(activities);
+    try {
+      activities[index] = updatedActivity;
+      await this.saveToStorage(activities);
 
-    return updatedActivity;
+      return updatedActivity;
+    } catch (error) {
+      if (error instanceof StorageError) {
+        throw error;
+      }
+      throw new StorageError(`Erro ao atualizar atividade: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    }
   }
 
   async delete(id: string): Promise<void> {
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+      throw new ValidationError('ID inválido para exclusão de atividade');
+    }
+
     const activities = await this.getAllFromStorage();
     const filtered = activities.filter((a) => a.id !== id);
 
     if (filtered.length === activities.length) {
-      throw new Error('Atividade não encontrada');
+      throw new NotFoundError('Atividade', id);
     }
 
-    await this.saveToStorage(filtered);
+    try {
+      await this.saveToStorage(filtered);
+    } catch (error) {
+      if (error instanceof StorageError) {
+        throw error;
+      }
+      throw new StorageError(`Erro ao deletar atividade: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    }
   }
 }

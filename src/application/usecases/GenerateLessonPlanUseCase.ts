@@ -4,6 +4,7 @@ import { IUnitRepository } from '@/repository/interfaces/IUnitRepository';
 import { ISubjectRepository } from '@/repository/interfaces/ISubjectRepository';
 import { LessonPlanGenerator } from '@/infrastructure/services/LessonPlanGenerator';
 import { GenerateLessonPlanDTO } from '../dto/GenerateLessonPlanDTO';
+import { NotFoundError, ValidationError, ServiceUnavailableError } from '../errors';
 
 /**
  * Caso de uso: Gerar plano de aula via IA
@@ -21,32 +22,44 @@ export class GenerateLessonPlanUseCase {
     // Busca a unidade
     const unit = await this.unitRepository.findById(dto.unitId);
     if (!unit) {
-      throw new Error('Unidade não encontrada');
+      throw new NotFoundError('Unidade', dto.unitId);
     }
 
     // Verifica se já existe um plano para esta unidade
     const existingPlan = await this.lessonPlanRepository.findByUnitId(dto.unitId);
     if (existingPlan) {
-      throw new Error('Já existe um plano de aula para esta unidade');
+      throw new ValidationError('Já existe um plano de aula para esta unidade');
     }
 
     // Busca a disciplina associada
     const subject = await this.subjectRepository.findById(unit.subjectId);
     if (!subject) {
-      throw new Error('Disciplina não encontrada');
+      throw new NotFoundError('Disciplina', unit.subjectId);
     }
 
-    // Gera o plano de aula usando IA
-    const generatedPlan = await this.lessonPlanGenerator.generate({
-      unit,
-      subject,
-      year: dto.year,
-      additionalContext: dto.additionalContext,
-    });
+    try {
+      // Gera o plano de aula usando IA
+      const generatedPlan = await this.lessonPlanGenerator.generate({
+        unit,
+        subject,
+        year: dto.year,
+        additionalContext: dto.additionalContext,
+      });
 
-    // Salva o plano gerado
-    const savedPlan = await this.lessonPlanRepository.create(generatedPlan);
+      // Salva o plano gerado
+      const savedPlan = await this.lessonPlanRepository.create(generatedPlan);
 
-    return savedPlan;
+      return savedPlan;
+    } catch (error) {
+      // Se já for um ServiceUnavailableError, repassa
+      if (error instanceof ServiceUnavailableError) {
+        throw error;
+      }
+      // Converte outros erros relacionados à IA em ServiceUnavailableError
+      if (error instanceof Error) {
+        throw new ServiceUnavailableError('Gerador de Plano de Aula', error.message);
+      }
+      throw new ServiceUnavailableError('Gerador de Plano de Aula');
+    }
   }
 }

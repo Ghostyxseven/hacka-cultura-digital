@@ -1,16 +1,15 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useUnitForm, useToast } from '@/app/hooks';
-import { ToastContainer } from '@/app/components';
+import { ToastContainer, LoadingSpinner } from '@/app/components';
 
 /**
- * Página de criação de unidade
- * Lógica de negócio separada em hook customizado (Clean Architecture)
+ * Componente interno que usa useSearchParams
  */
-export default function NewUnitPage() {
+function NewUnitForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const subjectId = searchParams.get('subjectId') || '';
@@ -235,5 +234,21 @@ export default function NewUnitPage() {
       </div>
       </div>
     </>
+  );
+}
+
+/**
+ * Página de criação de unidade
+ * Wrapped em Suspense para useSearchParams
+ */
+export default function NewUnitPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner message="Carregando formulário..." size="lg" />
+      </div>
+    }>
+      <NewUnitForm />
+    </Suspense>
   );
 }

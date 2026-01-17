@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { ApplicationServiceFactory } from '@/application';
 import type { Subject } from '@/application/viewmodels';
+import { getErrorMessage } from '@/app/utils/errorHandler';
 
 export interface SubjectFormData {
   name: string;
@@ -20,6 +21,99 @@ export function useSubjectForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nameValidation, setNameValidation] = useState<{
+    isValidating: boolean;
+    isAvailable: boolean | null;
+    message: string | null;
+  }>({
+    isValidating: false,
+    isAvailable: null,
+    message: null,
+  });
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Validação de nome único em tempo real (com debounce)
+  const validateNameAvailability = useCallback(async (name: string) => {
+    const trimmedName = name.trim();
+    
+    // Reset validação se campo vazio
+    if (!trimmedName || trimmedName.length < 2) {
+      setNameValidation({
+        isValidating: false,
+        isAvailable: null,
+        message: null,
+      });
+      return;
+    }
+
+    // Validação de comprimento mínimo
+    if (trimmedName.length < 2) {
+      setNameValidation({
+        isValidating: false,
+        isAvailable: false,
+        message: 'Nome deve ter pelo menos 2 caracteres',
+      });
+      return;
+    }
+
+    // Validação de comprimento máximo
+    if (trimmedName.length > 100) {
+      setNameValidation({
+        isValidating: false,
+        isAvailable: false,
+        message: 'Nome não pode ter mais de 100 caracteres',
+      });
+      return;
+    }
+
+    // Debounce: espera 500ms antes de validar
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    setNameValidation({
+      isValidating: true,
+      isAvailable: null,
+      message: null,
+    });
+
+    debounceTimerRef.current = setTimeout(async () => {
+      try {
+        const subjectService = ApplicationServiceFactory.createSubjectService();
+        const allSubjects = await subjectService.findAll();
+        
+        const exists = allSubjects.some(
+          (s) => !s.archived && s.name.toLowerCase().trim() === trimmedName.toLowerCase().trim()
+        );
+
+        setNameValidation({
+          isValidating: false,
+          isAvailable: !exists,
+          message: exists ? `Já existe uma disciplina com o nome "${trimmedName}"` : 'Nome disponível',
+        });
+      } catch (err: any) {
+        setNameValidation({
+          isValidating: false,
+          isAvailable: null,
+          message: null,
+        });
+      }
+    }, 500);
+  }, []);
+
+  // Limpar timer ao desmontar
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Valida nome quando mudar
+  useEffect(() => {
+    validateNameAvailability(formData.name);
+  }, [formData.name, validateNameAvailability]);
 
   const toggleSchoolYear = useCallback((year: string) => {
     setFormData((prev) => ({
@@ -62,7 +156,7 @@ export function useSubjectForm() {
 
       return subject;
     } catch (err: any) {
-      const errorMessage = err.message || 'Erro ao criar disciplina';
+      const errorMessage = getErrorMessage(err);
       setError(errorMessage);
       throw err;
     } finally {
@@ -75,6 +169,7 @@ export function useSubjectForm() {
     setFormData,
     loading,
     error,
+    nameValidation,
     toggleSchoolYear,
     createSubject,
   };

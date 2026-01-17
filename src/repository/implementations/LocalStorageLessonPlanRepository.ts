@@ -4,6 +4,37 @@ import { ILessonPlanRepository } from '../interfaces/ILessonPlanRepository';
 const STORAGE_KEY = 'lessonPlans';
 
 /**
+ * Erros personalizados do repositório de planos de aula
+ */
+class RepositoryError extends Error {
+  constructor(message: string, public code: string) {
+    super(message);
+    this.name = 'RepositoryError';
+  }
+}
+
+class NotFoundError extends RepositoryError {
+  constructor(resource: string, id: string) {
+    super(`${resource} com ID "${id}" não encontrado(a)`, 'NOT_FOUND');
+    this.name = 'NotFoundError';
+  }
+}
+
+class ValidationError extends RepositoryError {
+  constructor(message: string) {
+    super(message, 'VALIDATION_ERROR');
+    this.name = 'ValidationError';
+  }
+}
+
+class StorageError extends RepositoryError {
+  constructor(message: string) {
+    super(message, 'STORAGE_ERROR');
+    this.name = 'StorageError';
+  }
+}
+
+/**
  * Implementação do repositório de planos de aula usando localStorage
  */
 export class LocalStorageLessonPlanRepository implements ILessonPlanRepository {
@@ -55,29 +86,40 @@ export class LocalStorageLessonPlanRepository implements ILessonPlanRepository {
 
   async create(planData: Omit<LessonPlan, 'id' | 'createdAt'>): Promise<LessonPlan> {
     if (!validateLessonPlan(planData)) {
-      throw new Error('Dados do plano de aula inválidos');
+      throw new ValidationError('Dados do plano de aula inválidos');
     }
 
     // Verifica se já existe um plano para esta unidade
     const existingPlan = await this.findByUnitId(planData.unitId);
     if (existingPlan) {
-      throw new Error('Já existe um plano de aula para esta unidade');
+      throw new ValidationError('Já existe um plano de aula para esta unidade');
     }
 
-    const plan = createLessonPlan(planData);
-    const plans = await this.getAllFromStorage();
-    plans.push(plan);
-    await this.saveToStorage(plans);
+    try {
+      const plan = createLessonPlan(planData);
+      const plans = await this.getAllFromStorage();
+      plans.push(plan);
+      await this.saveToStorage(plans);
 
-    return plan;
+      return plan;
+    } catch (error) {
+      if (error instanceof ValidationError || error instanceof StorageError) {
+        throw error;
+      }
+      throw new StorageError(`Erro ao criar plano de aula: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    }
   }
 
   async update(id: string, updates: Partial<LessonPlan>): Promise<LessonPlan> {
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+      throw new ValidationError('ID inválido para atualização de plano de aula');
+    }
+
     const plans = await this.getAllFromStorage();
     const index = plans.findIndex((p) => p.id === id);
 
     if (index === -1) {
-      throw new Error('Plano de aula não encontrado');
+      throw new NotFoundError('Plano de aula', id);
     }
 
     const updatedPlan: LessonPlan = {
@@ -88,23 +130,41 @@ export class LocalStorageLessonPlanRepository implements ILessonPlanRepository {
     };
 
     if (!validateLessonPlan(updatedPlan)) {
-      throw new Error('Dados atualizados do plano de aula são inválidos');
+      throw new ValidationError('Dados atualizados do plano de aula são inválidos');
     }
 
-    plans[index] = updatedPlan;
-    await this.saveToStorage(plans);
+    try {
+      plans[index] = updatedPlan;
+      await this.saveToStorage(plans);
 
-    return updatedPlan;
+      return updatedPlan;
+    } catch (error) {
+      if (error instanceof StorageError) {
+        throw error;
+      }
+      throw new StorageError(`Erro ao atualizar plano de aula: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    }
   }
 
   async delete(id: string): Promise<void> {
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+      throw new ValidationError('ID inválido para exclusão de plano de aula');
+    }
+
     const plans = await this.getAllFromStorage();
     const filtered = plans.filter((p) => p.id !== id);
 
     if (filtered.length === plans.length) {
-      throw new Error('Plano de aula não encontrado');
+      throw new NotFoundError('Plano de aula', id);
     }
 
-    await this.saveToStorage(filtered);
+    try {
+      await this.saveToStorage(filtered);
+    } catch (error) {
+      if (error instanceof StorageError) {
+        throw error;
+      }
+      throw new StorageError(`Erro ao deletar plano de aula: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    }
   }
 }

@@ -9,6 +9,7 @@ import {
   ActionButton,
   LoadingSpinner,
   SearchBar,
+  GridSkeleton,
 } from '@/app/components';
 
 /**
@@ -81,10 +82,22 @@ export default function ProfessorDashboard() {
 
   const yearFilters = uniqueYears.map(year => ({ value: year, label: year }));
 
-  if (loading) {
+  // Mostra skeleton loaders enquanto carrega inicialmente
+  if (loading && subjects.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner message="Carregando dashboard..." size="lg" />
+      <div className="min-h-screen bg-gray-50">
+        <div className="px-4 py-4 md:px-8 md:py-8">
+          <div className="mb-8">
+            <div className="h-8 bg-gray-200 rounded-lg w-64 animate-pulse mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded-lg w-96 animate-pulse"></div>
+          </div>
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-24 bg-gray-200 rounded-xl animate-pulse"></div>
+            ))}
+          </div>
+          <GridSkeleton count={6} />
+        </div>
       </div>
     );
   }
@@ -190,10 +203,12 @@ export default function ProfessorDashboard() {
               />
             </div>
             
-            {filteredSubjects.length > 0 ? (
+            {loading && subjects.length > 0 ? (
+              <GridSkeleton count={filteredSubjects.length || 3} />
+            ) : filteredSubjects.length > 0 ? (
               <SubjectGrid
                 subjects={filteredSubjects}
-                loading={loading}
+                loading={false}
               />
             ) : (
               <div className="text-center py-12 bg-white rounded-xl border border-gray-200">

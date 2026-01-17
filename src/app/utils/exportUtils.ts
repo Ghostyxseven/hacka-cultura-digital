@@ -3,8 +3,7 @@
  * Suporta múltiplos formatos: PDF, Markdown, Word (HTML para conversão)
  */
 
-import { LessonPlan } from '@/core/entities/LessonPlan';
-import { Activity } from '@/core/entities/Activity';
+import type { LessonPlan, Activity } from '@/application/viewmodels';
 
 /**
  * Exporta plano de aula e atividade em formato Markdown

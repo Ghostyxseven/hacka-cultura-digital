@@ -71,46 +71,82 @@ export class ActivityGenerator {
     return `
 ${basePrompt}
 
-TAREFA: Gerar uma atividade avaliativa completa em formato JSON para a seguinte unidade:
+TAREFA: Gerar uma PROVA/ATIVIDADE AVALIATIVA COMPLETA e DETALHADA em formato JSON para a seguinte unidade:
 
 Disciplina: ${params.subject.name}
 Unidade: ${params.unit.title}
 Tema: ${params.unit.theme}
-Tipo de atividade: ${params.activityType || 'exercício'}
+Tipo de atividade: ${params.activityType || 'prova'}
 Número de questões: ${numberOfQuestions}
 ${params.year ? `Ano/Série: ${params.year}` : ''}
 ${params.additionalContext ? `Contexto adicional: ${params.additionalContext}` : ''}
 
 FORMATO DE RESPOSTA (JSON):
 {
-  "title": "Título da atividade",
-  "description": "Descrição da atividade",
-  "type": "exercicio",
+  "title": "PROVA DE [DISCIPLINA] - [TEMA] - [ANO/SÉRIE]",
+  "description": "Descrição DETALHADA da atividade (mínimo 300 palavras). Inclua: objetivos da avaliação, competências e habilidades BNCC avaliadas, instruções gerais, tempo estimado, pontuação total, critérios de avaliação",
+  "type": "prova",
   "questions": [
     {
       "id": "q1",
-      "question": "Texto da questão",
+      "question": "Texto da questão DETALHADO e contextualizado. Questões devem ser: claras, alinhadas à BNCC, relacionadas ao tema de Cultura Digital, apropriadas para o ano/série",
       "type": "multiple_choice",
-      "options": ["Opção A", "Opção B", "Opção C", "Opção D"],
+      "options": ["Opção A - descrita completa", "Opção B - descrita completa", "Opção C - descrita completa", "Opção D - descrita completa"],
       "correctAnswer": "Opção A",
-      "points": 10
+      "points": 10,
+      "bnccSkill": "Código BNCC (ex: EF04MA27)"
     }
   ],
-  "instructions": "Instruções para o aluno",
-  "evaluationCriteria": "Critérios de avaliação"
+  "instructions": "Instruções COMPLETAS para o aluno (mínimo 200 palavras). Inclua: como preencher, tempo disponível, forma de entrega, materiais permitidos, critérios de avaliação",
+  "evaluationCriteria": "Critérios de avaliação DETALHADOS (mínimo 300 palavras). Inclua: rubrica de avaliação, pontuação por questão, níveis de desempenho (Excelente, Bom, Regular, Em desenvolvimento), habilidades específicas avaliadas"
 }
 
 TIPOS DE QUESTÕES POSSÍVEIS:
-- "multiple_choice": Múltipla escolha (requer options e correctAnswer)
-- "open": Questão aberta (não requer options ou correctAnswer)
-- "true_false": Verdadeiro ou Falso (requer correctAnswer: "true" ou "false")
-- "essay": Dissertativa (não requer options ou correctAnswer)
+- "multiple_choice": Múltipla escolha (requer options e correctAnswer). Use para questões objetivas sobre conceitos.
+- "open": Questão aberta (não requer options ou correctAnswer). Use para respostas curtas e diretas.
+- "true_false": Verdadeiro ou Falso (requer correctAnswer: "true" ou "false"). Use para afirmações sobre segurança digital.
+- "essay": Dissertativa (não requer options ou correctAnswer). Use para reflexões e análises críticas.
+
+DISTRIBUIÇÃO SUGERIDA DE QUESTÕES:
+- 40% Múltipla escolha (conceitos e definições)
+- 30% Questões abertas (aplicação prática)
+- 20% Dissertativas (análise crítica)
+- 10% Verdadeiro/Falso (conceitos rápidos)
+
+ESTRUTURA DAS QUESTÕES:
+Cada questão deve incluir:
+1. Enunciado claro e contextualizado
+2. Contexto relacionado à Cultura Digital
+3. Relação com habilidades BNCC
+4. Dificuldade apropriada para o ano/série
+5. Opções plausíveis e bem elaboradas (para múltipla escolha)
+
+EXEMPLO DE BOA QUESTÃO (Múltipla Escolha):
+{
+  "id": "q1",
+  "question": "Mariana, aluna do 4º ano, está navegando na internet e encontra um site que oferece um jogo gratuito. Para acessar, o site pede que ela digite seu endereço de casa e o telefone da mãe. Considerando o que aprendemos sobre navegação segura, o que Mariana deve fazer?",
+  "type": "multiple_choice",
+  "options": [
+    "A) Informar os dados rapidamente para poder jogar",
+    "B) Pedir ajuda de um adulto responsável antes de fornecer qualquer informação pessoal",
+    "C) Fechar o site e procurar outro jogo em qualquer site",
+    "D) Compartilhar apenas o telefone, mas não o endereço"
+  ],
+  "correctAnswer": "B) Pedir ajuda de um adulto responsável antes de fornecer qualquer informação pessoal",
+  "points": 10,
+  "bnccSkill": "EF04CI08 - Cultura Digital (Cidadania Digital)"
+}
 
 IMPORTANTE:
-- A atividade deve estar alinhada às competências BNCC de Cultura Digital
-- Inclua uma variedade de tipos de questões
-- Seja claro e objetivo
-- Pontuação total sugerida: 100 pontos (distribuir entre questões)
+- A atividade DEVE estar extremamente alinhada às competências BNCC de Cultura Digital
+- Inclua variedade de tipos de questões (mínimo 5 questões variadas)
+- Seja MUITO claro, objetivo e pedagógico
+- Questões devem avaliar competências, não apenas memorização
+- Contextualize questões em situações reais de uso digital
+- Pontuação total: 100 pontos (distribuir proporcionalmente)
+- Cada questão deve ter habilidade BNCC associada
+- Questões progressivas em dificuldade
+- Inclua questões que avaliam pensamento crítico sobre tecnologia
     `.trim();
   }
 

@@ -3,9 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 
-export default function LoginPage() {
+// Força renderização dinâmica para evitar erro de prerender
+export const dynamic = 'force-dynamic';
+
+function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
@@ -85,5 +88,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <AuthProvider>
+      <LoginForm />
+    </AuthProvider>
   );
 }

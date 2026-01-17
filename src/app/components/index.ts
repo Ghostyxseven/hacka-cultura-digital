@@ -7,6 +7,8 @@ export * from './SubjectGrid';
 export * from './ContentSelectionCard';
 export * from './EmptyState';
 export * from './LoadingSpinner';
+export * from './SkeletonLoader';
+export * from './ProgressIndicator';
 export * from './ActionButton';
 export * from './LessonPlanView';
 export * from './ActivityView';
