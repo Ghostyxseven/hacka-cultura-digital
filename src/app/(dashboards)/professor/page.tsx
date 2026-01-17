@@ -1,12 +1,14 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useDashboard } from '@/app/hooks';
+import { useDashboard, useToast } from '@/app/hooks';
 import {
   DashboardStats,
   SubjectGrid,
   ActionButton,
   LoadingSpinner,
+  SearchBar,
 } from '@/app/components';
 
 /**
@@ -28,7 +30,56 @@ import {
  * Lógica de negócio separada em hook customizado (Clean Architecture)
  */
 export default function ProfessorDashboard() {
-  const { subjects, subjectsWithStats, loading, error, stats, archivedStats } = useDashboard();
+  const { subjects, subjectsWithStats, loading, error, stats, archivedStats, reload } = useDashboard();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [yearFilter, setYearFilter] = useState('');
+
+  // Escuta eventos de atualização do AIAgent
+  useEffect(() => {
+    const handleUpdate = () => {
+      reload();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('dashboard:update', handleUpdate);
+      return () => {
+        window.removeEventListener('dashboard:update', handleUpdate);
+      };
+    }
+  }, [reload]);
+
+  // Filtra disciplinas por busca e ano
+  const filteredSubjects = subjectsWithStats.length > 0 
+    ? subjectsWithStats.filter((subject) => {
+        const matchesSearch = searchQuery === '' || 
+          subject.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (subject.description && subject.description.toLowerCase().includes(searchQuery.toLowerCase()));
+        
+        const matchesYear = yearFilter === '' || 
+          subject.schoolYears.some(year => year.includes(yearFilter));
+        
+        return matchesSearch && matchesYear;
+      })
+    : subjects.filter((subject) => {
+        const matchesSearch = searchQuery === '' || 
+          subject.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (subject.description && subject.description.toLowerCase().includes(searchQuery.toLowerCase()));
+        
+        const matchesYear = yearFilter === '' || 
+          subject.schoolYears.some(year => year.includes(yearFilter));
+        
+        return matchesSearch && matchesYear;
+      });
+
+  // Extrai anos únicos para o filtro
+  const uniqueYears = Array.from(
+    new Set(
+      (subjectsWithStats.length > 0 ? subjectsWithStats : subjects)
+        .flatMap(s => s.schoolYears)
+    )
+  ).sort();
+
+  const yearFilters = uniqueYears.map(year => ({ value: year, label: year }));
 
   if (loading) {
     return (
@@ -40,14 +91,14 @@ export default function ProfessorDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="px-8 py-8">
+      <div className="px-4 py-4 md:px-8 md:py-8">
         {/* Saudação e Calendário - Design moderno */}
         <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 flex items-center gap-4">
-            <span className="text-5xl">👋</span>
+          <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-200 flex items-center gap-3 md:gap-4 w-full sm:w-auto">
+            <span className="text-4xl md:text-5xl">👋</span>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">Olá, Professor!</h1>
-              <p className="text-gray-600">Hoje é um ótimo dia para ensinar.</p>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">Olá, Professor!</h1>
+              <p className="text-sm md:text-base text-gray-600">Hoje é um ótimo dia para ensinar.</p>
             </div>
           </div>
           <div className="bg-white rounded-xl shadow-sm px-5 py-3 border border-gray-200 flex items-center gap-3">
@@ -125,14 +176,38 @@ export default function ProfessorDashboard() {
           <div id="meus-conteudos" className="mt-8 scroll-mt-8">
             <div className="mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Disciplinas Cadastradas</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 mb-4">
                 Gerencie suas disciplinas e unidades de ensino criadas
               </p>
+              
+              {/* Busca e Filtros */}
+              <SearchBar
+                placeholder="Buscar disciplinas por nome ou descrição..."
+                onSearch={setSearchQuery}
+                onFilterChange={setYearFilter}
+                filters={yearFilters}
+                className="mb-6"
+              />
             </div>
-            <SubjectGrid
-              subjects={subjectsWithStats.length > 0 ? subjectsWithStats : subjects}
-              loading={loading}
-            />
+            
+            {filteredSubjects.length > 0 ? (
+              <SubjectGrid
+                subjects={filteredSubjects}
+                loading={loading}
+              />
+            ) : (
+              <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                <span className="text-5xl mb-4 block">🔍</span>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                  Nenhuma disciplina encontrada
+                </h4>
+                <p className="text-gray-600">
+                  {searchQuery || yearFilter 
+                    ? 'Tente ajustar os filtros de busca' 
+                    : 'Comece criando sua primeira disciplina'}
+                </p>
+              </div>
+            )}
           </div>
         )}
 

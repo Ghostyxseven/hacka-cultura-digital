@@ -126,6 +126,74 @@ export default function ArquivadosPage() {
     }
   };
 
+  const handleDeleteSubject = async (subjectId: string) => {
+    if (!confirm('⚠️ Tem certeza que deseja DELETAR PERMANENTEMENTE esta disciplina?\n\nEsta ação não pode ser desfeita!')) {
+      return;
+    }
+
+    try {
+      const { LocalStorageSubjectRepository } = await import('@/repository/implementations/LocalStorageSubjectRepository');
+      const subjectRepository = new LocalStorageSubjectRepository();
+
+      await subjectRepository.delete(subjectId);
+      showToast('Disciplina deletada permanentemente!', 'success');
+      await loadArchivedContent();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao deletar disciplina', 'error');
+    }
+  };
+
+  const handleDeleteUnit = async (unitId: string) => {
+    if (!confirm('⚠️ Tem certeza que deseja DELETAR PERMANENTEMENTE esta unidade?\n\nEsta ação não pode ser desfeita!')) {
+      return;
+    }
+
+    try {
+      const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
+      const unitRepository = new LocalStorageUnitRepository();
+
+      await unitRepository.delete(unitId);
+      showToast('Unidade deletada permanentemente!', 'success');
+      await loadArchivedContent();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao deletar unidade', 'error');
+    }
+  };
+
+  const handleDeletePlan = async (planId: string) => {
+    if (!confirm('⚠️ Tem certeza que deseja DELETAR PERMANENTEMENTE este plano?\n\nEsta ação não pode ser desfeita!')) {
+      return;
+    }
+
+    try {
+      const { LocalStorageLessonPlanRepository } = await import('@/repository/implementations/LocalStorageLessonPlanRepository');
+      const planRepository = new LocalStorageLessonPlanRepository();
+
+      await planRepository.delete(planId);
+      showToast('Plano deletado permanentemente!', 'success');
+      await loadArchivedContent();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao deletar plano', 'error');
+    }
+  };
+
+  const handleDeleteActivity = async (activityId: string) => {
+    if (!confirm('⚠️ Tem certeza que deseja DELETAR PERMANENTEMENTE esta atividade?\n\nEsta ação não pode ser desfeita!')) {
+      return;
+    }
+
+    try {
+      const { LocalStorageActivityRepository } = await import('@/repository/implementations/LocalStorageActivityRepository');
+      const activityRepository = new LocalStorageActivityRepository();
+
+      await activityRepository.delete(activityId);
+      showToast('Atividade deletada permanentemente!', 'success');
+      await loadArchivedContent();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao deletar atividade', 'error');
+    }
+  };
+
   const handleUnarchiveSubject = async (subjectId: string) => {
     try {
       const { LocalStorageSubjectRepository } = await import('@/repository/implementations/LocalStorageSubjectRepository');
@@ -347,13 +415,22 @@ export default function ArquivadosPage() {
                             </div>
                           )}
                         </div>
-                        <button
-                          onClick={() => handleUnarchiveSubject(subject.id)}
-                          className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl hover:from-green-700 hover:to-emerald-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-                        >
-                          <span className="mr-2">📦</span>
-                          Restaurar Disciplina
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleUnarchiveSubject(subject.id)}
+                            className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl hover:from-green-700 hover:to-emerald-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                          >
+                            <span className="mr-2">📦</span>
+                            Restaurar
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSubject(subject.id)}
+                            className="px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                            title="Deletar permanentemente"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -393,13 +470,22 @@ export default function ArquivadosPage() {
                             </div>
                           )}
                         </div>
-                        <button
-                          onClick={() => handleUnarchiveUnit(unit.id)}
-                          className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl hover:from-green-700 hover:to-emerald-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-                        >
-                          <span className="mr-2">📦</span>
-                          Restaurar Unidade
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleUnarchiveUnit(unit.id)}
+                            className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl hover:from-green-700 hover:to-emerald-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                          >
+                            <span className="mr-2">📦</span>
+                            Restaurar
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUnit(unit.id)}
+                            className="px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                            title="Deletar permanentemente"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -439,13 +525,22 @@ export default function ArquivadosPage() {
                             </div>
                           )}
                         </div>
-                        <button
-                          onClick={() => handleUnarchivePlan(plan.id)}
-                          className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl hover:from-green-700 hover:to-emerald-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-                        >
-                          <span className="mr-2">📦</span>
-                          Restaurar Plano
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleUnarchivePlan(plan.id)}
+                            className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl hover:from-green-700 hover:to-emerald-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                          >
+                            <span className="mr-2">📦</span>
+                            Restaurar
+                          </button>
+                          <button
+                            onClick={() => handleDeletePlan(plan.id)}
+                            className="px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                            title="Deletar permanentemente"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -485,13 +580,22 @@ export default function ArquivadosPage() {
                             </div>
                           )}
                         </div>
-                        <button
-                          onClick={() => handleUnarchiveActivity(activity.id)}
-                          className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl hover:from-green-700 hover:to-emerald-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-                        >
-                          <span className="mr-2">📦</span>
-                          Restaurar Atividade
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleUnarchiveActivity(activity.id)}
+                            className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl hover:from-green-700 hover:to-emerald-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                          >
+                            <span className="mr-2">📦</span>
+                            Restaurar
+                          </button>
+                          <button
+                            onClick={() => handleDeleteActivity(activity.id)}
+                            className="px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                            title="Deletar permanentemente"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

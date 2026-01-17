@@ -15,3 +15,4 @@ export * from './services/BNCCService';
 export * from './services/LessonPlanGenerator';
 export * from './services/ActivityGenerator';
 export * from './services/UnitSuggestionService';
+export * from './services/SlideGenerator';

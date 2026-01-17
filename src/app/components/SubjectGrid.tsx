@@ -58,10 +58,9 @@ export function SubjectGrid({ subjects, loading }: SubjectGridProps) {
         const unitsCount = subjectWithUnits.unitsCount ?? 0;
         
         return (
-          <Link
+          <div
             key={subject.id}
-            href={`/professor/disciplinas/${subject.id}`}
-            className="bg-gradient-to-br from-white to-indigo-50/30 rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 hover:scale-[1.03] cursor-pointer group border border-gray-200 hover:border-indigo-400 relative overflow-hidden"
+            className="bg-gradient-to-br from-white to-indigo-50/30 rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 hover:scale-[1.03] group border border-gray-200 hover:border-indigo-400 relative overflow-hidden"
           >
             {/* Gradiente de fundo sutil no hover */}
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/5 group-hover:to-purple-500/5 transition-all duration-300"></div>
@@ -69,17 +68,27 @@ export function SubjectGrid({ subjects, loading }: SubjectGridProps) {
             <div className="relative z-10">
               {/* Header com ícone e nome */}
               <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3 flex-1">
+                <Link 
+                  href={`/professor/disciplinas/${subject.id}`}
+                  className="flex items-center gap-3 flex-1 cursor-pointer"
+                >
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all transform group-hover:rotate-6">
                     <span className="text-2xl">📖</span>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 group-hover:text-indigo-700 transition-colors">
                     {subject.name}
                   </h3>
+                </Link>
+                
+                {/* Menu de ações */}
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/professor/disciplinas/${subject.id}`}
+                    className="text-2xl text-gray-400 group-hover:text-indigo-600 transition-all transform group-hover:translate-x-1"
+                  >
+                    →
+                  </Link>
                 </div>
-                <span className="text-2xl text-gray-400 group-hover:text-indigo-600 transition-all transform group-hover:translate-x-1">
-                  →
-                </span>
               </div>
 
               {/* Descrição */}
@@ -107,7 +116,7 @@ export function SubjectGrid({ subjects, loading }: SubjectGridProps) {
                 ))}
               </div>
             </div>
-          </Link>
+          </div>
         );
       })}
     </div>

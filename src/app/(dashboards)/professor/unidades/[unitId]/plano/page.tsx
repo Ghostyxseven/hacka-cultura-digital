@@ -9,6 +9,7 @@ import {
   GenerationForm,
   LessonPlanView,
   ActivityView,
+  SlideView,
   Tabs,
   ExportButton,
   ActionButton,
@@ -41,11 +42,14 @@ export default function GenerateLessonPlanPage() {
   const {
     lessonPlan,
     activity,
+    slides,
     loading,
     generating,
+    generatingSlides,
     error,
     loadMaterials,
     generateMaterials,
+    generateSlides,
     archiveAllMaterials,
   } = useMaterialGeneration(unitId);
   const { toasts, showToast, removeToast } = useToast();
@@ -85,6 +89,24 @@ export default function GenerateLessonPlanPage() {
 
   const handleRegenerate = () => {
     setShowForm(true);
+  };
+
+  const handleGenerateSlides = async () => {
+    if (!lessonPlan) {
+      showToast('Gere o plano de aula primeiro antes de gerar slides', 'warning');
+      setActiveTab('plano');
+      return;
+    }
+
+    try {
+      await generateSlides({
+        unitId,
+      });
+      showToast('Slides gerados com sucesso!', 'success');
+      setActiveTab('slides');
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao gerar slides', 'error');
+    }
   };
 
   const handleArchive = async () => {
@@ -251,7 +273,7 @@ export default function GenerateLessonPlanPage() {
                   >
                     Arquivar Materiais
                   </ActionButton>
-                  <ExportButton onExport={handleExportPDF} />
+                  <ExportButton onExport={handleExportPDF} lessonPlan={lessonPlan} activity={activity} />
                 </div>
               </div>
             </div>
@@ -274,15 +296,31 @@ export default function GenerateLessonPlanPage() {
               )}
 
               {activeTab === 'slides' && (
-                <div id="slides" className="bg-white rounded-xl shadow-lg p-12 text-center border border-gray-200">
-                  <div className="text-6xl mb-6">🖼️</div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-3">Slides de Apresentação</h2>
-                  <p className="text-gray-600 mb-4 max-w-md mx-auto leading-relaxed">
-                    Funcionalidade de geração de slides será implementada em breve.
-                  </p>
-                  <p className="text-gray-500 text-sm">
-                    Os slides serão gerados automaticamente a partir do plano de aula.
-                  </p>
+                <div id="slides">
+                  {generatingSlides ? (
+                    <LoadingSpinner message="Gerando slides..." size="lg" />
+                  ) : slides && slides.length > 0 ? (
+                    <SlideView slides={slides} onRegenerate={handleGenerateSlides} />
+                  ) : (
+                    <div className="bg-white rounded-xl shadow-lg p-12 text-center border border-gray-200">
+                      <div className="text-6xl mb-6">🖼️</div>
+                      <h2 className="text-2xl font-bold text-gray-900 mb-3">Slides de Apresentação</h2>
+                      <p className="text-gray-600 mb-6 max-w-md mx-auto leading-relaxed">
+                        {lessonPlan 
+                          ? 'Clique no botão abaixo para gerar slides automaticamente a partir do plano de aula.'
+                          : 'Gere o plano de aula primeiro para poder criar os slides.'}
+                      </p>
+                      {lessonPlan && (
+                        <button
+                          onClick={handleGenerateSlides}
+                          className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                          aria-label="Gerar slides"
+                        >
+                          🖼️ Gerar Slides
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
