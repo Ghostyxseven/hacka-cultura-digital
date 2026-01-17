@@ -56,6 +56,38 @@ export function AIAgent() {
     }
   }, [isOpen]);
 
+  // Navegação do histórico com setas do teclado
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Navega pelo histórico apenas quando o input está focado
+      if (document.activeElement === inputRef.current) {
+        if (e.key === 'ArrowUp' && commandHistory.length > 0) {
+          e.preventDefault();
+          const newIndex = historyIndex < commandHistory.length - 1 ? historyIndex + 1 : historyIndex;
+          setHistoryIndex(newIndex);
+          setInput(commandHistory[commandHistory.length - 1 - newIndex]);
+          setShowSuggestions(false);
+        } else if (e.key === 'ArrowDown' && historyIndex >= 0) {
+          e.preventDefault();
+          const newIndex = historyIndex - 1;
+          if (newIndex >= 0) {
+            setHistoryIndex(newIndex);
+            setInput(commandHistory[commandHistory.length - 1 - newIndex]);
+          } else {
+            setHistoryIndex(-1);
+            setInput('');
+            setShowSuggestions(true);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, commandHistory, historyIndex]);
+
   const addMessage = (role: 'user' | 'assistant', content: string) => {
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -338,6 +370,15 @@ export function AIAgent() {
 
     const userMessage = input.trim();
     setInput('');
+    setShowSuggestions(false);
+    setHistoryIndex(-1);
+    
+    // Adiciona ao histórico (máximo 50 comandos)
+    setCommandHistory((prev) => {
+      const newHistory = [userMessage, ...prev.filter(cmd => cmd !== userMessage)].slice(0, 50);
+      return newHistory;
+    });
+    
     addMessage('user', userMessage);
 
     setIsProcessing(true);
@@ -428,6 +469,29 @@ export function AIAgent() {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Sugestões Rápidas */}
+      {showSuggestions && messages.length === 1 && (
+        <div className="px-4 pt-2 pb-2 border-t border-gray-200 bg-gray-50">
+          <p className="text-xs text-gray-600 mb-2 font-semibold">Sugestões rápidas:</p>
+          <div className="flex flex-wrap gap-2">
+            {QUICK_SUGGESTIONS.map((suggestion, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setInput(suggestion.text);
+                  setShowSuggestions(false);
+                  inputRef.current?.focus();
+                }}
+                className="px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg hover:border-teal-400 hover:bg-teal-50 transition-all flex items-center gap-1.5"
+              >
+                <span>{suggestion.icon}</span>
+                <span className="text-gray-700">{suggestion.text}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200 bg-white rounded-b-xl">
         <div className="flex gap-2">
@@ -435,7 +499,16 @@ export function AIAgent() {
             ref={inputRef}
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              setShowSuggestions(false);
+              setHistoryIndex(-1);
+            }}
+            onFocus={() => {
+              if (input === '' && commandHistory.length === 0) {
+                setShowSuggestions(true);
+              }
+            }}
             placeholder="Digite seu comando..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             disabled={isProcessing}
@@ -448,9 +521,44 @@ export function AIAgent() {
             ➤
           </button>
         </div>
-        <p className="text-xs text-gray-500 mt-2">
-          Ex: "Criar disciplina Matemática para 6º ano" | "Gerar atividade de História"
-        </p>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-xs text-gray-500">
+            Ex: "Criar disciplina Matemática" | Use ↑↓ para histórico
+          </p>
+          {commandHistory.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setShowSuggestions(!showSuggestions);
+                if (!showSuggestions && input === '') {
+                  inputRef.current?.focus();
+                }
+              }}
+              className="text-xs text-teal-600 hover:text-teal-700 transition-colors"
+            >
+              {showSuggestions ? 'Ocultar' : 'Mostrar'} histórico ({commandHistory.length})
+            </button>
+          )}
+        </div>
+        
+        {/* Histórico de Comandos */}
+        {showSuggestions && commandHistory.length > 0 && input === '' && (
+          <div className="mt-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg bg-white">
+            {commandHistory.slice(0, 5).map((cmd, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setInput(cmd);
+                  setShowSuggestions(false);
+                  inputRef.current?.focus();
+                }}
+                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-teal-50 transition-colors border-b border-gray-100 last:border-b-0"
+              >
+                {cmd}
+              </button>
+            ))}
+          </div>
+        )}
       </form>
     </div>
   );

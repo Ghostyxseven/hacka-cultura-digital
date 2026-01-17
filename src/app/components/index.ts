@@ -22,3 +22,4 @@ export * from './SubjectCard';
 export * from './SubjectsList';
 export * from './UnitCard';
 export * from './UnitsList';
+export * from './SearchBar';
