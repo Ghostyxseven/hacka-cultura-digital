@@ -1,4 +1,4 @@
-import { BNCCCompetency, CULTURE_DIGITAL_COMPETENCIES, findRelevantCompetencies } from '@/core/entities/BNCCCompetency';
+import { BNCCCompetency, ALL_BNCC_COMPETENCIES, CULTURE_DIGITAL_COMPETENCIES, findRelevantCompetencies } from '@/core/entities/BNCCCompetency';
 
 /**
  * Serviço de Recuperação Aumentada por Geração (RAG) com BNCC
@@ -56,9 +56,112 @@ ${competency.skills.map((skill) => `- ${skill}`).join('\n')}
   }
 
   /**
-   * Obtém diretrizes pedagógicas específicas para Cultura Digital
+   * Obtém diretrizes pedagógicas específicas para uma área/disciplina
    */
-  getCultureDigitalGuidelines(): string {
+  getGuidelinesForComponent(component?: string): string {
+    const componentLower = component?.toLowerCase() || '';
+    
+    if (componentLower.includes('matemática') || componentLower.includes('matematica')) {
+      return `
+DIRETRIZES PEDAGÓGICAS - MATEMÁTICA (BNCC)
+
+A Matemática na BNCC prevê que os estudantes devem:
+1. Compreender e utilizar conhecimentos numéricos, algébricos, geométricos e estatísticos
+2. Resolver e elaborar problemas em diferentes contextos
+3. Desenvolver raciocínio lógico e pensamento crítico
+4. Utilizar tecnologias digitais para investigação e resolução de problemas
+5. Comunicar ideias matemáticas de forma clara e precisa
+
+Princípios pedagógicos:
+- Promover resolução de problemas contextualizados
+- Desenvolver raciocínio lógico e pensamento crítico
+- Integrar tecnologias digitais quando apropriado
+- Conectar matemática com situações reais
+- Alinhar com competências gerais da BNCC
+      `.trim();
+    }
+    
+    if (componentLower.includes('português') || componentLower.includes('portugues') || componentLower.includes('língua')) {
+      return `
+DIRETRIZES PEDAGÓGICAS - LÍNGUA PORTUGUESA (BNCC)
+
+A Língua Portuguesa na BNCC prevê que os estudantes devem:
+1. Compreender e produzir textos de diferentes gêneros
+2. Desenvolver habilidades de leitura, escrita, oralidade e escuta
+3. Utilizar tecnologias digitais para produção e leitura de textos
+4. Analisar criticamente textos em diferentes suportes
+5. Desenvolver competências comunicativas
+
+Princípios pedagógicos:
+- Promover leitura crítica e produção textual
+- Desenvolver habilidades comunicativas
+- Integrar tecnologias digitais na produção textual
+- Trabalhar com gêneros textuais diversos
+- Alinhar com competências gerais da BNCC
+      `.trim();
+    }
+    
+    if (componentLower.includes('ciências') || componentLower.includes('ciencias')) {
+      return `
+DIRETRIZES PEDAGÓGICAS - CIÊNCIAS (BNCC)
+
+As Ciências na BNCC prevêem que os estudantes devem:
+1. Compreender fenômenos naturais e científicos
+2. Desenvolver pensamento científico e investigativo
+3. Utilizar tecnologias digitais para pesquisa e experimentação
+4. Analisar questões ambientais e de sustentabilidade
+5. Desenvolver atitudes científicas e éticas
+
+Princípios pedagógicos:
+- Promover investigação científica
+- Desenvolver pensamento crítico
+- Integrar tecnologias digitais na pesquisa
+- Conectar ciência com questões sociais e ambientais
+- Alinhar com competências gerais da BNCC
+      `.trim();
+    }
+    
+    if (componentLower.includes('história') || componentLower.includes('historia')) {
+      return `
+DIRETRIZES PEDAGÓGICAS - HISTÓRIA (BNCC)
+
+A História na BNCC prevê que os estudantes devem:
+1. Compreender processos históricos e temporais
+2. Desenvolver pensamento histórico crítico
+3. Utilizar tecnologias digitais para pesquisa histórica
+4. Analisar fontes históricas diversas
+5. Desenvolver consciência histórica e cidadã
+
+Princípios pedagógicos:
+- Promover análise crítica de fontes históricas
+- Desenvolver consciência temporal
+- Integrar tecnologias digitais na pesquisa histórica
+- Conectar passado, presente e futuro
+- Alinhar com competências gerais da BNCC
+      `.trim();
+    }
+    
+    if (componentLower.includes('geografia') || componentLower.includes('geografia')) {
+      return `
+DIRETRIZES PEDAGÓGICAS - GEOGRAFIA (BNCC)
+
+A Geografia na BNCC prevê que os estudantes devem:
+1. Compreender relações espaciais e territoriais
+2. Analisar transformações do espaço geográfico
+3. Utilizar tecnologias digitais para análise espacial
+4. Desenvolver consciência geográfica e ambiental
+5. Compreender processos de globalização
+
+Princípios pedagógicos:
+- Promover análise espacial e territorial
+- Desenvolver consciência geográfica
+- Integrar tecnologias digitais (mapas, GPS, etc.)
+- Conectar local e global
+- Alinhar com competências gerais da BNCC
+      `.trim();
+    }
+    
+    // Fallback: diretrizes gerais de Cultura Digital
     return `
 DIRETRIZES PEDAGÓGICAS - CULTURA DIGITAL (BNCC)
 
@@ -78,6 +181,13 @@ Princípios pedagógicos:
 - Alinhar atividades com as competências gerais da BNCC
     `.trim();
   }
+  
+  /**
+   * Mantém compatibilidade com código existente
+   */
+  getCultureDigitalGuidelines(): string {
+    return this.getGuidelinesForComponent('Cultura Digital');
+  }
 
   /**
    * Constrói prompt base com contexto BNCC para geração de materiais
@@ -94,10 +204,10 @@ Princípios pedagógicos:
       theme: params.theme,
     });
 
-    const guidelines = this.getCultureDigitalGuidelines();
+    const guidelines = this.getGuidelinesForComponent(params.component);
 
     return `
-Você é um assistente pedagógico especializado em gerar materiais didáticos alinhados à Base Nacional Comum Curricular (BNCC) com foco em Cultura Digital.
+Você é um assistente pedagógico especializado em gerar materiais didáticos alinhados à Base Nacional Comum Curricular (BNCC).
 
 CONTEXTO BNCC RELEVANTE:
 ${bnccContext}
@@ -106,11 +216,14 @@ DIRETRIZES PEDAGÓGICAS:
 ${guidelines}
 
 INSTRUÇÕES:
-- Todo conteúdo gerado deve estar alinhado às competências BNCC apresentadas
-- Priorize aspectos relacionados à Cultura Digital
+- Todo conteúdo gerado DEVE estar rigorosamente alinhado às competências BNCC apresentadas acima
+- Use os códigos de habilidades BNCC (ex: EF04MA01, EF06LP01) nos materiais gerados
+- ${params.component ? `Foque na área de ${params.component}` : 'Integre diferentes áreas do conhecimento quando apropriado'}
+- Priorize aspectos relacionados à Cultura Digital quando relevante
 - Use linguagem adequada ao nível educacional: ${params.year || 'Ensino Fundamental/Médio'}
 - Seja claro, objetivo e pedagógico
 - Estruture o conteúdo de forma didática e acessível
+- Inclua conexões entre diferentes áreas do conhecimento quando possível
     `.trim();
   }
 }
