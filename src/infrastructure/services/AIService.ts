@@ -16,17 +16,45 @@ export interface AIGenerationResponse {
 }
 
 /**
+ * Tipos de erros da API
+ */
+export enum AIErrorType {
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  API_KEY_INVALID = 'API_KEY_INVALID',
+  RATE_LIMIT = 'RATE_LIMIT',
+  QUOTA_EXCEEDED = 'QUOTA_EXCEEDED',
+  INVALID_REQUEST = 'INVALID_REQUEST',
+  SERVER_ERROR = 'SERVER_ERROR',
+  UNKNOWN = 'UNKNOWN',
+}
+
+/**
+ * Erro customizado da API de IA com tipo e mensagem específica
+ */
+export class AIError extends Error {
+  constructor(
+    message: string,
+    public type: AIErrorType,
+    public originalError?: any,
+    public retryable: boolean = false
+  ) {
+    super(message);
+    this.name = 'AIError';
+  }
+}
+
+/**
  * Interface para provedores de IA
  */
 export interface AIProvider {
-  generateText(request: AIGenerationRequest): Promise<AIGenerationResponse>;
+  generateText(request: AIGenerationRequest, maxRetries?: number): Promise<AIGenerationResponse>;
 }
 
 /**
  * Provedor Mock - Usado quando não há chave API ou para desenvolvimento
  */
 export class MockAIProvider implements AIProvider {
-  async generateText(request: AIGenerationRequest): Promise<AIGenerationResponse> {
+  async generateText(request: AIGenerationRequest, maxRetries?: number): Promise<AIGenerationResponse> {
     // Simula delay de API
     await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 2000));
 
@@ -121,56 +149,171 @@ export class GoogleAIProvider implements AIProvider {
     this.baseUrl = 'https://generativelanguage.googleapis.com/v1';
   }
 
-  async generateText(request: AIGenerationRequest): Promise<AIGenerationResponse> {
+  private parseError(error: any, status?: number): AIError {
+    // Erros de rede
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return new AIError(
+        'Erro de conexão com a API. Verifique sua conexão com a internet e tente novamente.',
+        AIErrorType.NETWORK_ERROR,
+        error,
+        true
+      );
+    }
+
+    // Erros de status HTTP
+    if (status === 400) {
+      return new AIError(
+        'Requisição inválida. Verifique os parâmetros e tente novamente.',
+        AIErrorType.INVALID_REQUEST,
+        error,
+        false
+      );
+    }
+
+    if (status === 401 || status === 403) {
+      return new AIError(
+        'Chave API inválida ou sem permissão. Verifique sua chave API do Google AI.',
+        AIErrorType.API_KEY_INVALID,
+        error,
+        false
+      );
+    }
+
+    if (status === 429) {
+      return new AIError(
+        'Limite de requisições excedido. Aguarde alguns instantes e tente novamente.',
+        AIErrorType.RATE_LIMIT,
+        error,
+        true
+      );
+    }
+
+    if (status === 503 || status === 504) {
+      return new AIError(
+        'Serviço temporariamente indisponível. Tente novamente em alguns instantes.',
+        AIErrorType.SERVER_ERROR,
+        error,
+        true
+      );
+    }
+
+    if (status && status >= 500) {
+      return new AIError(
+        'Erro no servidor da API. Tente novamente mais tarde.',
+        AIErrorType.SERVER_ERROR,
+        error,
+        true
+      );
+    }
+
+    // Erro genérico
+    const message = error?.error?.message || error?.message || 'Erro desconhecido ao gerar conteúdo';
+    return new AIError(
+      `Erro na API Google Gemini: ${message}`,
+      AIErrorType.UNKNOWN,
+      error,
+      false
+    );
+  }
+
+  async generateText(
+    request: AIGenerationRequest,
+    maxRetries: number = 3
+  ): Promise<AIGenerationResponse> {
     if (!this.apiKey) {
-      throw new Error('Chave API do Google AI não configurada. Configure NEXT_PUBLIC_GOOGLE_AI_API_KEY');
+      throw new AIError(
+        'Chave API do Google AI não configurada. Configure NEXT_PUBLIC_GOOGLE_AI_API_KEY',
+        AIErrorType.API_KEY_INVALID
+      );
     }
 
-    try {
-      // Usando gemini-2.5-flash (mais recente e rápido) ou gemini-2.5-pro (mais poderoso)
-      // gemini-pro e gemini-1.5-flash não estão mais disponíveis
-      const model = 'models/gemini-2.5-flash';
-      const url = `${this.baseUrl}/${model}:generateContent?key=${this.apiKey}`;
+    let lastError: AIError | null = null;
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `Você é um assistente pedagógico especializado em materiais didáticos alinhados à BNCC.\n\n${request.prompt}`,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: request.temperature || 0.7,
-            maxOutputTokens: request.maxTokens || 2000,
+    // Retry lógico com backoff exponencial
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        // Usando gemini-2.5-flash (mais recente e rápido) ou gemini-2.5-pro (mais poderoso)
+        const model = 'models/gemini-2.5-flash';
+        const url = `${this.baseUrl}/${model}:generateContent?key=${this.apiKey}`;
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        }),
-      });
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `Você é um assistente pedagógico especializado em materiais didáticos alinhados à BNCC.\n\n${request.prompt}`,
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              temperature: request.temperature || 0.7,
+              maxOutputTokens: request.maxTokens || 2000,
+            },
+          }),
+        });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Erro na API Google Gemini: ${error.error?.message || 'Erro desconhecido'}`);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          const error = this.parseError(errorData, response.status);
+
+          // Se não for retryable, lança imediatamente
+          if (!error.retryable || attempt === maxRetries - 1) {
+            throw error;
+          }
+
+          lastError = error;
+          // Backoff exponencial: 1s, 2s, 4s
+          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          continue;
+        }
+
+        const data = await response.json();
+        const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+        if (!content) {
+          throw new AIError(
+            'A API retornou uma resposta vazia. Tente novamente.',
+            AIErrorType.INVALID_REQUEST,
+            data,
+            true
+          );
+        }
+
+        return {
+          content,
+          model: 'gemini-2.5-flash',
+          tokensUsed: data.usageMetadata?.totalTokenCount,
+        };
+      } catch (error) {
+        if (error instanceof AIError) {
+          if (!error.retryable || attempt === maxRetries - 1) {
+            throw error;
+          }
+          lastError = error;
+          // Backoff exponencial
+          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          continue;
+        }
+
+        // Erro de rede ou outro erro não tipado
+        const aiError = this.parseError(error);
+        if (!aiError.retryable || attempt === maxRetries - 1) {
+          throw aiError;
+        }
+        lastError = aiError;
+        // Backoff exponencial
+        await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
       }
-
-      const data = await response.json();
-      const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-      return {
-        content,
-        model: 'gemini-2.5-flash',
-        tokensUsed: data.usageMetadata?.totalTokenCount,
-      };
-    } catch (error) {
-      console.error('Erro ao gerar texto com Google Gemini:', error);
-      throw error;
     }
+
+    // Se chegou aqui, todas as tentativas falharam
+    throw lastError || new AIError('Erro ao gerar conteúdo após múltiplas tentativas', AIErrorType.UNKNOWN);
   }
 }
 
@@ -186,52 +329,138 @@ export class OpenAIProvider implements AIProvider {
     this.baseUrl = 'https://api.openai.com/v1';
   }
 
-  async generateText(request: AIGenerationRequest): Promise<AIGenerationResponse> {
+  async generateText(request: AIGenerationRequest, maxRetries: number = 3): Promise<AIGenerationResponse> {
     if (!this.apiKey) {
-      throw new Error('Chave API do OpenAI não configurada. Configure NEXT_PUBLIC_OPENAI_API_KEY');
+      throw new AIError(
+        'Chave API do OpenAI não configurada. Configure NEXT_PUBLIC_OPENAI_API_KEY',
+        AIErrorType.API_KEY_INVALID
+      );
     }
 
-    try {
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'system',
-              content: 'Você é um assistente pedagógico especializado em materiais didáticos alinhados à BNCC.',
-            },
-            {
-              role: 'user',
-              content: request.prompt,
-            },
-          ],
-          max_tokens: request.maxTokens || 2000,
-          temperature: request.temperature || 0.7,
-        }),
-      });
+    let lastError: AIError | null = null;
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Erro na API OpenAI: ${error.error?.message || 'Erro desconhecido'}`);
+    // Retry lógico com backoff exponencial
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = await fetch(`${this.baseUrl}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.apiKey}`,
+          },
+          body: JSON.stringify({
+            model: 'gpt-3.5-turbo',
+            messages: [
+              {
+                role: 'system',
+                content: 'Você é um assistente pedagógico especializado em materiais didáticos alinhados à BNCC.',
+              },
+              {
+                role: 'user',
+                content: request.prompt,
+              },
+            ],
+            max_tokens: request.maxTokens || 2000,
+            temperature: request.temperature || 0.7,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          const error = this.parseError(errorData, response.status);
+
+          if (!error.retryable || attempt === maxRetries - 1) {
+            throw error;
+          }
+
+          lastError = error;
+          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          continue;
+        }
+
+        const data = await response.json();
+        const content = data.choices[0]?.message?.content || '';
+
+        if (!content) {
+          throw new AIError(
+            'A API retornou uma resposta vazia. Tente novamente.',
+            AIErrorType.INVALID_REQUEST,
+            data,
+            true
+          );
+        }
+
+        return {
+          content,
+          model: data.model,
+          tokensUsed: data.usage?.total_tokens,
+        };
+      } catch (error) {
+        if (error instanceof AIError) {
+          if (!error.retryable || attempt === maxRetries - 1) {
+            throw error;
+          }
+          lastError = error;
+          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          continue;
+        }
+
+        const aiError = this.parseError(error);
+        if (!aiError.retryable || attempt === maxRetries - 1) {
+          throw aiError;
+        }
+        lastError = aiError;
+        await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
       }
-
-      const data = await response.json();
-      const content = data.choices[0]?.message?.content || '';
-
-      return {
-        content,
-        model: data.model,
-        tokensUsed: data.usage?.total_tokens,
-      };
-    } catch (error) {
-      console.error('Erro ao gerar texto com OpenAI:', error);
-      throw error;
     }
+
+    throw lastError || new AIError('Erro ao gerar conteúdo após múltiplas tentativas', AIErrorType.UNKNOWN);
+  }
+
+  private parseError(error: any, status?: number): AIError {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return new AIError(
+        'Erro de conexão com a API. Verifique sua conexão com a internet e tente novamente.',
+        AIErrorType.NETWORK_ERROR,
+        error,
+        true
+      );
+    }
+
+    if (status === 401 || status === 403) {
+      return new AIError(
+        'Chave API inválida ou sem permissão. Verifique sua chave API do OpenAI.',
+        AIErrorType.API_KEY_INVALID,
+        error,
+        false
+      );
+    }
+
+    if (status === 429) {
+      return new AIError(
+        'Limite de requisições excedido. Aguarde alguns instantes e tente novamente.',
+        AIErrorType.RATE_LIMIT,
+        error,
+        true
+      );
+    }
+
+    if (status && status >= 500) {
+      return new AIError(
+        'Erro no servidor da API. Tente novamente mais tarde.',
+        AIErrorType.SERVER_ERROR,
+        error,
+        true
+      );
+    }
+
+    const message = error?.error?.message || error?.message || 'Erro desconhecido ao gerar conteúdo';
+    return new AIError(
+      `Erro na API OpenAI: ${message}`,
+      AIErrorType.UNKNOWN,
+      error,
+      false
+    );
   }
 }
 
@@ -260,8 +489,8 @@ export class AIService {
     }
   }
 
-  async generateText(request: AIGenerationRequest): Promise<AIGenerationResponse> {
-    return this.provider.generateText(request);
+  async generateText(request: AIGenerationRequest, maxRetries: number = 3): Promise<AIGenerationResponse> {
+    return this.provider.generateText(request, maxRetries);
   }
 
   /**
