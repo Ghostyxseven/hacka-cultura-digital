@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ApplicationServiceFactory } from '@/application';
 import type { LessonPlan, Activity } from '@/application/viewmodels';
+import type { Slide } from '@/infrastructure/services/SlideGenerator';
 
 export interface GenerateMaterialParams {
   unitId: string;
@@ -15,8 +16,10 @@ export interface GenerateMaterialParams {
 export function useMaterialGeneration(unitId: string) {
   const [lessonPlan, setLessonPlan] = useState<LessonPlan | null>(null);
   const [activity, setActivity] = useState<Activity | null>(null);
+  const [slides, setSlides] = useState<Slide[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [generatingSlides, setGeneratingSlides] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadMaterials = useCallback(async () => {
@@ -123,14 +126,44 @@ export function useMaterialGeneration(unitId: string) {
     }
   }, [archiveLessonPlan, archiveActivity]);
 
+  const generateSlides = useCallback(async (params: GenerateMaterialParams) => {
+    try {
+      setGeneratingSlides(true);
+      setError(null);
+
+      // Verifica se o plano de aula existe (necessário para gerar slides)
+      if (!lessonPlan) {
+        throw new Error('Gere o plano de aula primeiro antes de gerar slides');
+      }
+
+      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+      const generatedSlides = await materialService.generateSlides(
+        params.unitId,
+        params.year,
+        params.additionalContext
+      );
+
+      setSlides(generatedSlides);
+      return generatedSlides;
+    } catch (err: any) {
+      setError(err.message || 'Erro ao gerar slides');
+      throw err;
+    } finally {
+      setGeneratingSlides(false);
+    }
+  }, [lessonPlan]);
+
   return {
     lessonPlan,
     activity,
+    slides,
     loading,
     generating,
+    generatingSlides,
     error,
     loadMaterials,
     generateMaterials,
+    generateSlides,
     archiveLessonPlan,
     archiveActivity,
     archiveAllMaterials,

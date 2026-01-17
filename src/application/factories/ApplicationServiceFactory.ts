@@ -10,6 +10,7 @@ import {
   LessonPlanGenerator,
   ActivityGenerator,
   UnitSuggestionService,
+  SlideGenerator,
 } from '@/infrastructure';
 import {
   CreateSubjectUseCase,
@@ -23,6 +24,7 @@ import {
   GenerateActivityUseCase,
   GetLessonPlanByUnitUseCase,
   GetActivityByUnitUseCase,
+  GenerateSlidesUseCase,
 } from '../usecases';
 import { SubjectService, UnitService, MaterialGenerationService } from '../services';
 
@@ -43,6 +45,7 @@ export class ApplicationServiceFactory {
   private static lessonPlanGenerator: LessonPlanGenerator;
   private static activityGenerator: ActivityGenerator;
   private static unitSuggestionService: UnitSuggestionService;
+  private static slideGenerator: SlideGenerator;
 
   // Serviços de aplicação (singletons)
   private static subjectService: SubjectService;
@@ -81,6 +84,9 @@ export class ApplicationServiceFactory {
     }
     if (!this.unitSuggestionService) {
       this.unitSuggestionService = new UnitSuggestionService(this.aiService, this.bnccService);
+    }
+    if (!this.slideGenerator) {
+      this.slideGenerator = new SlideGenerator(this.aiService, this.bnccService);
     }
   }
 
@@ -177,11 +183,19 @@ export class ApplicationServiceFactory {
       this.unitRepository
     );
 
+    const generateSlidesUseCase = new GenerateSlidesUseCase(
+      this.slideGenerator,
+      this.unitRepository,
+      this.subjectRepository,
+      this.lessonPlanRepository
+    );
+
     this.materialGenerationService = new MaterialGenerationService(
       generateLessonPlanUseCase,
       generateActivityUseCase,
       getLessonPlanByUnitUseCase,
-      getActivityByUnitUseCase
+      getActivityByUnitUseCase,
+      generateSlidesUseCase
     );
 
     return this.materialGenerationService;

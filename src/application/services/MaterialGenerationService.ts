@@ -5,8 +5,10 @@ import {
   GenerateActivityUseCase,
   GetLessonPlanByUnitUseCase,
   GetActivityByUnitUseCase,
+  GenerateSlidesUseCase,
 } from '../usecases';
 import { GenerateLessonPlanDTO, GenerateActivityDTO } from '../dto';
+import { Slide } from '@/infrastructure/services/SlideGenerator';
 
 /**
  * Serviço de aplicação: Geração de materiais didáticos via IA
@@ -17,7 +19,8 @@ export class MaterialGenerationService {
     private readonly generateLessonPlanUseCase: GenerateLessonPlanUseCase,
     private readonly generateActivityUseCase: GenerateActivityUseCase,
     private readonly getLessonPlanByUnitUseCase: GetLessonPlanByUnitUseCase,
-    private readonly getActivityByUnitUseCase: GetActivityByUnitUseCase
+    private readonly getActivityByUnitUseCase: GetActivityByUnitUseCase,
+    private readonly generateSlidesUseCase: GenerateSlidesUseCase
   ) {}
 
   /**
@@ -69,5 +72,17 @@ export class MaterialGenerationService {
       lessonPlan,
       activity,
     };
+  }
+
+  /**
+   * Gera slides de apresentação para uma unidade
+   * Requer que o plano de aula já tenha sido gerado
+   */
+  async generateSlides(unitId: string, year?: string, additionalContext?: string): Promise<Slide[]> {
+    return this.generateSlidesUseCase.execute({
+      unitId,
+      year,
+      additionalContext,
+    });
   }
 }
