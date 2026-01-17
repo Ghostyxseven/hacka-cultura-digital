@@ -66,4 +66,11 @@ export class UnitService {
   async findAllIncludingArchived(): Promise<Unit[]> {
     return this.unitRepository.findAll();
   }
+
+  /**
+   * Deletar permanentemente uma unidade
+   */
+  async delete(id: string): Promise<void> {
+    return this.unitRepository.delete(id);
+  }
 }

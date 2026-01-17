@@ -112,10 +112,14 @@ export default function ArquivadosPage() {
       return;
     }
 
-    // Note: delete() não está no UnitService, mas podemos adicionar se necessário
-    // Por enquanto, mantemos o uso direto do repository apenas para delete
-    // Pois delete é uma operação que já existe via SubjectService.delete (que deleta unidades relacionadas)
-    showToast('Funcionalidade de deletar unidade será implementada via SubjectService', 'info');
+    try {
+      const unitService = ApplicationServiceFactory.createUnitService();
+      await unitService.delete(unitId);
+      showToast('Unidade deletada permanentemente!', 'success');
+      await loadArchivedContent();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao deletar unidade', 'error');
+    }
   };
 
   const handleDeletePlan = async (planId: string) => {
@@ -123,9 +127,14 @@ export default function ArquivadosPage() {
       return;
     }
 
-    // Similar ao delete de unidade, isso precisaria de um método no MaterialGenerationService
-    // Por enquanto, mantemos comentado
-    showToast('Funcionalidade de deletar plano será implementada', 'info');
+    try {
+      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+      await materialService.deleteLessonPlan(planId);
+      showToast('Plano deletado permanentemente!', 'success');
+      await loadArchivedContent();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao deletar plano', 'error');
+    }
   };
 
   const handleDeleteActivity = async (activityId: string) => {
@@ -133,9 +142,14 @@ export default function ArquivadosPage() {
       return;
     }
 
-    // Similar ao delete de plano, isso precisaria de um método no MaterialGenerationService
-    // Por enquanto, mantemos comentado
-    showToast('Funcionalidade de deletar atividade será implementada', 'info');
+    try {
+      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+      await materialService.deleteActivity(activityId);
+      showToast('Atividade deletada permanentemente!', 'success');
+      await loadArchivedContent();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao deletar atividade', 'error');
+    }
   };
 
   const handleUnarchiveSubject = async (subjectId: string) => {

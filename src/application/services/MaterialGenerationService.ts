@@ -9,6 +9,8 @@ import {
   GenerateSlidesUseCase,
 } from '../usecases';
 import { GenerateLessonPlanDTO, GenerateActivityDTO } from '../dto';
+import { ILessonPlanRepository } from '@/repository/interfaces/ILessonPlanRepository';
+import { IActivityRepository } from '@/repository/interfaces/IActivityRepository';
 
 /**
  * Serviço de aplicação: Geração de materiais didáticos via IA
@@ -140,5 +142,19 @@ export class MaterialGenerationService {
    */
   async findAllActivitiesIncludingArchived(): Promise<Activity[]> {
     return this.activityRepository.findAll();
+  }
+
+  /**
+   * Deletar permanentemente um plano de aula
+   */
+  async deleteLessonPlan(id: string): Promise<void> {
+    return this.lessonPlanRepository.delete(id);
+  }
+
+  /**
+   * Deletar permanentemente uma atividade
+   */
+  async deleteActivity(id: string): Promise<void> {
+    return this.activityRepository.delete(id);
   }
 }
