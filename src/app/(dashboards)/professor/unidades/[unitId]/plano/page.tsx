@@ -273,7 +273,7 @@ export default function GenerateLessonPlanPage() {
                   >
                     Arquivar Materiais
                   </ActionButton>
-                  <ExportButton onExport={handleExportPDF} />
+                  <ExportButton onExport={handleExportPDF} lessonPlan={lessonPlan} activity={activity} />
                 </div>
               </div>
             </div>
