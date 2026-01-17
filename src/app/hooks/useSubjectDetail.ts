@@ -25,7 +25,6 @@ export function useSubjectDetail(subjectId: string) {
       const unitsData = await unitService.findBySubject(subjectId);
       
       // Busca unidades arquivadas usando o Service
-      const unitService = ApplicationServiceFactory.createUnitService();
       const allUnits = await unitService.findAllIncludingArchived();
       const archivedData = allUnits.filter(
         (u) => u.subjectId === subjectId && u.archived === true
