@@ -39,7 +39,7 @@ export interface Unit {
 const MIN_TITLE_LENGTH = 3;
 const MAX_TITLE_LENGTH = 200;
 const MIN_THEME_LENGTH = 3;
-const MAX_THEME_LENGTH = 300;
+const MAX_THEME_LENGTH = 1000; // Aumentado para permitir descrições mais detalhadas
 
 /**
  * Valida uma unidade de ensino

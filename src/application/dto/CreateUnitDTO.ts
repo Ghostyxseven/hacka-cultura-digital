@@ -18,7 +18,7 @@ export interface CreateUnitDTO {
   subjectId: string;
   /** Título da unidade (obrigatório, 3-200 caracteres) */
   title: string;
-  /** Tema da aula (obrigatório, 3-300 caracteres) */
+  /** Tema da aula (obrigatório, 3-1000 caracteres) */
   theme: string;
   /** Indica se foi gerada automaticamente por IA (opcional, padrão: false) */
   isAIGenerated?: boolean;
@@ -54,8 +54,8 @@ export function validateCreateUnitDTO(dto: Partial<CreateUnitDTO>): { valid: boo
     const trimmedTheme = dto.theme.trim();
     if (trimmedTheme.length < 3) {
       errors.push('Tema deve ter pelo menos 3 caracteres');
-    } else if (trimmedTheme.length > 300) {
-      errors.push('Tema não pode ter mais de 300 caracteres');
+    } else if (trimmedTheme.length > 1000) {
+      errors.push('Tema não pode ter mais de 1000 caracteres');
     }
   }
 

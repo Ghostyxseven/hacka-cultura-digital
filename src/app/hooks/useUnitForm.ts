@@ -114,8 +114,8 @@ export function useUnitForm(initialSubjectId?: string) {
         throw new Error('Tema deve ter pelo menos 3 caracteres');
       }
 
-      if (trimmedTheme.length > 300) {
-        throw new Error('Tema não pode ter mais de 300 caracteres');
+      if (trimmedTheme.length > 1000) {
+        throw new Error('Tema não pode ter mais de 1000 caracteres');
       }
 
       const unitService = ApplicationServiceFactory.createUnitService();
