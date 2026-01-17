@@ -3,6 +3,8 @@ import { AIService, AIGenerationRequest } from './AIService';
 import { BNCCService } from './BNCCService';
 import { Subject } from '@/core/entities/Subject';
 import { Unit } from '@/core/entities/Unit';
+import { RobustJSONParser } from './RobustJSONParser';
+import { ContentValidator } from './ContentValidator';
 
 export interface GenerateActivityParams {
   unit: Unit;
