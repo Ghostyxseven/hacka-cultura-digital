@@ -3,6 +3,7 @@ import type { Slide } from '@/application/viewmodels';
 import { ISubjectRepository } from '@/repository/interfaces/ISubjectRepository';
 import { IUnitRepository } from '@/repository/interfaces/IUnitRepository';
 import { ILessonPlanRepository } from '@/repository/interfaces/ILessonPlanRepository';
+import { NotFoundError, ValidationError, ServiceUnavailableError } from '../errors';
 
 export interface GenerateSlidesDTO {
   unitId: string;
@@ -25,36 +26,48 @@ export class GenerateSlidesUseCase {
   async execute(dto: GenerateSlidesDTO): Promise<Slide[]> {
     // Validação de entrada
     if (!dto.unitId || dto.unitId.trim().length === 0) {
-      throw new Error('ID da unidade é obrigatório');
+      throw new ValidationError('ID da unidade é obrigatório', 'unitId');
     }
 
     // Busca a unidade
     const unit = await this.unitRepository.findById(dto.unitId);
     if (!unit) {
-      throw new Error('Unidade não encontrada');
+      throw new NotFoundError('Unidade', dto.unitId);
     }
 
     // Busca a disciplina
     const subject = await this.subjectRepository.findById(unit.subjectId);
     if (!subject) {
-      throw new Error('Disciplina não encontrada');
+      throw new NotFoundError('Disciplina', unit.subjectId);
     }
 
     // Busca o plano de aula (deve existir antes de gerar slides)
     const lessonPlan = await this.lessonPlanRepository.findByUnitId(dto.unitId);
     if (!lessonPlan) {
-      throw new Error('Plano de aula não encontrado. Gere o plano de aula primeiro.');
+      throw new ValidationError('Plano de aula não encontrado. Gere o plano de aula primeiro.');
     }
 
-    // Gera os slides via IA
-    const slides = await this.slideGenerator.generate({
-      unit,
-      subject,
-      lessonPlan,
-      year: dto.year,
-      additionalContext: dto.additionalContext,
-    });
+    try {
+      // Gera os slides via IA
+      const slides = await this.slideGenerator.generate({
+        unit,
+        subject,
+        lessonPlan,
+        year: dto.year,
+        additionalContext: dto.additionalContext,
+      });
 
-    return slides;
+      return slides;
+    } catch (error) {
+      // Se já for um ServiceUnavailableError, repassa
+      if (error instanceof ServiceUnavailableError) {
+        throw error;
+      }
+      // Converte outros erros relacionados à IA em ServiceUnavailableError
+      if (error instanceof Error) {
+        throw new ServiceUnavailableError('Gerador de Slides', error.message);
+      }
+      throw new ServiceUnavailableError('Gerador de Slides');
+    }
   }
 }

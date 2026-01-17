@@ -4,6 +4,7 @@ import { IUnitRepository } from '@/repository/interfaces/IUnitRepository';
 import { ISubjectRepository } from '@/repository/interfaces/ISubjectRepository';
 import { ActivityGenerator } from '@/infrastructure/services/ActivityGenerator';
 import { GenerateActivityDTO } from '../dto/GenerateActivityDTO';
+import { NotFoundError, ValidationError, ServiceUnavailableError } from '../errors';
 
 /**
  * Caso de uso: Gerar atividade avaliativa via IA
@@ -21,34 +22,46 @@ export class GenerateActivityUseCase {
     // Busca a unidade
     const unit = await this.unitRepository.findById(dto.unitId);
     if (!unit) {
-      throw new Error('Unidade não encontrada');
+      throw new NotFoundError('Unidade', dto.unitId);
     }
 
     // Verifica se já existe uma atividade para esta unidade
     const existingActivity = await this.activityRepository.findByUnitId(dto.unitId);
     if (existingActivity) {
-      throw new Error('Já existe uma atividade avaliativa para esta unidade');
+      throw new ValidationError('Já existe uma atividade avaliativa para esta unidade');
     }
 
     // Busca a disciplina associada
     const subject = await this.subjectRepository.findById(unit.subjectId);
     if (!subject) {
-      throw new Error('Disciplina não encontrada');
+      throw new NotFoundError('Disciplina', unit.subjectId);
     }
 
-    // Gera a atividade usando IA
-    const generatedActivity = await this.activityGenerator.generate({
-      unit,
-      subject,
-      year: dto.year,
-      activityType: dto.activityType,
-      numberOfQuestions: dto.numberOfQuestions,
-      additionalContext: dto.additionalContext,
-    });
+    try {
+      // Gera a atividade usando IA
+      const generatedActivity = await this.activityGenerator.generate({
+        unit,
+        subject,
+        year: dto.year,
+        activityType: dto.activityType,
+        numberOfQuestions: dto.numberOfQuestions,
+        additionalContext: dto.additionalContext,
+      });
 
-    // Salva a atividade gerada
-    const savedActivity = await this.activityRepository.create(generatedActivity);
+      // Salva a atividade gerada
+      const savedActivity = await this.activityRepository.create(generatedActivity);
 
-    return savedActivity;
+      return savedActivity;
+    } catch (error) {
+      // Se já for um ServiceUnavailableError, repassa
+      if (error instanceof ServiceUnavailableError) {
+        throw error;
+      }
+      // Converte outros erros relacionados à IA em ServiceUnavailableError
+      if (error instanceof Error) {
+        throw new ServiceUnavailableError('Gerador de Atividade', error.message);
+      }
+      throw new ServiceUnavailableError('Gerador de Atividade');
+    }
   }
 }

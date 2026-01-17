@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ApplicationServiceFactory } from '@/application';
 import type { Subject } from '@/application/viewmodels';
+import { getErrorMessage } from '@/app/utils/errorHandler';
 
 export interface UnitFormData {
   subjectId: string;
@@ -48,7 +49,7 @@ export function useUnitForm(initialSubjectId?: string) {
         setFormData((prev) => ({ ...prev, subjectId: allSubjects[0].id }));
       }
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar disciplinas');
+      setError(getErrorMessage(err));
     } finally {
       setLoadingSubjects(false);
     }
@@ -95,7 +96,8 @@ export function useUnitForm(initialSubjectId?: string) {
 
       return unit;
     } catch (err: any) {
-      setError(err.message || 'Erro ao criar unidade');
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);

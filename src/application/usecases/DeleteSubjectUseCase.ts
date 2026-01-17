@@ -1,5 +1,6 @@
 import { ISubjectRepository } from '@/repository/interfaces/ISubjectRepository';
 import { IUnitRepository } from '@/repository/interfaces/IUnitRepository';
+import { NotFoundError, ValidationError } from '../errors';
 
 /**
  * Caso de uso: Deletar disciplina
@@ -15,13 +16,13 @@ export class DeleteSubjectUseCase {
     // Verifica se a disciplina existe
     const subject = await this.subjectRepository.findById(id);
     if (!subject) {
-      throw new Error('Disciplina não encontrada');
+      throw new NotFoundError('Disciplina', id);
     }
 
     // Verifica se existem unidades associadas
     const units = await this.unitRepository.findBySubjectId(id);
     if (units.length > 0) {
-      throw new Error(
+      throw new ValidationError(
         `Não é possível deletar a disciplina. Existem ${units.length} unidade(s) associada(s).`
       );
     }

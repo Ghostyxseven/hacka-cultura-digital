@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ApplicationServiceFactory } from '@/application';
 import type { Subject, Unit } from '@/application/viewmodels';
+import { getErrorMessage } from '@/app/utils/errorHandler';
 
 /**
  * Hook customizado para lógica de detalhes da disciplina
@@ -34,7 +35,7 @@ export function useSubjectDetail(subjectId: string) {
       setUnits(unitsData);
       setArchivedUnits(archivedData);
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar dados');
+      setError(getErrorMessage(err));
       console.error('Erro ao carregar dados:', err);
     } finally {
       setLoading(false);
@@ -53,7 +54,7 @@ export function useSubjectDetail(subjectId: string) {
       await subjectService.delete(subjectId);
       return true;
     } catch (err: any) {
-      setError(err.message || 'Erro ao deletar disciplina');
+      setError(getErrorMessage(err));
       return false;
     }
   }, [subjectId]);
@@ -64,7 +65,7 @@ export function useSubjectDetail(subjectId: string) {
       await subjectService.archive(subjectId);
       return true;
     } catch (err: any) {
-      setError(err.message || 'Erro ao arquivar disciplina');
+      setError(getErrorMessage(err));
       return false;
     }
   }, [subjectId]);
@@ -76,7 +77,7 @@ export function useSubjectDetail(subjectId: string) {
       await loadData(); // Recarrega dados
       return true;
     } catch (err: any) {
-      setError(err.message || 'Erro ao arquivar unidade');
+      setError(getErrorMessage(err));
       return false;
     }
   }, [loadData]);
@@ -88,7 +89,7 @@ export function useSubjectDetail(subjectId: string) {
       await loadData(); // Recarrega dados
       return true;
     } catch (err: any) {
-      setError(err.message || 'Erro ao desarquivar unidade');
+      setError(getErrorMessage(err));
       return false;
     }
   }, [loadData]);

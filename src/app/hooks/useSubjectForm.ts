@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { ApplicationServiceFactory } from '@/application';
 import type { Subject } from '@/application/viewmodels';
+import { getErrorMessage } from '@/app/utils/errorHandler';
 
 export interface SubjectFormData {
   name: string;
@@ -155,7 +156,7 @@ export function useSubjectForm() {
 
       return subject;
     } catch (err: any) {
-      const errorMessage = err.message || 'Erro ao criar disciplina';
+      const errorMessage = getErrorMessage(err);
       setError(errorMessage);
       throw err;
     } finally {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ApplicationServiceFactory } from '@/application';
 import type { Subject } from '@/application/viewmodels';
+import { getErrorMessage } from '@/app/utils/errorHandler';
 
 interface DashboardStats {
   totalSubjects: number;
@@ -101,7 +102,7 @@ export function useDashboard() {
         archivedActivities: archivedActivitiesCount,
       });
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar dashboard');
+      setError(getErrorMessage(err));
       console.error('Erro ao carregar dashboard:', err);
     } finally {
       setLoading(false);
