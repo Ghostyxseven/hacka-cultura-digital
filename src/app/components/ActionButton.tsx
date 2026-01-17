@@ -36,10 +36,13 @@ export function ActionButton({
 
   const classes = `${baseClasses} ${variantClasses[variant]} ${className}`;
 
-  if (href && !disabled) {
+  // Valida se href é uma string válida e não vazia
+  const hasValidHref = href && typeof href === 'string' && href.trim().length > 0;
+
+  if (hasValidHref && !disabled) {
     return (
       <Link 
-        href={href} 
+        href={href}
         className={classes}
         aria-label={typeof children === 'string' ? children : undefined}
         role="button"
