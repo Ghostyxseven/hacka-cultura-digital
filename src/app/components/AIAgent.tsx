@@ -17,6 +17,14 @@ interface Message {
   timestamp: Date;
 }
 
+// Sugestões de comandos rápidos
+const QUICK_SUGGESTIONS = [
+  { text: 'Criar disciplina de Matemática', icon: '📐' },
+  { text: 'Criar disciplina de História', icon: '📚' },
+  { text: 'Gerar atividade de Português', icon: '✍️' },
+  { text: 'Criar unidade sobre Frações', icon: '🔢' },
+];
+
 /**
  * Agente de IA Conversacional
  * 
@@ -37,6 +45,9 @@ export function AIAgent() {
   ]);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
