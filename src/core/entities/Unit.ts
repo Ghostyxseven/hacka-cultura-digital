@@ -29,6 +29,10 @@ export interface Unit {
   updatedAt?: string;
   /** Indica se foi criada manualmente ou sugerida pela IA (padrão: false) */
   isAIGenerated?: boolean;
+  /** Indica se a unidade está arquivada (padrão: false) */
+  archived?: boolean;
+  /** Data em que a unidade foi arquivada no formato ISO 8601 (opcional) */
+  archivedAt?: string;
 }
 
 /** Constantes para validação */
@@ -115,6 +119,7 @@ export function createUnit(data: Omit<Unit, 'id' | 'createdAt'>): Unit {
     title: data.title.trim(),
     theme: data.theme.trim(),
     isAIGenerated: data.isAIGenerated ?? false,
+    archived: data.archived ?? false,
     createdAt: new Date().toISOString(),
   };
 }

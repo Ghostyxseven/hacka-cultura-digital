@@ -211,9 +211,9 @@ export function AIAgent() {
           // Procura por "sobre" para separar disciplina de tópico
           const sobreIndex = words.findIndex(w => w === 'sobre');
           if (sobreIndex >= 0) {
-            match = [null, words.slice(0, sobreIndex).join(' '), words.slice(sobreIndex + 1).join(' ')];
+            match = ['', words.slice(0, sobreIndex).join(' '), words.slice(sobreIndex + 1).join(' ')];
           } else {
-            match = [null, afterDe, ''];
+            match = ['', afterDe, ''];
           }
         }
       }
