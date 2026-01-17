@@ -4,7 +4,8 @@ import { IUnitRepository } from '@/repository/interfaces/IUnitRepository';
 import { ISubjectRepository } from '@/repository/interfaces/ISubjectRepository';
 import { LessonPlanGenerator } from '@/infrastructure/services/LessonPlanGenerator';
 import { GenerateLessonPlanDTO } from '../dto/GenerateLessonPlanDTO';
-import { NotFoundError, ValidationError, ServiceUnavailableError } from '../errors';
+import { NotFoundError, ValidationError, ServiceUnavailableError, ForbiddenError } from '../errors';
+import { assertCanGenerateFor } from '@/core/policies';
 
 /**
  * Caso de uso: Gerar plano de aula via IA
@@ -25,6 +26,9 @@ export class GenerateLessonPlanUseCase {
       throw new NotFoundError('Unidade', dto.unitId);
     }
 
+    // REGRA DE BLOQUEIO: Não permite gerar plano para unidade arquivada
+    assertCanGenerateFor(unit, 'Unidade');
+
     // Verifica se já existe um plano para esta unidade
     const existingPlan = await this.lessonPlanRepository.findByUnitId(dto.unitId);
     if (existingPlan) {
@@ -36,6 +40,9 @@ export class GenerateLessonPlanUseCase {
     if (!subject) {
       throw new NotFoundError('Disciplina', unit.subjectId);
     }
+
+    // REGRA DE BLOQUEIO: Não permite gerar plano para disciplina arquivada
+    assertCanGenerateFor(subject, 'Disciplina');
 
     try {
       // Gera o plano de aula usando IA

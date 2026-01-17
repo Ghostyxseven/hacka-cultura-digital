@@ -4,6 +4,7 @@ import { ISubjectRepository } from '@/repository/interfaces/ISubjectRepository';
 import { IUnitRepository } from '@/repository/interfaces/IUnitRepository';
 import { ILessonPlanRepository } from '@/repository/interfaces/ILessonPlanRepository';
 import { NotFoundError, ValidationError, ServiceUnavailableError } from '../errors';
+import { assertCanGenerateFor } from '@/core/policies';
 
 export interface GenerateSlidesDTO {
   unitId: string;
@@ -35,17 +36,26 @@ export class GenerateSlidesUseCase {
       throw new NotFoundError('Unidade', dto.unitId);
     }
 
+    // REGRA DE BLOQUEIO: Não permite gerar slides para unidade arquivada
+    assertCanGenerateFor(unit, 'Unidade');
+
     // Busca a disciplina
     const subject = await this.subjectRepository.findById(unit.subjectId);
     if (!subject) {
       throw new NotFoundError('Disciplina', unit.subjectId);
     }
 
+    // REGRA DE BLOQUEIO: Não permite gerar slides para disciplina arquivada
+    assertCanGenerateFor(subject, 'Disciplina');
+
     // Busca o plano de aula (deve existir antes de gerar slides)
     const lessonPlan = await this.lessonPlanRepository.findByUnitId(dto.unitId);
     if (!lessonPlan) {
       throw new ValidationError('Plano de aula não encontrado. Gere o plano de aula primeiro.');
     }
+
+    // REGRA DE BLOQUEIO: Não permite gerar slides para plano arquivado
+    assertCanGenerateFor(lessonPlan, 'Plano de aula');
 
     try {
       // Gera os slides via IA

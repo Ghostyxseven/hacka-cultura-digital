@@ -4,7 +4,8 @@ import { IUnitRepository } from '@/repository/interfaces/IUnitRepository';
 import { ISubjectRepository } from '@/repository/interfaces/ISubjectRepository';
 import { ActivityGenerator } from '@/infrastructure/services/ActivityGenerator';
 import { GenerateActivityDTO } from '../dto/GenerateActivityDTO';
-import { NotFoundError, ValidationError, ServiceUnavailableError } from '../errors';
+import { NotFoundError, ValidationError, ServiceUnavailableError, ForbiddenError } from '../errors';
+import { assertCanGenerateFor } from '@/core/policies';
 
 /**
  * Caso de uso: Gerar atividade avaliativa via IA
@@ -25,6 +26,9 @@ export class GenerateActivityUseCase {
       throw new NotFoundError('Unidade', dto.unitId);
     }
 
+    // REGRA DE BLOQUEIO: Não permite gerar atividade para unidade arquivada
+    assertCanGenerateFor(unit, 'Unidade');
+
     // Verifica se já existe uma atividade para esta unidade
     const existingActivity = await this.activityRepository.findByUnitId(dto.unitId);
     if (existingActivity) {
@@ -36,6 +40,9 @@ export class GenerateActivityUseCase {
     if (!subject) {
       throw new NotFoundError('Disciplina', unit.subjectId);
     }
+
+    // REGRA DE BLOQUEIO: Não permite gerar atividade para disciplina arquivada
+    assertCanGenerateFor(subject, 'Disciplina');
 
     try {
       // Gera a atividade usando IA
