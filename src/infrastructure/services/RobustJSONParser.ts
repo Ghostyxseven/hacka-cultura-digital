@@ -118,10 +118,11 @@ export class RobustJSONParser {
     const trimmed = content.trim();
 
     // Procura por objetos JSON
-    const objectMatches = [...trimmed.matchAll(/\{[\s\S]*?\}/g)];
-    for (const match of objectMatches) {
+    const objectRegex = /\{[\s\S]*?\}/g;
+    let objectMatch: RegExpExecArray | null;
+    while ((objectMatch = objectRegex.exec(trimmed)) !== null) {
       try {
-        const parsed = JSON.parse(match[0]);
+        const parsed = JSON.parse(objectMatch[0]);
         results.push(parsed);
       } catch {
         // Ignora JSONs inválidos
@@ -129,10 +130,11 @@ export class RobustJSONParser {
     }
 
     // Procura por arrays JSON
-    const arrayMatches = [...trimmed.matchAll(/\[[\s\S]*?\]/g)];
-    for (const match of arrayMatches) {
+    const arrayRegex = /\[[\s\S]*?\]/g;
+    let arrayMatch: RegExpExecArray | null;
+    while ((arrayMatch = arrayRegex.exec(trimmed)) !== null) {
       try {
-        const parsed = JSON.parse(match[0]);
+        const parsed = JSON.parse(arrayMatch[0]);
         results.push(parsed);
       } catch {
         // Ignora JSONs inválidos
