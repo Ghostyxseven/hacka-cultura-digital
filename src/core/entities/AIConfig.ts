@@ -10,13 +10,11 @@ export type AIProviderType = 'google' | 'openai' | 'auto';
 
 /**
  * Modelos disponíveis do Google Gemini
+ * Apenas modelos que funcionam e estão disponíveis
  */
 export type GoogleModel = 
   | 'gemini-2.5-flash'    // Rápido e eficiente (recomendado)
-  | 'gemini-2.5-pro'      // Mais poderoso, melhor qualidade
-  | 'gemini-1.5-flash'    // Versão anterior rápida
-  | 'gemini-1.5-pro'      // Versão anterior poderosa
-  | 'gemini-pro';         // Versão legacy
+  | 'gemini-2.5-pro';     // Mais poderoso, melhor qualidade
 
 /**
  * Modelos disponíveis do OpenAI
@@ -50,13 +48,11 @@ export const DEFAULT_OPENAI_MODEL: OpenAIModel = 'gpt-3.5-turbo';
 
 /**
  * Lista de modelos do Google com descrições
+ * Apenas modelos que funcionam e estão disponíveis
  */
 export const GOOGLE_MODELS: Array<{ value: GoogleModel; label: string; description: string }> = [
   { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', description: 'Rápido e eficiente (Recomendado)' },
   { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', description: 'Mais poderoso, melhor qualidade' },
-  { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash', description: 'Versão anterior rápida' },
-  { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', description: 'Versão anterior poderosa' },
-  { value: 'gemini-pro', label: 'Gemini Pro', description: 'Versão legacy' },
 ];
 
 /**
