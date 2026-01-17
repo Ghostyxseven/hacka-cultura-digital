@@ -22,7 +22,7 @@ const SCHOOL_YEARS = [
  */
 export default function NewSubjectPage() {
   const router = useRouter();
-  const { formData, setFormData, loading, error, nameValidation, toggleSchoolYear, createSubject } =
+  const { formData, setFormData, loading, error, nameValidation, selectSchoolYear, createSubject } =
     useSubjectForm();
   const { toasts, showToast, removeToast } = useToast();
 
@@ -150,17 +150,17 @@ export default function NewSubjectPage() {
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Anos Escolares * <span className="text-gray-500 font-normal">(selecione pelo menos um)</span>
+                  Ano Escolar * <span className="text-gray-500 font-normal">(selecione um)</span>
                 </label>
                 <p className="text-xs text-gray-500 mb-3">
-                  Selecione os anos escolares para os quais esta disciplina será utilizada
+                  Selecione o ano escolar para o qual esta disciplina será utilizada
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {SCHOOL_YEARS.map((year) => (
                     <button
                       key={year}
                       type="button"
-                      onClick={() => toggleSchoolYear(year)}
+                      onClick={() => selectSchoolYear(year)}
                       className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 ${
                         formData.schoolYears.includes(year)
                           ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white border-indigo-600 shadow-lg'
