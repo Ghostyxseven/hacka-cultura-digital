@@ -86,11 +86,43 @@ export function useUnitForm(initialSubjectId?: string) {
       setLoading(true);
       setError(null);
 
+      // Validação básica antes de enviar
+      const trimmedTitle = data.title?.trim() || '';
+      const trimmedTheme = data.theme?.trim() || '';
+
+      if (!data.subjectId || data.subjectId.trim().length === 0) {
+        throw new Error('Selecione uma disciplina');
+      }
+
+      if (!trimmedTitle) {
+        throw new Error('Título é obrigatório');
+      }
+
+      if (trimmedTitle.length < 3) {
+        throw new Error('Título deve ter pelo menos 3 caracteres');
+      }
+
+      if (trimmedTitle.length > 200) {
+        throw new Error('Título não pode ter mais de 200 caracteres');
+      }
+
+      if (!trimmedTheme) {
+        throw new Error('Tema é obrigatório');
+      }
+
+      if (trimmedTheme.length < 3) {
+        throw new Error('Tema deve ter pelo menos 3 caracteres');
+      }
+
+      if (trimmedTheme.length > 300) {
+        throw new Error('Tema não pode ter mais de 300 caracteres');
+      }
+
       const unitService = ApplicationServiceFactory.createUnitService();
       const unit = await unitService.create({
-        subjectId: data.subjectId,
-        title: data.title.trim(),
-        theme: data.theme.trim(),
+        subjectId: data.subjectId.trim(),
+        title: trimmedTitle,
+        theme: trimmedTheme,
         isAIGenerated: data.isAIGenerated,
       });
 

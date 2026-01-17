@@ -16,8 +16,9 @@ export class CreateUnitUseCase {
 
   async execute(dto: CreateUnitDTO): Promise<Unit> {
     // Validação de entrada usando função de validação do DTO
-    if (!validateCreateUnitDTO(dto)) {
-      throw new ValidationError('Dados da unidade inválidos');
+    const validation = validateCreateUnitDTO(dto);
+    if (!validation.valid) {
+      throw new ValidationError(validation.errors.join('. ') || 'Dados da unidade inválidos');
     }
 
     // Valida se a disciplina existe
