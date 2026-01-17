@@ -69,7 +69,7 @@ export class LessonPlanGenerator {
     return `
 ${basePrompt}
 
-TAREFA: Gerar um plano de aula completo em formato JSON para a seguinte unidade:
+TAREFA: Gerar um plano de aula COMPLETO e DETALHADO em formato JSON para a seguinte unidade:
 
 Disciplina: ${params.subject.name}
 Unidade: ${params.unit.title}
@@ -79,21 +79,77 @@ ${params.additionalContext ? `Contexto adicional: ${params.additionalContext}` :
 
 FORMATO DE RESPOSTA (JSON):
 {
-  "title": "Título do plano de aula",
-  "objective": "Objetivo de aprendizagem específico",
-  "content": "Conteúdo detalhado da aula",
-  "methodology": "Metodologia de ensino proposta",
-  "resources": ["Recurso 1", "Recurso 2", ...],
-  "evaluation": "Como será avaliado o aprendizado",
-  "bnccAlignment": "Alinhamento específico com BNCC",
+  "title": "Título completo do plano de aula",
+  "objective": "Objetivo de aprendizagem específico e claro (máximo 300 palavras). Inclua habilidades BNCC trabalhadas (códigos como EF04MA27, EF15LP01, etc.)",
+  "content": "Conteúdo DETALHADO da aula com no mínimo 800 palavras. Organize em seções: 1) Tema Principal, 2) Objetivos de Aprendizagem com códigos BNCC, 3) Habilidades de Cultura Digital, 4) Competências Gerais da BNCC, 5) Desenvolvimento da aula (Momento Inicial, Desenvolvimento, Fechamento), 6) Atividades Práticas com descrição detalhada, 7) Recursos necessários",
+  "methodology": "Metodologia de ensino DETALHADA (mínimo 400 palavras). Descreva passo a passo: estratégias de engajamento, atividades práticas, adaptações para diferentes contextos tecnológicos, formas de interação, materiais alternativos",
+  "resources": ["Lista detalhada de recursos", "Computadores/tablets", "Acesso à internet OU alternativas offline", "Materiais impressos", "Recursos digitais específicos"],
+  "evaluation": "Avaliação DETALHADA (mínimo 300 palavras). Inclua: critérios de avaliação baseados nas habilidades BNCC, formas de acompanhamento (formativa e somativa), atividades de reforço, conexão com a família, rubrica de avaliação",
+  "bnccAlignment": "Alinhamento COMPLETO com BNCC (mínimo 400 palavras). Liste: competências gerais desenvolvidas, habilidades específicas com códigos, eixos de Cultura Digital trabalhados (Letramento Digital, Cidadania Digital, etc.), conexões entre áreas do conhecimento",
   "duration": 50
 }
 
+ESTRUTURA ESPERADA NO CONTEÚDO:
+O campo "content" deve seguir esta estrutura detalhada:
+
+# TEMA E OBJETIVOS
+## Tema Principal
+[Descrição clara do tema]
+
+## Objetivos de Aprendizagem
+- [Código BNCC] - [Descrição do objetivo]
+- [Código BNCC] - [Descrição do objetivo]
+
+## Habilidades de Cultura Digital Trabalhadas
+- Eixo 1 - LETRAMENTO DIGITAL: [Descrição]
+- Eixo 2 - CIDADANIA DIGITAL: [Descrição]
+- Eixo 3 - TRABALHO E PROJETO DE VIDA: [Se aplicável]
+
+# COMPETÊNCIAS TRABALHADAS
+## Competências Gerais da BNCC Desenvolvidas
+- Competência X: [Descrição]
+
+## Relação com Habilidades Específicas
+[Descrição das conexões]
+
+# DURAÇÃO E RECURSOS
+## Tempo Estimado
+[Especificar duração]
+
+## Materiais Necessários
+[Lista detalhada com alternativas para recursos limitados]
+
+# DESENVOLVIMENTO
+## Momento Inicial - Engajamento ([X] minutos)
+[Descrição detalhada]
+
+## Desenvolvimento - Atividades Principais ([X] minutos)
+[Atividades passo a passo]
+
+## Fechamento - Síntese e Avaliação ([X] minutos)
+[Descrição detalhada]
+
+# ATIVIDADES PRÁTICAS
+## Atividade Prática 1: [Nome]
+[Descrição completa com adaptações]
+
+# AVALIAÇÃO
+## Critérios de Avaliação
+[Baseados em habilidades BNCC]
+
+## Formas de Acompanhamento
+[Formativa e somativa]
+
 IMPORTANTE:
-- O plano deve estar alinhado às competências BNCC de Cultura Digital
-- Seja específico e prático
-- Inclua recursos digitais quando apropriado
-- Defina duração em minutos (padrão: 50 minutos)
+- O plano DEVE estar extremamente alinhado às competências BNCC de Cultura Digital
+- Seja MUITO específico e prático
+- Inclua recursos digitais E alternativas offline
+- Adapte para diferentes contextos tecnológicos
+- Mínimo de 2000 palavras no total do conteúdo
+- Use códigos de habilidades BNCC (ex: EF04MA27, EF15LP01)
+- Mencione os 5 eixos de Cultura Digital quando aplicável
+- Defina duração em minutos (padrão: 50 minutos, mas pode ser mais)
+- Seja pedagógico e didático
     `.trim();
   }
 

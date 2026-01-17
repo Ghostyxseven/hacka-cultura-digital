@@ -67,7 +67,7 @@ export class SlideGenerator {
     return `
 ${basePrompt}
 
-TAREFA: Gerar slides de apresentação em formato JSON para a seguinte unidade:
+TAREFA: Gerar slides de apresentação DETALHADOS em formato JSON para a seguinte unidade:
 
 Disciplina: ${params.subject.name}
 Unidade: ${params.unit.title}
@@ -75,6 +75,7 @@ Tema: ${params.unit.theme}
 Objetivo da Aula: ${params.lessonPlan.objective}
 Conteúdo da Aula: ${params.lessonPlan.content}
 Metodologia: ${params.lessonPlan.methodology}
+Recursos: ${params.lessonPlan.resources.join(', ')}
 ${params.year ? `Ano/Série: ${params.year}` : ''}
 ${params.additionalContext ? `Contexto adicional: ${params.additionalContext}` : ''}
 
@@ -88,26 +89,44 @@ FORMATO DE RESPOSTA (JSON - Array de slides):
   },
   {
     "id": "slide-2",
-    "title": "Objetivos",
-    "content": "Objetivo 1\nObjetivo 2\nObjetivo 3",
+    "title": "Objetivos de Aprendizagem",
+    "content": "• Objetivo 1 (Código BNCC)\n• Objetivo 2 (Código BNCC)\n• Objetivo 3 (Código BNCC)",
     "type": "content"
   }
 ]
 
+ESTRUTURA ESPERADA DOS SLIDES:
+1. Slide de Título (apresentação do tema)
+2. Slide de Objetivos (habilidades BNCC)
+3. Slide de Competências (BNCC e Cultura Digital)
+4. Slides de Conteúdo Principal (desenvolvimento do tema)
+5. Slides de Atividades (práticas)
+6. Slide de Recursos (materiais necessários)
+7. Slide de Avaliação (critérios)
+8. Slide de Resumo/Conclusão
+
 TIPOS DE SLIDE:
-- "title": Slide de título/apresentação
+- "title": Slide de título/apresentação (primeiro slide)
 - "content": Slide com conteúdo principal (bullet points ou texto)
-- "summary": Slide de resumo/conclusão
+- "summary": Slide de resumo/conclusão (último slide)
+
+FORMATO DO CONTEÚDO:
+- Use bullet points (•) para listas
+- Máximo 6-8 pontos por slide
+- Cada ponto com no máximo 10 palavras
+- Use emojis quando apropriado (📚, 🎯, 🔒, etc.)
+- Seja visual e objetivo
 
 IMPORTANTE:
-- Gere entre 8 a 15 slides
-- Primeiro slide deve ser título da aula
-- Último slide deve ser resumo/conclusão
-- Slides intermediários devem cobrir o conteúdo do plano de aula
-- Use bullet points (•) para listas
-- Seja objetivo e direto (máximo 5-7 pontos por slide)
-- Mantenha alinhamento com BNCC de Cultura Digital
-- Cada slide deve ter no máximo 40 palavras
+- Gere entre 10 a 18 slides (abrangente mas não exaustivo)
+- Primeiro slide: título da aula + ano/série
+- Slides intermediários: cobrir TODO o conteúdo do plano detalhadamente
+- Último slide: resumo/conclusão + próximos passos
+- Cada slide máximo 50 palavras
+- Mantenha alinhamento rigoroso com BNCC de Cultura Digital
+- Slides progressivos em complexidade
+- Inclua slides sobre segurança digital e cidadania digital
+- Use linguagem apropriada para o ano/série
     `.trim();
   }
 
