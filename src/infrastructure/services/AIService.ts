@@ -144,9 +144,11 @@ export class MockAIProvider implements AIProvider {
 export class GoogleAIProvider implements AIProvider {
   private apiKey: string;
   private baseUrl: string;
+  private model: string;
 
-  constructor(apiKey?: string) {
+  constructor(apiKey?: string, model: string = 'gemini-2.5-flash') {
     this.apiKey = apiKey || process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || '';
+    this.model = model;
     // Usando v1 ao invés de v1beta para modelos mais recentes
     this.baseUrl = 'https://generativelanguage.googleapis.com/v1';
   }
@@ -234,9 +236,9 @@ export class GoogleAIProvider implements AIProvider {
     // Retry lógico com backoff exponencial
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        // Usando gemini-2.5-flash (mais recente e rápido) ou gemini-2.5-pro (mais poderoso)
-        const model = 'models/gemini-2.5-flash';
-        const url = `${this.baseUrl}/${model}:generateContent?key=${this.apiKey}`;
+        // Usa o modelo configurado ou padrão
+        const modelPath = `models/${this.model}`;
+        const url = `${this.baseUrl}/${modelPath}:generateContent?key=${this.apiKey}`;
 
         const response = await fetch(url, {
           method: 'POST',
@@ -318,7 +320,7 @@ export class GoogleAIProvider implements AIProvider {
 
         return {
           content,
-          model: 'gemini-2.5-flash',
+          model: this.model,
           tokensUsed: data.usageMetadata?.totalTokenCount,
         };
       } catch (error) {
@@ -354,9 +356,11 @@ export class GoogleAIProvider implements AIProvider {
 export class OpenAIProvider implements AIProvider {
   private apiKey: string;
   private baseUrl: string;
+  private model: string;
 
-  constructor(apiKey?: string) {
+  constructor(apiKey?: string, model: string = 'gpt-3.5-turbo') {
     this.apiKey = apiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY || '';
+    this.model = model;
     this.baseUrl = 'https://api.openai.com/v1';
   }
 
@@ -380,7 +384,7 @@ export class OpenAIProvider implements AIProvider {
             Authorization: `Bearer ${this.apiKey}`,
           },
           body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
+            model: this.model,
             messages: [
               {
                 role: 'system',
@@ -539,12 +543,19 @@ export class AIService {
    */
   private selectProvider(preferredProvider?: 'google' | 'openai' | 'auto'): AIProvider {
     // Tenta importar o serviço de configuração (só funciona no cliente)
-    let userConfig: { provider?: string; googleApiKey?: string; openaiApiKey?: string } | null = null;
+    let userConfig: { 
+      provider?: string; 
+      googleApiKey?: string; 
+      openaiApiKey?: string;
+      googleModel?: string;
+      openaiModel?: string;
+    } | null = null;
     
     if (typeof window !== 'undefined') {
       try {
         // Importa dinamicamente para evitar erro de SSR
         const { AIConfigService } = require('./AIConfigService');
+        const { DEFAULT_GOOGLE_MODEL, DEFAULT_OPENAI_MODEL } = require('@/core/entities/AIConfig');
         const configService = new AIConfigService();
         userConfig = configService.getConfig();
       } catch (error) {
@@ -559,36 +570,40 @@ export class AIService {
     // Obtém chaves API (preferência: config do usuário > env vars)
     const googleApiKey = userConfig?.googleApiKey || process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || '';
     const openAiApiKey = userConfig?.openaiApiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY || '';
+    
+    // Obtém modelos configurados (com fallback para padrão)
+    const googleModel = userConfig?.googleModel || 'gemini-2.5-flash';
+    const openaiModel = userConfig?.openaiModel || 'gpt-3.5-turbo';
 
     // Seleciona o provedor baseado na preferência
     if (providerToUse === 'google') {
       if (googleApiKey) {
-        return new GoogleAIProvider(googleApiKey);
+        return new GoogleAIProvider(googleApiKey, googleModel);
       }
       // Fallback se não tiver chave mas usuário escolheu Google
       if (openAiApiKey) {
-        return new OpenAIProvider(openAiApiKey);
+        return new OpenAIProvider(openAiApiKey, openaiModel);
       }
       return new MockAIProvider();
     }
 
     if (providerToUse === 'openai') {
       if (openAiApiKey) {
-        return new OpenAIProvider(openAiApiKey);
+        return new OpenAIProvider(openAiApiKey, openaiModel);
       }
       // Fallback se não tiver chave mas usuário escolheu OpenAI
       if (googleApiKey) {
-        return new GoogleAIProvider(googleApiKey);
+        return new GoogleAIProvider(googleApiKey, googleModel);
       }
       return new MockAIProvider();
     }
 
     // Auto-detect: Google AI > OpenAI > Mock
     if (googleApiKey) {
-      return new GoogleAIProvider(googleApiKey);
+      return new GoogleAIProvider(googleApiKey, googleModel);
     }
     if (openAiApiKey) {
-      return new OpenAIProvider(openAiApiKey);
+      return new OpenAIProvider(openAiApiKey, openaiModel);
     }
     return new MockAIProvider();
   }

@@ -2,7 +2,15 @@
 
 import { useState, useEffect, FormEvent } from 'react';
 import { AIConfigService } from '@/infrastructure/services/AIConfigService';
-import { AIProviderType } from '@/core/entities/AIConfig';
+import { 
+  AIProviderType, 
+  GoogleModel, 
+  OpenAIModel,
+  GOOGLE_MODELS,
+  OPENAI_MODELS,
+  DEFAULT_GOOGLE_MODEL,
+  DEFAULT_OPENAI_MODEL
+} from '@/core/entities/AIConfig';
 import { useToast } from '@/app/hooks/useToast';
 
 interface AIConfigSettingsProps {
@@ -17,6 +25,8 @@ interface AIConfigSettingsProps {
 export function AIConfigSettings({ onClose, className = '' }: AIConfigSettingsProps) {
   const [configService] = useState(() => new AIConfigService());
   const [selectedProvider, setSelectedProvider] = useState<AIProviderType>('auto');
+  const [googleModel, setGoogleModel] = useState<GoogleModel>(DEFAULT_GOOGLE_MODEL);
+  const [openaiModel, setOpenaiModel] = useState<OpenAIModel>(DEFAULT_OPENAI_MODEL);
   const [googleApiKey, setGoogleApiKey] = useState('');
   const [openaiApiKey, setOpenaiApiKey] = useState('');
   const [showApiKeys, setShowApiKeys] = useState(false);
@@ -32,6 +42,8 @@ export function AIConfigSettings({ onClose, className = '' }: AIConfigSettingsPr
     // Carrega configuração atual
     const config = configService.getConfig();
     setSelectedProvider(config.provider);
+    setGoogleModel(config.googleModel || DEFAULT_GOOGLE_MODEL);
+    setOpenaiModel(config.openaiModel || DEFAULT_OPENAI_MODEL);
     setGoogleApiKey(config.googleApiKey || '');
     setOpenaiApiKey(config.openaiApiKey || '');
     setAvailableProviders(configService.getAvailableProviders());
@@ -45,6 +57,8 @@ export function AIConfigSettings({ onClose, className = '' }: AIConfigSettingsPr
       // Salva configuração
       const config = configService.saveConfig({
         provider: selectedProvider,
+        googleModel: selectedProvider === 'google' ? googleModel : undefined,
+        openaiModel: selectedProvider === 'openai' ? openaiModel : undefined,
         googleApiKey: googleApiKey.trim() || undefined,
         openaiApiKey: openaiApiKey.trim() || undefined,
       });
@@ -71,6 +85,8 @@ export function AIConfigSettings({ onClose, className = '' }: AIConfigSettingsPr
       configService.reset();
       const config = configService.getConfig();
       setSelectedProvider(config.provider);
+      setGoogleModel(config.googleModel || DEFAULT_GOOGLE_MODEL);
+      setOpenaiModel(config.openaiModel || DEFAULT_OPENAI_MODEL);
       setGoogleApiKey('');
       setOpenaiApiKey('');
       showToast('Configurações resetadas para o padrão', 'success');
@@ -145,8 +161,21 @@ export function AIConfigSettings({ onClose, className = '' }: AIConfigSettingsPr
                     )}
                   </div>
                   <div className="text-sm text-gray-600">
-                    Usa o modelo Gemini 2.5 Flash (rápido e eficiente)
+                    Modelos do Google Gemini para geração de conteúdo
                   </div>
+                  {selectedProvider === 'google' && (
+                    <select
+                      value={googleModel}
+                      onChange={(e) => setGoogleModel(e.target.value as GoogleModel)}
+                      className="mt-2 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                    >
+                      {GOOGLE_MODELS.map((model) => (
+                        <option key={model.value} value={model.value}>
+                          {model.label} - {model.description}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
                 {selectedProvider === 'google' && (
                   <span className="ml-2 text-indigo-600">✓</span>
@@ -175,8 +204,21 @@ export function AIConfigSettings({ onClose, className = '' }: AIConfigSettingsPr
                     )}
                   </div>
                   <div className="text-sm text-gray-600">
-                    Usa o modelo GPT-3.5 Turbo
+                    Modelos do OpenAI para geração de conteúdo
                   </div>
+                  {selectedProvider === 'openai' && (
+                    <select
+                      value={openaiModel}
+                      onChange={(e) => setOpenaiModel(e.target.value as OpenAIModel)}
+                      className="mt-2 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                    >
+                      {OPENAI_MODELS.map((model) => (
+                        <option key={model.value} value={model.value}>
+                          {model.label} - {model.description}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
                 {selectedProvider === 'openai' && (
                   <span className="ml-2 text-indigo-600">✓</span>
