@@ -245,7 +245,7 @@ Princípios pedagógicos:
     component?: string;
     year?: string;
     theme?: string;
-    materialType: 'lesson_plan' | 'activity' | 'unit_suggestion';
+    materialType: 'lesson_plan' | 'activity' | 'unit_suggestion' | 'slides';
   }): string {
     const bnccContext = this.buildBNCCContext({
       component: params.component,
