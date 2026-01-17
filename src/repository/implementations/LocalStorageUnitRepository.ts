@@ -4,6 +4,37 @@ import { IUnitRepository } from '../interfaces/IUnitRepository';
 const STORAGE_KEY = 'units';
 
 /**
+ * Erros personalizados do repositório de unidades
+ */
+class RepositoryError extends Error {
+  constructor(message: string, public code: string) {
+    super(message);
+    this.name = 'RepositoryError';
+  }
+}
+
+class NotFoundError extends RepositoryError {
+  constructor(resource: string, id: string) {
+    super(`${resource} com ID "${id}" não encontrado(a)`, 'NOT_FOUND');
+    this.name = 'NotFoundError';
+  }
+}
+
+class ValidationError extends RepositoryError {
+  constructor(message: string) {
+    super(message, 'VALIDATION_ERROR');
+    this.name = 'ValidationError';
+  }
+}
+
+class StorageError extends RepositoryError {
+  constructor(message: string) {
+    super(message, 'STORAGE_ERROR');
+    this.name = 'StorageError';
+  }
+}
+
+/**
  * Implementação do repositório de unidades de ensino usando localStorage
  */
 export class LocalStorageUnitRepository implements IUnitRepository {
@@ -34,7 +65,7 @@ export class LocalStorageUnitRepository implements IUnitRepository {
       localStorage.setItem(this.getStorageKey(), JSON.stringify(units));
     } catch (error) {
       console.error('Erro ao salvar unidades no localStorage:', error);
-      throw new Error('Falha ao salvar unidade');
+      throw new StorageError(`Falha ao salvar unidade: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     }
   }
 
@@ -54,23 +85,34 @@ export class LocalStorageUnitRepository implements IUnitRepository {
 
   async create(unitData: Omit<Unit, 'id' | 'createdAt'>): Promise<Unit> {
     if (!validateUnit(unitData)) {
-      throw new Error('Dados da unidade inválidos');
+      throw new ValidationError('Dados da unidade inválidos');
     }
 
-    const unit = createUnit(unitData);
-    const units = await this.getAllFromStorage();
-    units.push(unit);
-    await this.saveToStorage(units);
+    try {
+      const unit = createUnit(unitData);
+      const units = await this.getAllFromStorage();
+      units.push(unit);
+      await this.saveToStorage(units);
 
-    return unit;
+      return unit;
+    } catch (error) {
+      if (error instanceof ValidationError || error instanceof StorageError) {
+        throw error;
+      }
+      throw new StorageError(`Erro ao criar unidade: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    }
   }
 
   async update(id: string, updates: Partial<Unit>): Promise<Unit> {
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+      throw new ValidationError('ID inválido para atualização de unidade');
+    }
+
     const units = await this.getAllFromStorage();
     const index = units.findIndex((u) => u.id === id);
 
     if (index === -1) {
-      throw new Error('Unidade não encontrada');
+      throw new NotFoundError('Unidade', id);
     }
 
     const updatedUnit: Unit = {
@@ -81,23 +123,41 @@ export class LocalStorageUnitRepository implements IUnitRepository {
     };
 
     if (!validateUnit(updatedUnit)) {
-      throw new Error('Dados atualizados da unidade são inválidos');
+      throw new ValidationError('Dados atualizados da unidade são inválidos');
     }
 
-    units[index] = updatedUnit;
-    await this.saveToStorage(units);
+    try {
+      units[index] = updatedUnit;
+      await this.saveToStorage(units);
 
-    return updatedUnit;
+      return updatedUnit;
+    } catch (error) {
+      if (error instanceof StorageError) {
+        throw error;
+      }
+      throw new StorageError(`Erro ao atualizar unidade: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    }
   }
 
   async delete(id: string): Promise<void> {
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+      throw new ValidationError('ID inválido para exclusão de unidade');
+    }
+
     const units = await this.getAllFromStorage();
     const filtered = units.filter((u) => u.id !== id);
 
     if (filtered.length === units.length) {
-      throw new Error('Unidade não encontrada');
+      throw new NotFoundError('Unidade', id);
     }
 
-    await this.saveToStorage(filtered);
+    try {
+      await this.saveToStorage(filtered);
+    } catch (error) {
+      if (error instanceof StorageError) {
+        throw error;
+      }
+      throw new StorageError(`Erro ao deletar unidade: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    }
   }
 }

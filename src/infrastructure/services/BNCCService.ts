@@ -6,6 +6,23 @@ import { BNCCCompetency, ALL_BNCC_COMPETENCIES, CULTURE_DIGITAL_COMPETENCIES, fi
  */
 export class BNCCService {
   /**
+   * Cache para contexto BNCC construído
+   * Chave: string composta por component-year-theme
+   * Valor: contexto BNCC formatado
+   */
+  private contextCache: Map<string, string> = new Map();
+
+  /**
+   * Gera chave de cache baseada nos parâmetros
+   */
+  private getCacheKey(params: {
+    component?: string;
+    year?: string;
+    theme?: string;
+  }): string {
+    return `${params.component || 'all'}-${params.year || 'all'}-${params.theme || 'all'}`;
+  }
+  /**
    * Recupera competências BNCC relevantes para um tema/disciplina/ano
    * Esta é a parte "Retrieval" do RAG
    */
@@ -20,23 +37,55 @@ export class BNCCService {
   /**
    * Constrói o contexto BNCC formatado para prompt de IA
    * Combina competências relevantes em um texto estruturado
+   * Utiliza cache para melhorar performance em requisições repetidas
    */
   buildBNCCContext(params: {
     component?: string;
     year?: string;
     theme?: string;
   }): string {
+    // Verifica cache primeiro
+    const cacheKey = this.getCacheKey(params);
+    if (this.contextCache.has(cacheKey)) {
+      return this.contextCache.get(cacheKey)!;
+    }
+
+    // Constrói contexto se não estiver em cache
     const competencies = this.retrieveRelevantCompetencies(params);
 
+    let context: string;
     if (competencies.length === 0) {
       // Fallback: retorna competência geral de Cultura Digital
       const defaultCompetency = CULTURE_DIGITAL_COMPETENCIES[0];
-      return this.formatCompetencyForPrompt(defaultCompetency);
+      context = this.formatCompetencyForPrompt(defaultCompetency);
+    } else {
+      // Combina todas as competências relevantes
+      const contextParts = competencies.map((comp) => this.formatCompetencyForPrompt(comp));
+      context = contextParts.join('\n\n---\n\n');
     }
 
-    // Combina todas as competências relevantes
-    const contextParts = competencies.map((comp) => this.formatCompetencyForPrompt(comp));
-    return contextParts.join('\n\n---\n\n');
+    // Armazena no cache
+    this.contextCache.set(cacheKey, context);
+
+    return context;
+  }
+
+  /**
+   * Limpa o cache de contexto BNCC
+   * Útil para forçar reconstrução do contexto após atualizações
+   */
+  clearCache(): void {
+    this.contextCache.clear();
+  }
+
+  /**
+   * Obtém estatísticas do cache
+   */
+  getCacheStats(): { size: number; keys: string[] } {
+    return {
+      size: this.contextCache.size,
+      keys: Array.from(this.contextCache.keys()),
+    };
   }
 
   /**

@@ -6,6 +6,7 @@ import { ApplicationServiceFactory } from '@/application';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/app/hooks';
 import { LoadingSpinner } from './LoadingSpinner';
+import { getErrorMessage, getErrorToastType } from '@/app/utils/errorHandler';
 
 // Evento customizado para atualizar dashboard
 const DASHBOARD_UPDATE_EVENT = 'dashboard:update';
@@ -414,7 +415,10 @@ export function AIAgent() {
       }
     } catch (error: any) {
       console.error('Erro ao executar ação:', error);
-      return `❌ Erro: ${error.message || 'Não foi possível executar a ação.'}`;
+      const errorMessage = getErrorMessage(error);
+      const toastType = getErrorToastType(error);
+      showToast(errorMessage, toastType);
+      return `❌ ${errorMessage}`;
     }
   };
 
@@ -454,7 +458,10 @@ export function AIAgent() {
 
       addMessage('assistant', response);
     } catch (error: any) {
-      addMessage('assistant', `❌ Erro: ${error.message || 'Não foi possível processar sua solicitação.'}`);
+      const errorMessage = getErrorMessage(error);
+      const toastType = getErrorToastType(error);
+      showToast(errorMessage, toastType);
+      addMessage('assistant', `❌ ${errorMessage}`);
     } finally {
       setIsProcessing(false);
     }
