@@ -415,13 +415,22 @@ export default function ArquivadosPage() {
                             </div>
                           )}
                         </div>
-                        <button
-                          onClick={() => handleUnarchiveSubject(subject.id)}
-                          className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl hover:from-green-700 hover:to-emerald-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-                        >
-                          <span className="mr-2">📦</span>
-                          Restaurar Disciplina
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleUnarchiveSubject(subject.id)}
+                            className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl hover:from-green-700 hover:to-emerald-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                          >
+                            <span className="mr-2">📦</span>
+                            Restaurar
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSubject(subject.id)}
+                            className="px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                            title="Deletar permanentemente"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
