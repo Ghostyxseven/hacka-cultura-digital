@@ -1,4 +1,5 @@
-import { SlideGenerator, Slide } from '@/infrastructure/services/SlideGenerator';
+import { SlideGenerator } from '@/infrastructure/services/SlideGenerator';
+import type { Slide } from '@/application/viewmodels';
 import { ISubjectRepository } from '@/repository/interfaces/ISubjectRepository';
 import { IUnitRepository } from '@/repository/interfaces/IUnitRepository';
 import { ILessonPlanRepository } from '@/repository/interfaces/ILessonPlanRepository';

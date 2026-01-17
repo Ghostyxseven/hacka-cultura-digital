@@ -1,13 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-
-export interface Slide {
-  id: string;
-  title: string;
-  content: string;
-  type: 'title' | 'content' | 'summary';
-}
+import type { Slide } from '@/application/viewmodels';
 
 interface SlideViewProps {
   slides: Slide[];

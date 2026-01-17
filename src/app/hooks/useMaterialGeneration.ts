@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { ApplicationServiceFactory } from '@/application';
-import type { LessonPlan, Activity } from '@/application/viewmodels';
-import type { Slide } from '@/infrastructure/services/SlideGenerator';
+import type { LessonPlan, Activity, Slide } from '@/application/viewmodels';
 
 export interface GenerateMaterialParams {
   unitId: string;
@@ -76,13 +75,8 @@ export function useMaterialGeneration(unitId: string) {
     try {
       if (!lessonPlan) return false;
 
-      const { LocalStorageLessonPlanRepository } = await import('@/repository/implementations/LocalStorageLessonPlanRepository');
-      const planRepository = new LocalStorageLessonPlanRepository();
-      
-      await planRepository.update(lessonPlan.id, {
-        archived: true,
-        archivedAt: new Date().toISOString(),
-      });
+      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+      await materialService.archiveLessonPlan(lessonPlan.id);
       
       setLessonPlan(null);
       return true;
@@ -96,13 +90,8 @@ export function useMaterialGeneration(unitId: string) {
     try {
       if (!activity) return false;
 
-      const { LocalStorageActivityRepository } = await import('@/repository/implementations/LocalStorageActivityRepository');
-      const activityRepository = new LocalStorageActivityRepository();
-      
-      await activityRepository.update(activity.id, {
-        archived: true,
-        archivedAt: new Date().toISOString(),
-      });
+      const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+      await materialService.archiveActivity(activity.id);
       
       setActivity(null);
       return true;

@@ -5,6 +5,7 @@ import {
   SuggestUnitsUseCase,
 } from '../usecases';
 import { CreateUnitDTO, SuggestUnitsDTO } from '../dto';
+import { IUnitRepository } from '@/repository/interfaces/IUnitRepository';
 
 /**
  * Serviço de aplicação: Gerenciamento de unidades de ensino
@@ -14,7 +15,8 @@ export class UnitService {
   constructor(
     private readonly createUnitUseCase: CreateUnitUseCase,
     private readonly getUnitsBySubjectUseCase: GetUnitsBySubjectUseCase,
-    private readonly suggestUnitsUseCase: SuggestUnitsUseCase
+    private readonly suggestUnitsUseCase: SuggestUnitsUseCase,
+    private readonly unitRepository: IUnitRepository
   ) {}
 
   /**
@@ -36,5 +38,32 @@ export class UnitService {
    */
   async suggest(dto: SuggestUnitsDTO): Promise<Array<{ title: string; theme: string }>> {
     return this.suggestUnitsUseCase.execute(dto);
+  }
+
+  /**
+   * Arquivar uma unidade
+   */
+  async archive(id: string): Promise<Unit> {
+    return this.unitRepository.update(id, {
+      archived: true,
+      archivedAt: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * Desarquivar uma unidade
+   */
+  async unarchive(id: string): Promise<Unit> {
+    return this.unitRepository.update(id, {
+      archived: false,
+      archivedAt: undefined,
+    });
+  }
+
+  /**
+   * Buscar todas as unidades (incluindo arquivadas)
+   */
+  async findAllIncludingArchived(): Promise<Unit[]> {
+    return this.unitRepository.findAll();
   }
 }

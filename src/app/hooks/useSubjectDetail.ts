@@ -24,11 +24,9 @@ export function useSubjectDetail(subjectId: string) {
       const subjectData = await subjectService.findById(subjectId);
       const unitsData = await unitService.findBySubject(subjectId);
       
-      // Busca unidades arquivadas usando findAll e filtrando manualmente
-      // Isso é necessário porque findArchivedBySubjectId não está na interface
-      const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
-      const unitRepository = new LocalStorageUnitRepository();
-      const allUnits = await unitRepository.findAll();
+      // Busca unidades arquivadas usando o Service
+      const unitService = ApplicationServiceFactory.createUnitService();
+      const allUnits = await unitService.findAllIncludingArchived();
       const archivedData = allUnits.filter(
         (u) => u.subjectId === subjectId && u.archived === true
       );
@@ -63,15 +61,8 @@ export function useSubjectDetail(subjectId: string) {
 
   const archiveSubject = useCallback(async () => {
     try {
-      // Usa update do repositório para arquivar a disciplina
-      const { LocalStorageSubjectRepository } = await import('@/repository/implementations/LocalStorageSubjectRepository');
-      const subjectRepository = new LocalStorageSubjectRepository();
-      
-      await subjectRepository.update(subjectId, {
-        archived: true,
-        archivedAt: new Date().toISOString(),
-      });
-      
+      const subjectService = ApplicationServiceFactory.createSubjectService();
+      await subjectService.archive(subjectId);
       return true;
     } catch (err: any) {
       setError(err.message || 'Erro ao arquivar disciplina');
@@ -81,15 +72,8 @@ export function useSubjectDetail(subjectId: string) {
 
   const archiveUnit = useCallback(async (unitId: string) => {
     try {
-      // Usa update do repositório para arquivar a unidade
-      const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
-      const unitRepository = new LocalStorageUnitRepository();
-      
-      await unitRepository.update(unitId, {
-        archived: true,
-        archivedAt: new Date().toISOString(),
-      });
-      
+      const unitService = ApplicationServiceFactory.createUnitService();
+      await unitService.archive(unitId);
       await loadData(); // Recarrega dados
       return true;
     } catch (err: any) {
@@ -100,15 +84,8 @@ export function useSubjectDetail(subjectId: string) {
 
   const unarchiveUnit = useCallback(async (unitId: string) => {
     try {
-      // Usa update do repositório para desarquivar a unidade
-      const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
-      const unitRepository = new LocalStorageUnitRepository();
-      
-      await unitRepository.update(unitId, {
-        archived: false,
-        archivedAt: undefined,
-      });
-      
+      const unitService = ApplicationServiceFactory.createUnitService();
+      await unitService.unarchive(unitId);
       await loadData(); // Recarrega dados
       return true;
     } catch (err: any) {

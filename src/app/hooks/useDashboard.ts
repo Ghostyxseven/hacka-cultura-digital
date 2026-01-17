@@ -54,15 +54,6 @@ export function useDashboard() {
       const unitService = ApplicationServiceFactory.createUnitService();
       const materialService = ApplicationServiceFactory.createMaterialGenerationService();
       
-      // Importa repositórios para buscar arquivados
-      const { LocalStorageUnitRepository } = await import('@/repository/implementations/LocalStorageUnitRepository');
-      const { LocalStorageLessonPlanRepository } = await import('@/repository/implementations/LocalStorageLessonPlanRepository');
-      const { LocalStorageActivityRepository } = await import('@/repository/implementations/LocalStorageActivityRepository');
-      
-      const unitRepository = new LocalStorageUnitRepository();
-      const planRepository = new LocalStorageLessonPlanRepository();
-      const activityRepository = new LocalStorageActivityRepository();
-      
       let totalUnits = 0;
       let totalPlans = 0;
       const subjectsStats: SubjectWithStats[] = [];
@@ -89,10 +80,10 @@ export function useDashboard() {
         });
       }
 
-      // Conta materiais arquivados
-      const allUnits = await unitRepository.findAll();
-      const allPlans = await planRepository.findAll();
-      const allActivities = await activityRepository.findAll();
+      // Conta materiais arquivados usando os Services
+      const allUnits = await unitService.findAllIncludingArchived();
+      const allPlans = await materialService.findAllLessonPlansIncludingArchived();
+      const allActivities = await materialService.findAllActivitiesIncludingArchived();
 
       const archivedUnitsCount = allUnits.filter((u) => u.archived === true).length;
       const archivedPlansCount = allPlans.filter((p) => p.archived === true).length;

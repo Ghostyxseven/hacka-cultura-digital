@@ -3,6 +3,7 @@ import { BNCCService } from './BNCCService';
 import { Subject } from '@/core/entities/Subject';
 import { Unit } from '@/core/entities/Unit';
 import { LessonPlan } from '@/core/entities/LessonPlan';
+import type { Slide } from '@/application/viewmodels';
 
 export interface GenerateSlidesParams {
   unit: Unit;
@@ -10,13 +11,6 @@ export interface GenerateSlidesParams {
   lessonPlan: LessonPlan;
   year?: string;
   additionalContext?: string;
-}
-
-export interface Slide {
-  id: string;
-  title: string;
-  content: string;
-  type: 'title' | 'content' | 'summary';
 }
 
 /**
