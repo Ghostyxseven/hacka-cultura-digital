@@ -6,6 +6,7 @@ import {
 } from '../usecases';
 import { CreateUnitDTO, SuggestUnitsDTO } from '../dto';
 import { IUnitRepository } from '@/repository/interfaces/IUnitRepository';
+import { ArchiveService } from './ArchiveService';
 
 /**
  * Serviço de aplicação: Gerenciamento de unidades de ensino
@@ -16,7 +17,8 @@ export class UnitService {
     private readonly createUnitUseCase: CreateUnitUseCase,
     private readonly getUnitsBySubjectUseCase: GetUnitsBySubjectUseCase,
     private readonly suggestUnitsUseCase: SuggestUnitsUseCase,
-    private readonly unitRepository: IUnitRepository
+    private readonly unitRepository: IUnitRepository,
+    private readonly archiveService?: ArchiveService // Opcional para não quebrar código existente
   ) {}
 
   /**
@@ -42,8 +44,16 @@ export class UnitService {
 
   /**
    * Arquivar uma unidade
+   * Se ArchiveService estiver disponível, usa arquivamento em cascata
    */
-  async archive(id: string): Promise<Unit> {
+  async archive(id: string, cascade: boolean = true): Promise<Unit> {
+    if (this.archiveService && cascade) {
+      // ARQUIVAMENTO EM CASCATA: arquiva Unit → Plans/Activities
+      await this.archiveService.archiveUnitCascade(id);
+      return this.unitRepository.findById(id) as Promise<Unit>;
+    }
+
+    // Arquivamento simples (compatibilidade)
     return this.unitRepository.update(id, {
       archived: true,
       archivedAt: new Date().toISOString(),
@@ -52,8 +62,16 @@ export class UnitService {
 
   /**
    * Desarquivar uma unidade
+   * Se ArchiveService estiver disponível, usa desarquivamento em cascata
    */
-  async unarchive(id: string): Promise<Unit> {
+  async unarchive(id: string, cascade: boolean = true): Promise<Unit> {
+    if (this.archiveService && cascade) {
+      // DESARQUIVAMENTO EM CASCATA: restaura apenas Unit (Plans/Activities ficam arquivados)
+      await this.archiveService.unarchiveUnitCascade(id);
+      return this.unitRepository.findById(id) as Promise<Unit>;
+    }
+
+    // Desarquivamento simples (compatibilidade)
     return this.unitRepository.update(id, {
       archived: false,
       archivedAt: undefined,
