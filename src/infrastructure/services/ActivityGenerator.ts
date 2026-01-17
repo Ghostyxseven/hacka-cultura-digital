@@ -41,8 +41,9 @@ export class ActivityGenerator {
 
     const aiRequest: AIGenerationRequest = {
       prompt: specificPrompt,
-      maxTokens: 2000,
+      maxTokens: 6000, // Aumentado para evitar truncamento em atividades detalhadas
       temperature: 0.7,
+      detectTruncation: true, // Habilita detecção automática de truncamento
     };
 
     const aiResponse = await this.aiService.generateText(aiRequest);

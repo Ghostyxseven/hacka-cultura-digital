@@ -28,20 +28,39 @@ export interface CreateUnitDTO {
  * Valida um DTO de criação de unidade
  * 
  * @param dto - DTO a ser validado
- * @returns `true` se o DTO for válido, `false` caso contrário
+ * @returns Objeto com resultado da validação e mensagens de erro específicas
  */
-export function validateCreateUnitDTO(dto: Partial<CreateUnitDTO>): boolean {
+export function validateCreateUnitDTO(dto: Partial<CreateUnitDTO>): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
   if (!dto.subjectId || typeof dto.subjectId !== 'string' || dto.subjectId.trim().length === 0) {
-    return false;
+    errors.push('Disciplina é obrigatória');
   }
 
-  if (!dto.title || typeof dto.title !== 'string' || dto.title.trim().length < 3 || dto.title.trim().length > 200) {
-    return false;
+  if (!dto.title || typeof dto.title !== 'string') {
+    errors.push('Título é obrigatório');
+  } else {
+    const trimmedTitle = dto.title.trim();
+    if (trimmedTitle.length < 3) {
+      errors.push('Título deve ter pelo menos 3 caracteres');
+    } else if (trimmedTitle.length > 200) {
+      errors.push('Título não pode ter mais de 200 caracteres');
+    }
   }
 
-  if (!dto.theme || typeof dto.theme !== 'string' || dto.theme.trim().length < 3 || dto.theme.trim().length > 300) {
-    return false;
+  if (!dto.theme || typeof dto.theme !== 'string') {
+    errors.push('Tema é obrigatório');
+  } else {
+    const trimmedTheme = dto.theme.trim();
+    if (trimmedTheme.length < 3) {
+      errors.push('Tema deve ter pelo menos 3 caracteres');
+    } else if (trimmedTheme.length > 300) {
+      errors.push('Tema não pode ter mais de 300 caracteres');
+    }
   }
 
-  return true;
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
 }

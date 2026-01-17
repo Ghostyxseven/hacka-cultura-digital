@@ -7,6 +7,8 @@ export interface AIGenerationRequest {
   prompt: string;
   maxTokens?: number;
   temperature?: number;
+  /** Se true, detecta e retenta respostas truncadas automaticamente */
+  detectTruncation?: boolean;
 }
 
 export interface AIGenerationResponse {
@@ -274,7 +276,19 @@ export class GoogleAIProvider implements AIProvider {
         }
 
         const data = await response.json();
-        const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const candidate = data.candidates?.[0];
+        const content = candidate?.content?.parts?.[0]?.text || '';
+        const finishReason = candidate?.finishReason || candidate?.finish_reason || '';
+
+        // Detecta se a resposta foi truncada (finishReason indica truncamento por limite de tokens)
+        const isTruncatedByMaxTokens = finishReason === 'MAX_TOKENS' || 
+                                       finishReason === 'MAX_OUTPUT_TOKENS';
+
+        // Detecta se a resposta parece incompleta (termina abruptamente sem pontuação final)
+        const endsAbruptly = content.trim().length > 500 && 
+                            !content.trim().match(/[.!?]"?\s*$/) && 
+                            !content.trim().endsWith('}') && 
+                            !content.trim().endsWith(']');
 
         if (!content) {
           throw new AIError(
@@ -283,6 +297,23 @@ export class GoogleAIProvider implements AIProvider {
             data,
             true
           );
+        }
+
+        // Se detectar truncamento e detectTruncation estiver habilitado, retenta com mais tokens
+        if ((isTruncatedByMaxTokens || endsAbruptly) && 
+            (request.detectTruncation !== false) && 
+            attempt < maxRetries - 1) {
+          console.warn(`Resposta truncada ou incompleta detectada (finishReason: ${finishReason}, endsAbruptly: ${endsAbruptly}). Retentando com mais tokens...`);
+          lastError = new AIError(
+            'Resposta foi truncada. Tentando novamente com mais tokens...',
+            AIErrorType.UNKNOWN,
+            { finishReason, contentLength: content.length },
+            true
+          );
+          // Aumenta maxTokens para próxima tentativa (dobra ou usa mínimo de 4000)
+          request.maxTokens = Math.max((request.maxTokens || 2000) * 2, 4000);
+          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          continue;
         }
 
         return {
@@ -379,7 +410,9 @@ export class OpenAIProvider implements AIProvider {
         }
 
         const data = await response.json();
-        const content = data.choices[0]?.message?.content || '';
+        const choice = data.choices?.[0];
+        const content = choice?.message?.content || '';
+        const finishReason = choice?.finish_reason || '';
 
         if (!content) {
           throw new AIError(
@@ -388,6 +421,27 @@ export class OpenAIProvider implements AIProvider {
             data,
             true
           );
+        }
+
+        // Detecta se a resposta foi truncada (OpenAI retorna 'length' quando atinge max_tokens)
+        const isTruncatedByMaxTokens = finishReason === 'length';
+
+        // Detecta se a resposta parece incompleta (termina abruptamente sem pontuação final)
+        const endsAbruptly = content.trim().length > 500 && 
+                            !content.trim().match(/[.!?]"?\s*$/) && 
+                            !content.trim().endsWith('}') && 
+                            !content.trim().endsWith(']') &&
+                            !content.trim().endsWith('...');
+
+        // Se detectar truncamento e detectTruncation estiver habilitado, retenta com mais tokens
+        if ((isTruncatedByMaxTokens || endsAbruptly) && 
+            (request.detectTruncation !== false) && 
+            attempt < maxRetries - 1) {
+          console.warn(`Resposta truncada ou incompleta detectada (finish_reason: ${finishReason}, endsAbruptly: ${endsAbruptly}). Retentando com mais tokens...`);
+          // Aumenta maxTokens para próxima tentativa (dobra ou usa mínimo de 4000)
+          request.maxTokens = Math.max((request.maxTokens || 2000) * 2, 4000);
+          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          continue;
         }
 
         return {

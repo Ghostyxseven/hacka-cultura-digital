@@ -41,8 +41,9 @@ export class UnitSuggestionService {
 
     const aiRequest: AIGenerationRequest = {
       prompt: specificPrompt,
-      maxTokens: 1500,
+      maxTokens: 3000, // Aumentado para evitar truncamento em sugestões detalhadas
       temperature: 0.8, // Mais criativo para sugestões
+      detectTruncation: true, // Habilita detecção automática de truncamento
     };
 
     const aiResponse = await this.aiService.generateText(aiRequest);

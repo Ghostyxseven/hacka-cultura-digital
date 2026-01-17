@@ -115,12 +115,10 @@ export function useSubjectForm() {
     validateNameAvailability(formData.name);
   }, [formData.name, validateNameAvailability]);
 
-  const toggleSchoolYear = useCallback((year: string) => {
+  const selectSchoolYear = useCallback((year: string) => {
     setFormData((prev) => ({
       ...prev,
-      schoolYears: prev.schoolYears.includes(year)
-        ? prev.schoolYears.filter((y) => y !== year)
-        : [...prev.schoolYears, year],
+      schoolYears: [year], // Seleciona apenas um ano (substitui qualquer seleção anterior)
     }));
   }, []);
 
@@ -144,7 +142,7 @@ export function useSubjectForm() {
       }
 
       if (data.schoolYears.length === 0) {
-        throw new Error('Selecione pelo menos um ano escolar');
+        throw new Error('Selecione um ano escolar');
       }
 
       const subjectService = ApplicationServiceFactory.createSubjectService();
@@ -170,7 +168,7 @@ export function useSubjectForm() {
     loading,
     error,
     nameValidation,
-    toggleSchoolYear,
+    selectSchoolYear,
     createSubject,
   };
 }

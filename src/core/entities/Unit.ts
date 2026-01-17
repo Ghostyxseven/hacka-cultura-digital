@@ -143,13 +143,35 @@ export function updateUnit(
   unit: Unit,
   updates: Partial<Omit<Unit, 'id' | 'createdAt' | 'updatedAt'>>
 ): Unit {
+  // VALIDAÇÃO FORTE: Não permite modificar unidade arquivada (exceto para desarquivar)
+  if (unit.archived === true && updates.archived !== false) {
+    throw new Error('Unidade arquivada não pode ser modificada. Desarquive primeiro.');
+  }
+
+  // Garante integridade de arquivamento
+  const archiveUpdates: Partial<Unit> = { ...updates };
+  if (archiveUpdates.archived === true && !archiveUpdates.archivedAt) {
+    archiveUpdates.archivedAt = new Date().toISOString();
+  }
+  if (archiveUpdates.archived === false || archiveUpdates.archived === undefined) {
+    archiveUpdates.archivedAt = undefined;
+  }
+
   const updated: Unit = {
     ...unit,
-    ...updates,
+    ...archiveUpdates,
     title: updates.title?.trim() || unit.title,
     theme: updates.theme?.trim() || unit.theme,
     updatedAt: new Date().toISOString(),
   };
+
+  // Valida integridade de arquivamento
+  if (updated.archived === true && !updated.archivedAt) {
+    throw new Error('Unidade arquivada deve ter archivedAt definido');
+  }
+  if (updated.archived !== true && updated.archivedAt) {
+    throw new Error('Unidade não arquivada não pode ter archivedAt');
+  }
 
   if (!validateUnit(updated)) {
     throw new Error('Dados inválidos para atualização de unidade');

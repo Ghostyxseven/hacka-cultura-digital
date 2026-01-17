@@ -11,6 +11,7 @@ import {
   ServiceUnavailableError,
   ApplicationError,
 } from '@/application/errors';
+import { ArchivePolicyError } from '@/core/policies';
 
 /**
  * Obtém uma mensagem de erro amigável para o usuário
@@ -35,6 +36,10 @@ export function getErrorMessage(error: unknown): string {
 
   if (error instanceof ValidationError) {
     return `Validação: ${error.message}`;
+  }
+
+  if (error instanceof ArchivePolicyError) {
+    return error.message;
   }
 
   if (error instanceof ServiceUnavailableError) {
@@ -71,6 +76,10 @@ export function getErrorToastType(error: unknown): 'error' | 'warning' | 'info' 
 
   if (error instanceof ValidationError) {
     return 'error';
+  }
+
+  if (error instanceof ArchivePolicyError) {
+    return 'warning'; // Aviso para regras de bloqueio
   }
 
   if (error instanceof ServiceUnavailableError) {

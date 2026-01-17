@@ -124,6 +124,7 @@ export function createSubject(data: Omit<Subject, 'id' | 'createdAt'>): Subject 
  * @param subject - Disciplina a ser atualizada
  * @param updates - Dados para atualização
  * @returns Disciplina atualizada com novo `updatedAt`
+ * @throws {Error} Se a disciplina estiver arquivada ou dados inválidos
  * 
  * @example
  * ```typescript
@@ -137,13 +138,35 @@ export function updateSubject(
   subject: Subject,
   updates: Partial<Omit<Subject, 'id' | 'createdAt' | 'updatedAt'>>
 ): Subject {
+  // VALIDAÇÃO FORTE: Não permite modificar disciplina arquivada (exceto para desarquivar)
+  if (subject.archived === true && updates.archived !== false) {
+    throw new Error('Disciplina arquivada não pode ser modificada. Desarquive primeiro.');
+  }
+
+  // Garante integridade de arquivamento
+  const archiveUpdates: Partial<Subject> = { ...updates };
+  if (archiveUpdates.archived === true && !archiveUpdates.archivedAt) {
+    archiveUpdates.archivedAt = new Date().toISOString();
+  }
+  if (archiveUpdates.archived === false || archiveUpdates.archived === undefined) {
+    archiveUpdates.archivedAt = undefined;
+  }
+
   const updated: Subject = {
     ...subject,
-    ...updates,
+    ...archiveUpdates,
     name: updates.name?.trim() || subject.name,
     description: updates.description?.trim() ?? subject.description,
     updatedAt: new Date().toISOString(),
   };
+
+  // Valida integridade de arquivamento
+  if (updated.archived === true && !updated.archivedAt) {
+    throw new Error('Disciplina arquivada deve ter archivedAt definido');
+  }
+  if (updated.archived !== true && updated.archivedAt) {
+    throw new Error('Disciplina não arquivada não pode ter archivedAt');
+  }
 
   if (!validateSubject(updated)) {
     throw new Error('Dados inválidos para atualização de disciplina');

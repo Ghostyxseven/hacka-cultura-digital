@@ -449,9 +449,27 @@ export function AIAgent() {
         // Usa IA para gerar resposta geral
         const aiService = new AIService();
         const aiResponse = await aiService.generateText({
-          prompt: `Você é um assistente educacional. O usuário disse: "${userMessage}". Responda de forma amigável e ofereça ajuda para criar disciplinas, gerar atividades, criar unidades ou gerar PDFs.`,
+          prompt: `Você é um assistente educacional. O usuário disse: "${userMessage}". Responda de forma amigável e ofereça ajuda para criar disciplinas, gerar atividades, criar unidades ou gerar PDFs. IMPORTANTE: Complete sua resposta completamente. Não corte no meio de uma frase ou explicação.`,
+          maxTokens: 3000, // Mais tokens para evitar truncamento
+          detectTruncation: true, // Habilita detecção automática de truncamento
         });
-        response = aiResponse.content;
+        
+        let content = aiResponse.content;
+        
+        // Validação adicional: verifica se a resposta está completa
+        if (content.trim().endsWith('...') || 
+            (content.length > 100 && !content.trim().match(/[.!?]\s*$/))) {
+          // Resposta parece incompleta, tenta novamente com mais tokens
+          console.warn('Resposta do AIAgent parece incompleta. Retentando...');
+          const retryResponse = await aiService.generateText({
+            prompt: `Você é um assistente educacional. O usuário disse: "${userMessage}". Responda de forma amigável e ofereça ajuda para criar disciplinas, gerar atividades, criar unidades ou gerar PDFs. IMPORTANTE: Complete sua resposta completamente. Não corte no meio de uma frase ou explicação.`,
+            maxTokens: 4000,
+            detectTruncation: true,
+          });
+          content = retryResponse.content;
+        }
+        
+        response = content;
       } else {
         response = await executeAction(command.action, command.params);
       }

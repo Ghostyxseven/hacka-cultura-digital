@@ -7,6 +7,7 @@ import {
 } from '../usecases';
 import { CreateSubjectDTO } from '../dto';
 import { ISubjectRepository } from '@/repository/interfaces/ISubjectRepository';
+import { ArchiveService } from './ArchiveService';
 
 /**
  * Serviço de aplicação: Gerenciamento de disciplinas
@@ -18,7 +19,8 @@ export class SubjectService {
     private readonly getAllSubjectsUseCase: GetAllSubjectsUseCase,
     private readonly getSubjectByIdUseCase: GetSubjectByIdUseCase,
     private readonly deleteSubjectUseCase: DeleteSubjectUseCase,
-    private readonly subjectRepository: ISubjectRepository
+    private readonly subjectRepository: ISubjectRepository,
+    private readonly archiveService?: ArchiveService // Opcional para não quebrar código existente
   ) {}
 
   /**
@@ -51,8 +53,16 @@ export class SubjectService {
 
   /**
    * Arquivar uma disciplina
+   * Se ArchiveService estiver disponível, usa arquivamento em cascata
    */
-  async archive(id: string): Promise<Subject> {
+  async archive(id: string, cascade: boolean = true): Promise<Subject> {
+    if (this.archiveService && cascade) {
+      // ARQUIVAMENTO EM CASCATA: arquiva Subject → Units → Plans/Activities
+      await this.archiveService.archiveSubjectCascade(id);
+      return this.subjectRepository.findById(id) as Promise<Subject>;
+    }
+
+    // Arquivamento simples (compatibilidade)
     return this.subjectRepository.update(id, {
       archived: true,
       archivedAt: new Date().toISOString(),
@@ -61,8 +71,16 @@ export class SubjectService {
 
   /**
    * Desarquivar uma disciplina
+   * Se ArchiveService estiver disponível, usa desarquivamento em cascata
    */
-  async unarchive(id: string): Promise<Subject> {
+  async unarchive(id: string, cascade: boolean = true): Promise<Subject> {
+    if (this.archiveService && cascade) {
+      // DESARQUIVAMENTO EM CASCATA: restaura Subject e Units (Plans/Activities ficam arquivados)
+      await this.archiveService.unarchiveSubjectCascade(id);
+      return this.subjectRepository.findById(id) as Promise<Subject>;
+    }
+
+    // Desarquivamento simples (compatibilidade)
     return this.subjectRepository.update(id, {
       archived: false,
       archivedAt: undefined,

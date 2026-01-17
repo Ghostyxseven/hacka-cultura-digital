@@ -26,7 +26,7 @@ import {
   GetActivityByUnitUseCase,
   GenerateSlidesUseCase,
 } from '../usecases';
-import { SubjectService, UnitService, MaterialGenerationService } from '../services';
+import { SubjectService, UnitService, MaterialGenerationService, ArchiveService } from '../services';
 
 /**
  * Factory para criar instâncias dos serviços de aplicação
@@ -51,6 +51,7 @@ export class ApplicationServiceFactory {
   private static subjectService: SubjectService;
   private static unitService: UnitService;
   private static materialGenerationService: MaterialGenerationService;
+  private static archiveService: ArchiveService;
 
   // Inicializa repositórios
   private static initRepositories() {
@@ -91,6 +92,26 @@ export class ApplicationServiceFactory {
   }
 
   /**
+   * Cria e retorna instância do ArchiveService
+   */
+  private static createArchiveService(): ArchiveService {
+    if (this.archiveService) {
+      return this.archiveService;
+    }
+
+    this.initRepositories();
+
+    this.archiveService = new ArchiveService(
+      this.subjectRepository,
+      this.unitRepository,
+      this.lessonPlanRepository,
+      this.activityRepository
+    );
+
+    return this.archiveService;
+  }
+
+  /**
    * Cria e retorna instância do SubjectService
    */
   static createSubjectService(): SubjectService {
@@ -99,6 +120,7 @@ export class ApplicationServiceFactory {
     }
 
     this.initRepositories();
+    const archiveService = this.createArchiveService();
 
     const createSubjectUseCase = new CreateSubjectUseCase(this.subjectRepository);
     const getAllSubjectsUseCase = new GetAllSubjectsUseCase(this.subjectRepository);
@@ -113,7 +135,8 @@ export class ApplicationServiceFactory {
       getAllSubjectsUseCase,
       getSubjectByIdUseCase,
       deleteSubjectUseCase,
-      this.subjectRepository
+      this.subjectRepository,
+      archiveService
     );
 
     return this.subjectService;
@@ -129,6 +152,7 @@ export class ApplicationServiceFactory {
 
     this.initRepositories();
     this.initInfrastructure();
+    const archiveService = this.createArchiveService();
 
     const createUnitUseCase = new CreateUnitUseCase(this.unitRepository, this.subjectRepository);
     const getUnitsBySubjectUseCase = new GetUnitsBySubjectUseCase(
@@ -144,7 +168,8 @@ export class ApplicationServiceFactory {
       createUnitUseCase,
       getUnitsBySubjectUseCase,
       suggestUnitsUseCase,
-      this.unitRepository
+      this.unitRepository,
+      archiveService
     );
 
     return this.unitService;

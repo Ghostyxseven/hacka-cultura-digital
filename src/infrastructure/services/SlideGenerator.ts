@@ -41,8 +41,9 @@ export class SlideGenerator {
 
     const aiRequest: AIGenerationRequest = {
       prompt: specificPrompt,
-      maxTokens: 3000,
+      maxTokens: 5000, // Aumentado para evitar truncamento em slides detalhados
       temperature: 0.7,
+      detectTruncation: true, // Habilita detecção automática de truncamento
     };
 
     const aiResponse = await this.aiService.generateText(aiRequest);

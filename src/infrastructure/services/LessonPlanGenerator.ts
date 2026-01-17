@@ -39,8 +39,9 @@ export class LessonPlanGenerator {
 
     const aiRequest: AIGenerationRequest = {
       prompt: specificPrompt,
-      maxTokens: 2000,
+      maxTokens: 8000, // Aumentado para evitar truncamento em planos detalhados
       temperature: 0.7,
+      detectTruncation: true, // Habilita detecção automática de truncamento
     };
 
     const aiResponse = await this.aiService.generateText(aiRequest);
