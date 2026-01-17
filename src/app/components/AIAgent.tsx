@@ -464,7 +464,7 @@ export function AIAgent() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-br from-teal-500 to-purple-600 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center z-50"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-teal-500 to-purple-600 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center z-50"
         aria-label="Abrir assistente de IA"
       >
         <span className="text-3xl">🤖</span>
@@ -473,7 +473,7 @@ export function AIAgent() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-xl shadow-2xl border border-gray-200 flex flex-col z-50">
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 w-[calc(100vw-2rem)] md:w-96 h-[calc(100vh-8rem)] md:h-[600px] max-h-[80vh] md:max-h-none bg-white rounded-xl shadow-2xl border border-gray-200 flex flex-col z-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-teal-500 to-purple-600 text-white p-4 rounded-t-xl flex items-center justify-between">
         <div className="flex items-center gap-3">

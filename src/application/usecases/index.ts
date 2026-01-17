@@ -12,3 +12,4 @@ export * from './GenerateLessonPlanUseCase';
 export * from './GenerateActivityUseCase';
 export * from './GetLessonPlanByUnitUseCase';
 export * from './GetActivityByUnitUseCase';
+export * from './GenerateSlidesUseCase';

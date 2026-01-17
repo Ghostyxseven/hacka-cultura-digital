@@ -91,14 +91,14 @@ export default function ProfessorDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="px-8 py-8">
+      <div className="px-4 py-4 md:px-8 md:py-8">
         {/* Saudação e Calendário - Design moderno */}
         <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 flex items-center gap-4">
-            <span className="text-5xl">👋</span>
+          <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-200 flex items-center gap-3 md:gap-4 w-full sm:w-auto">
+            <span className="text-4xl md:text-5xl">👋</span>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">Olá, Professor!</h1>
-              <p className="text-gray-600">Hoje é um ótimo dia para ensinar.</p>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">Olá, Professor!</h1>
+              <p className="text-sm md:text-base text-gray-600">Hoje é um ótimo dia para ensinar.</p>
             </div>
           </div>
           <div className="bg-white rounded-xl shadow-sm px-5 py-3 border border-gray-200 flex items-center gap-3">

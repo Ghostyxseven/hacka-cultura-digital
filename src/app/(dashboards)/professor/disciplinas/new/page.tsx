@@ -44,7 +44,7 @@ export default function NewSubjectPage() {
     <>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       <div className="min-h-screen bg-gray-50">
-        <div className="px-8 py-8">
+        <div className="px-4 py-4 md:px-8 md:py-8">
         <div className="max-w-3xl mx-auto">
           <Link
             href="/"
