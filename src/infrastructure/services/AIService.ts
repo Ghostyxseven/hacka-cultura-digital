@@ -520,27 +520,77 @@ export class OpenAIProvider implements AIProvider {
 
 /**
  * Serviço principal de IA - Gerencia qual provedor usar
- * Prioridade: Google AI > OpenAI > Mock
+ * Agora usa configuração do usuário se disponível
  */
 export class AIService {
   private provider: AIProvider;
 
-  constructor(provider?: AIProvider) {
-    // Se não for fornecido um provedor, tenta usar Google AI, OpenAI ou fallback para Mock
+  constructor(provider?: AIProvider, preferredProvider?: 'google' | 'openai' | 'auto') {
+    // Se não for fornecido um provedor, usa a lógica de seleção
     if (provider) {
       this.provider = provider;
     } else {
-      const googleApiKey = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY;
-      const openAiApiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+      this.provider = this.selectProvider(preferredProvider);
+    }
+  }
 
-      if (googleApiKey) {
-        this.provider = new GoogleAIProvider(googleApiKey);
-      } else if (openAiApiKey) {
-        this.provider = new OpenAIProvider(openAiApiKey);
-      } else {
-        this.provider = new MockAIProvider();
+  /**
+   * Seleciona o provedor baseado na preferência do usuário ou auto-detecta
+   */
+  private selectProvider(preferredProvider?: 'google' | 'openai' | 'auto'): AIProvider {
+    // Tenta importar o serviço de configuração (só funciona no cliente)
+    let userConfig: { provider?: string; googleApiKey?: string; openaiApiKey?: string } | null = null;
+    
+    if (typeof window !== 'undefined') {
+      try {
+        // Importa dinamicamente para evitar erro de SSR
+        const { AIConfigService } = require('./AIConfigService');
+        const configService = new AIConfigService();
+        userConfig = configService.getConfig();
+      } catch (error) {
+        // Se não conseguir carregar, continua com auto-detect
+        console.warn('Não foi possível carregar configuração de IA:', error);
       }
     }
+
+    // Determina qual provedor usar
+    const providerToUse = preferredProvider || userConfig?.provider || 'auto';
+
+    // Obtém chaves API (preferência: config do usuário > env vars)
+    const googleApiKey = userConfig?.googleApiKey || process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || '';
+    const openAiApiKey = userConfig?.openaiApiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY || '';
+
+    // Seleciona o provedor baseado na preferência
+    if (providerToUse === 'google') {
+      if (googleApiKey) {
+        return new GoogleAIProvider(googleApiKey);
+      }
+      // Fallback se não tiver chave mas usuário escolheu Google
+      if (openAiApiKey) {
+        return new OpenAIProvider(openAiApiKey);
+      }
+      return new MockAIProvider();
+    }
+
+    if (providerToUse === 'openai') {
+      if (openAiApiKey) {
+        return new OpenAIProvider(openAiApiKey);
+      }
+      // Fallback se não tiver chave mas usuário escolheu OpenAI
+      if (googleApiKey) {
+        return new GoogleAIProvider(googleApiKey);
+      }
+      return new MockAIProvider();
+    }
+
+    // Auto-detect: Google AI > OpenAI > Mock
+    if (googleApiKey) {
+      return new GoogleAIProvider(googleApiKey);
+    }
+    if (openAiApiKey) {
+      return new OpenAIProvider(openAiApiKey);
+    }
+    return new MockAIProvider();
   }
 
   async generateText(request: AIGenerationRequest, maxRetries: number = 3): Promise<AIGenerationResponse> {

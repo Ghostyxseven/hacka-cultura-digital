@@ -13,6 +13,7 @@ export * from './ActionButton';
 export * from './LessonPlanView';
 export * from './ActivityView';
 export * from './GenerationForm';
+export * from './AIConfigSettings';
 export * from './Tabs';
 export * from './ExportButton';
 export * from './Sidebar';

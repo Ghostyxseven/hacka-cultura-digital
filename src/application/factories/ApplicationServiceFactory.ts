@@ -72,7 +72,20 @@ export class ApplicationServiceFactory {
   // Inicializa serviços de infraestrutura
   private static initInfrastructure() {
     if (!this.aiService) {
-      this.aiService = new AIService();
+      // Tenta carregar a configuração do usuário (só funciona no cliente)
+      let preferredProvider: 'google' | 'openai' | 'auto' | undefined = undefined;
+      if (typeof window !== 'undefined') {
+        try {
+          const { AIConfigService } = require('@/infrastructure/services/AIConfigService');
+          const configService = new AIConfigService();
+          const config = configService.getConfig();
+          preferredProvider = config.provider as 'google' | 'openai' | 'auto';
+        } catch (error) {
+          // Se não conseguir carregar, usa padrão (auto-detect)
+          console.warn('Não foi possível carregar configuração de IA:', error);
+        }
+      }
+      this.aiService = new AIService(undefined, preferredProvider);
     }
     if (!this.bnccService) {
       this.bnccService = new BNCCService();

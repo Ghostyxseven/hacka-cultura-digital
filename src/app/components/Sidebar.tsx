@@ -37,6 +37,7 @@ export function Sidebar() {
     { label: 'Início', href: '/professor', icon: '🏠' },
     { label: 'Criar Disciplina', href: '/professor/disciplinas/new', icon: '➕' },
     { label: 'Arquivados', href: '/professor/arquivados', icon: '📦' },
+    { label: 'Configurações', href: '/professor/configuracoes', icon: '⚙️' },
   ];
 
   const isActive = (href: string) => {

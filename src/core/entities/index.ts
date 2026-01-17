@@ -8,3 +8,4 @@ export * from './Activity';
 export * from './BNCCCompetency';
 export * from './AuditLog';
 export * from './Trash';
+export * from './AIConfig';
