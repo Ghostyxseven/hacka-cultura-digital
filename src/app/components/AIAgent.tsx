@@ -190,17 +190,60 @@ export function AIAgent() {
 
     // Gerar atividade
     if (lowerText.includes('gerar') && lowerText.includes('atividade')) {
-      const subjectMatch = lowerText.match(/(?:de|para|da)\s+([^,\n]+?)(?:\s+sobre\s+([^\n]+))?/);
-      const subjectName = subjectMatch?.[1]?.trim() || '';
-      const topic = subjectMatch?.[2]?.trim() || '';
+      // Melhor padrão para extrair nome da disciplina
+      // Ex: "Gerar atividade de Português" -> "Português"
+      // Ex: "Gerar atividade de História sobre Brasil" -> "História", "Brasil"
+      let match = lowerText.match(/gerar\s+atividade\s+(?:de|para|da)?\s+([a-záàâãéêíóôõúç\s]+?)(?:\s+sobre\s+([^\n]+))?$/i);
+      
+      // Se não encontrou, tenta padrão alternativo
+      if (!match) {
+        match = lowerText.match(/atividade\s+(?:de|para|da)?\s+([a-záàâãéêíóôõúç\s]+?)(?:\s+sobre\s+([^\n]+))?$/i);
+      }
+      
+      // Se ainda não encontrou, extrai tudo depois de "de/da/para"
+      if (!match) {
+        const deIndex = lowerText.search(/\s+(de|da|para)\s+/);
+        if (deIndex >= 0) {
+          const afterDe = lowerText.substring(deIndex).replace(/\s+(de|da|para)\s+/, ' ').trim();
+          const words = afterDe.split(/\s+/);
+          
+          // Procura por "sobre" para separar disciplina de tópico
+          const sobreIndex = words.findIndex(w => w === 'sobre');
+          if (sobreIndex >= 0) {
+            match = [null, words.slice(0, sobreIndex).join(' '), words.slice(sobreIndex + 1).join(' ')];
+          } else {
+            match = [null, afterDe, ''];
+          }
+        }
+      }
+      
+      let subjectName = match?.[1]?.trim() || '';
+      const topic = match?.[2]?.trim() || '';
+      
+      // Remove palavras desnecessárias
+      subjectName = subjectName.replace(/^(de|da|do|para|com|sobre|em)\s+/i, '').trim();
+      subjectName = subjectName.replace(/\s+(de|da|do|para|com|sobre|em)$/i, '').trim();
 
-      return {
-        action: 'generate_activity',
-        params: {
-          subjectName: subjectName,
-          topic: topic,
-        },
-      };
+      // Se não encontrou, procura por disciplinas comuns
+      if (!subjectName || subjectName.length < 2) {
+        const commonSubjects = ['português', 'portugues', 'matematica', 'matemática', 'historia', 'história', 'ciencias', 'ciências', 'geografia', 'ingles', 'inglês', 'fisica', 'física', 'quimica', 'química', 'biologia', 'artes', 'educacao fisica', 'educação física'];
+        for (const subj of commonSubjects) {
+          if (lowerText.includes(subj)) {
+            subjectName = subj;
+            break;
+          }
+        }
+      }
+
+      if (subjectName && subjectName.length >= 2) {
+        return {
+          action: 'generate_activity',
+          params: {
+            subjectName: subjectName,
+            topic: topic,
+          },
+        };
+      }
     }
 
     // Gerar PDF
@@ -273,8 +316,8 @@ export function AIAgent() {
 
         case 'generate_activity': {
           const { subjectName, topic } = params;
-          if (!subjectName) {
-            return 'Não consegui identificar a disciplina. Por favor, especifique qual disciplina você quer gerar atividade.';
+          if (!subjectName || subjectName.length < 2) {
+            return '❌ Não consegui identificar a disciplina.\n\n📝 Para gerar uma atividade, você precisa:\n\n1️⃣ Primeiro criar a disciplina (ex: "Criar disciplina de Português")\n2️⃣ Depois criar uma unidade na disciplina\n3️⃣ Então gerar a atividade\n\n💡 Exemplo de comando completo:\n"Criar disciplina de Português para 6º ano"';
           }
 
           const subjectService = ApplicationServiceFactory.createSubjectService();
@@ -282,14 +325,14 @@ export function AIAgent() {
           const subject = subjects.find((s) => s.name.toLowerCase().includes(subjectName.toLowerCase()));
 
           if (!subject) {
-            return `Não encontrei a disciplina "${subjectName}". Por favor, verifique o nome.`;
+            return `❌ Não encontrei a disciplina "${subjectName}".\n\n📚 Para gerar uma atividade, primeiro você precisa criar a disciplina!\n\n💡 Use o comando:\n"Criar disciplina de ${subjectName}"\n\nDepois de criar a disciplina e uma unidade, você poderá gerar atividades.`;
           }
 
           const unitService = ApplicationServiceFactory.createUnitService();
           const units = await unitService.findBySubject(subject.id);
 
           if (units.length === 0) {
-            return `A disciplina "${subject.name}" não possui unidades. Crie uma unidade primeiro.`;
+            return `❌ A disciplina "${subject.name}" não possui unidades.\n\n📝 Para gerar uma atividade, você precisa:\n\n1️⃣ Criar uma unidade na disciplina "${subject.name}"\n2️⃣ Depois gerar a atividade para essa unidade\n\n💡 Comando para criar unidade:\n"Criar unidade de ${subject.name} sobre [tema da aula]"`;
           }
 
           const unit = units[0]; // Usa a primeira unidade
