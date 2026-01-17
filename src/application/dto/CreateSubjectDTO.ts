@@ -32,7 +32,7 @@ export function validateCreateSubjectDTO(dto: Partial<CreateSubjectDTO>): boolea
     return false;
   }
 
-  if (dto.description !== undefined && typeof dto.description !== 'string' && dto.description.length > 500) {
+  if (dto.description !== undefined && (typeof dto.description !== 'string' || dto.description.length > 500)) {
     return false;
   }
 
