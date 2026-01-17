@@ -23,4 +23,3 @@ export * from './SubjectsList';
 export * from './UnitCard';
 export * from './UnitsList';
 export * from './SearchBar';
-export * from './BackupRestore';
