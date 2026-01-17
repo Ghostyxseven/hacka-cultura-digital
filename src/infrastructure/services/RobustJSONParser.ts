@@ -59,17 +59,24 @@ export class RobustJSONParser {
     }
 
     // Estratégia 3: Tentar extrair múltiplos objetos JSON e retornar o maior
-    const allMatches = [...trimmed.matchAll(/\{[\s\S]*?\}/g)];
+    const regex = /\{[\s\S]*?\}/g;
+    let match: RegExpExecArray | null;
+    const allMatches: RegExpExecArray[] = [];
+    
+    while ((match = regex.exec(trimmed)) !== null) {
+      allMatches.push(match);
+    }
+    
     if (allMatches.length > 0) {
-      let largestMatch: RegExpMatchArray | null = null;
+      let largestMatch: RegExpExecArray | null = null;
       let largestSize = 0;
 
-      for (const match of allMatches) {
-        if (match[0].length > largestSize) {
+      for (const m of allMatches) {
+        if (m[0].length > largestSize) {
           try {
-            JSON.parse(match[0]); // Testa se é JSON válido
-            largestMatch = match;
-            largestSize = match[0].length;
+            JSON.parse(m[0]); // Testa se é JSON válido
+            largestMatch = m;
+            largestSize = m[0].length;
           } catch {
             // Ignora JSONs inválidos
           }
