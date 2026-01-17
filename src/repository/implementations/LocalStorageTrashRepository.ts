@@ -6,7 +6,21 @@
 
 import { TrashItem, createTrashItem, validateTrashItem, isTrashItemExpired } from '@/core/entities/Trash';
 import { ITrashRepository } from '../interfaces/ITrashRepository';
-import { RepositoryError, StorageError } from './RepositoryErrors';
+
+// Classes de erro locais (compatibilidade com outros repositórios)
+class RepositoryError extends Error {
+  constructor(message: string, public code: string) {
+    super(message);
+    this.name = 'RepositoryError';
+  }
+}
+
+class StorageError extends RepositoryError {
+  constructor(message: string) {
+    super(message, 'STORAGE_ERROR');
+    this.name = 'StorageError';
+  }
+}
 
 const STORAGE_KEY = 'trash';
 
