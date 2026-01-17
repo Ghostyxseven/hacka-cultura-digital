@@ -38,16 +38,29 @@ export function ActionButton({
 
   if (href && !disabled) {
     return (
-      <Link href={href} className={classes}>
-        {icon && <span className="mr-2 text-lg">{icon}</span>}
+      <Link 
+        href={href} 
+        className={classes}
+        aria-label={typeof children === 'string' ? children : undefined}
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+      >
+        {icon && <span className="mr-2 text-lg" aria-hidden="true">{icon}</span>}
         {children}
       </Link>
     );
   }
 
   return (
-    <button type={type} onClick={onClick} disabled={disabled} className={classes}>
-      {icon && <span className="mr-2 text-lg">{icon}</span>}
+    <button 
+      type={type} 
+      onClick={onClick} 
+      disabled={disabled} 
+      className={classes}
+      aria-label={typeof children === 'string' ? children : undefined}
+      aria-disabled={disabled}
+    >
+      {icon && <span className="mr-2 text-lg" aria-hidden="true">{icon}</span>}
       {children}
     </button>
   );

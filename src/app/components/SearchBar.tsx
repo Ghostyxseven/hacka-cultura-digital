@@ -47,12 +47,15 @@ export function SearchBar({
           <span className="text-gray-400 text-xl">🔍</span>
         </div>
         <input
-          type="text"
+          type="search"
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
           placeholder={placeholder}
           className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white shadow-sm hover:shadow-md"
+          aria-label="Buscar disciplinas"
+          aria-describedby="search-help"
         />
+        <span id="search-help" className="sr-only">Digite para buscar disciplinas por nome</span>
         {query && (
           <button
             onClick={() => handleSearch('')}
@@ -70,6 +73,7 @@ export function SearchBar({
           value={selectedFilter}
           onChange={(e) => handleFilterChange(e.target.value)}
           className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white shadow-sm hover:shadow-md cursor-pointer"
+          aria-label="Filtrar por ano escolar"
         >
           <option value="">Todos</option>
           {filters.map((filter) => (

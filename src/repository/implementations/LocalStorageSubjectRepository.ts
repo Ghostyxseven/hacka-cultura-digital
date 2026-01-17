@@ -177,10 +177,14 @@ export class LocalStorageSubjectRepository implements ISubjectRepository {
       const subject = createSubject(subjectData);
       const subjects = await this.getAllFromStorage();
       
-      // Verifica duplicatas (opcional, pode ser removido se necessário)
-      const exists = subjects.some((s) => s.name.toLowerCase() === subject.name.toLowerCase());
+      // Verifica duplicatas (não permite disciplinas arquivadas na verificação)
+      const exists = subjects.some(
+        (s) => 
+          !s.archived && 
+          s.name.toLowerCase().trim() === subject.name.toLowerCase().trim()
+      );
       if (exists) {
-        console.warn(`Disciplina com nome "${subject.name}" já existe`);
+        throw new ValidationError(`Já existe uma disciplina com o nome "${subject.name}"`);
       }
 
       subjects.push(subject);

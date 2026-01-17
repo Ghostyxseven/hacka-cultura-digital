@@ -73,13 +73,24 @@ export default function NewSubjectPage() {
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-gray-400 transition-colors"
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-gray-400 transition-colors ${
+                    error && error.includes('nome') ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Ex: Matemática, Ciências, História..."
                   required
+                  aria-required="true"
+                  aria-describedby="name-help name-error"
+                  aria-invalid={error && error.includes('nome') ? 'true' : 'false'}
+                  maxLength={100}
                 />
-                <p className="mt-2 text-xs text-gray-500">
-                  Nome da disciplina que será usada para organizar suas aulas
+                <p id="name-help" className="mt-2 text-xs text-gray-500">
+                  Nome da disciplina que será usada para organizar suas aulas ({formData.name.length}/100 caracteres)
                 </p>
+                {error && error.includes('nome') && (
+                  <p id="name-error" className="mt-1 text-xs text-red-600" role="alert">
+                    {error}
+                  </p>
+                )}
               </div>
 
               <div className="mb-6">
