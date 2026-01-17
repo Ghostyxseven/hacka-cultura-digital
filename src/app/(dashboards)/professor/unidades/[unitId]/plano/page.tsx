@@ -44,6 +44,7 @@ export default function GenerateLessonPlanPage() {
     lessonPlan,
     activity,
     slides,
+    defaultYear,
     loading,
     generating,
     generatingSlides,
@@ -234,7 +235,7 @@ export default function GenerateLessonPlanPage() {
 
         {/* Formulário de geração */}
         {showForm && !lessonPlan && (
-          <GenerationForm onSubmit={handleGenerate} loading={generating} />
+          <GenerationForm onSubmit={handleGenerate} loading={generating} defaultYear={defaultYear} />
         )}
 
         {/* Estado de geração com progresso */}

@@ -17,6 +17,7 @@ export function useMaterialGeneration(unitId: string) {
   const [lessonPlan, setLessonPlan] = useState<LessonPlan | null>(null);
   const [activity, setActivity] = useState<Activity | null>(null);
   const [slides, setSlides] = useState<Slide[] | null>(null);
+  const [defaultYear, setDefaultYear] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generatingSlides, setGeneratingSlides] = useState(false);
@@ -28,6 +29,37 @@ export function useMaterialGeneration(unitId: string) {
       setError(null);
 
       const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+
+      // Busca a unidade para pegar o ano escolar da disciplina
+      try {
+        // Usa o MaterialGenerationService para buscar a unidade através do repositório
+        const materialService = ApplicationServiceFactory.createMaterialGenerationService();
+        
+        // Busca o plano de aula para ter acesso ao unitId, ou tenta buscar direto a unidade
+        // Como alternativa, vamos buscar através do getLessonPlanByUnit que já busca a unidade
+        // Mas na verdade, precisamos acessar o repositório diretamente aqui
+        
+        // Solução: buscar via ApplicationServiceFactory usando o repositório
+        const { LocalStorageUnitRepository } = await import('@/repository/implementations');
+        const { LocalStorageSubjectRepository } = await import('@/repository/implementations');
+        
+        const unitRepo = new LocalStorageUnitRepository();
+        const subjectRepo = new LocalStorageSubjectRepository();
+        
+        const unit = await unitRepo.findById(unitId);
+        
+        if (unit) {
+          // Busca a disciplina para pegar o ano escolar
+          const subject = await subjectRepo.findById(unit.subjectId);
+          if (subject && subject.schoolYears && subject.schoolYears.length > 0) {
+            // Pega o primeiro ano escolar (agora é seleção única)
+            setDefaultYear(subject.schoolYears[0]);
+          }
+        }
+      } catch (err) {
+        // Se não conseguir buscar, continua sem o ano padrão
+        console.warn('Erro ao buscar ano escolar da disciplina:', err);
+      }
 
       try {
         const [plan, act] = await Promise.all([
@@ -149,6 +181,7 @@ export function useMaterialGeneration(unitId: string) {
     lessonPlan,
     activity,
     slides,
+    defaultYear,
     loading,
     generating,
     generatingSlides,

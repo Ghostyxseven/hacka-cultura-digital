@@ -5,17 +5,25 @@ import { useState, FormEvent } from 'react';
 interface GenerationFormProps {
   onSubmit: (data: { year?: string; additionalContext?: string }) => Promise<void>;
   loading?: boolean;
+  defaultYear?: string; // Ano escolar padrão da disciplina
 }
 
 /**
  * Componente de formulário para geração de materiais
  * Usado na página de geração de plano de aula
  */
-export function GenerationForm({ onSubmit, loading }: GenerationFormProps) {
+export function GenerationForm({ onSubmit, loading, defaultYear }: GenerationFormProps) {
   const [formData, setFormData] = useState({
-    year: '',
+    year: defaultYear || '',
     additionalContext: '',
   });
+
+  // Atualiza o ano quando defaultYear mudar
+  useEffect(() => {
+    if (defaultYear && !formData.year) {
+      setFormData((prev) => ({ ...prev, year: defaultYear }));
+    }
+  }, [defaultYear, formData.year]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

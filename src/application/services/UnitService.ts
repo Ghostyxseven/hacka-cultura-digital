@@ -86,6 +86,13 @@ export class UnitService {
   }
 
   /**
+   * Busca uma unidade por ID
+   */
+  async findById(id: string): Promise<Unit | null> {
+    return this.unitRepository.findById(id);
+  }
+
+  /**
    * Deletar permanentemente uma unidade
    */
   async delete(id: string): Promise<void> {
