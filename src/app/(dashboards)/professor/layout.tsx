@@ -1,6 +1,6 @@
 'use client';
 
-import { Sidebar, AIAgent } from '@/app/components';
+import { Sidebar, AIAgent, BackupRestore } from '@/app/components';
 
 /**
  * Layout do Professor - Single User Application
@@ -18,6 +18,7 @@ export default function ProfessorLayout({
         {children}
       </main>
       <AIAgent />
+      <BackupRestore />
     </div>
   );
 }
