@@ -348,7 +348,6 @@ const SUBJECT_TO_COMPONENT_MAP: Record<string, string[]> = {
   'portugues': ['Língua Portuguesa'],
   'língua portuguesa': ['Língua Portuguesa'],
   'lingua portuguesa': ['Língua Portuguesa'],
-  'português': ['Língua Portuguesa'],
   'ciências': ['Ciências'],
   'ciencias': ['Ciências'],
   'história': ['História'],
