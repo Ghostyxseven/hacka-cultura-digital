@@ -42,9 +42,10 @@ export interface AIConfig {
 
 /**
  * Modelos padrão recomendados
+ * Usando modelos mais baratos e rápidos por padrão
  */
-export const DEFAULT_GOOGLE_MODEL: GoogleModel = 'gemini-2.5-flash';
-export const DEFAULT_OPENAI_MODEL: OpenAIModel = 'gpt-3.5-turbo';
+export const DEFAULT_GOOGLE_MODEL: GoogleModel = 'gemini-2.5-flash'; // Rápido e barato
+export const DEFAULT_OPENAI_MODEL: OpenAIModel = 'gpt-3.5-turbo'; // Mais barato e rápido
 
 /**
  * Lista de modelos do Google com descrições
@@ -57,12 +58,13 @@ export const GOOGLE_MODELS: Array<{ value: GoogleModel; label: string; descripti
 
 /**
  * Lista de modelos do OpenAI com descrições
+ * Ordenados do mais barato/rápido para o mais caro/poderoso
  */
 export const OPENAI_MODELS: Array<{ value: OpenAIModel; label: string; description: string }> = [
-  { value: 'gpt-4o', label: 'GPT-4o', description: 'Mais recente, otimizado (Recomendado)' },
+  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', description: 'Mais barato e rápido (Recomendado)' },
+  { value: 'gpt-4o', label: 'GPT-4o', description: 'Mais recente, otimizado' },
   { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', description: 'Alta performance' },
   { value: 'gpt-4', label: 'GPT-4', description: 'Poderoso, alta qualidade' },
-  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', description: 'Rápido e econômico' },
 ];
 
 /**
