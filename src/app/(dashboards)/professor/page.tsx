@@ -30,10 +30,9 @@ import {
  * Lógica de negócio separada em hook customizado (Clean Architecture)
  */
 export default function ProfessorDashboard() {
-  const { subjects, subjectsWithStats, loading, error, stats, archivedStats, reload, duplicateSubject } = useDashboard();
+  const { subjects, subjectsWithStats, loading, error, stats, archivedStats, reload } = useDashboard();
   const [searchQuery, setSearchQuery] = useState('');
   const [yearFilter, setYearFilter] = useState('');
-  const { showToast } = useToast();
 
   // Escuta eventos de atualização do AIAgent
   useEffect(() => {
@@ -195,18 +194,6 @@ export default function ProfessorDashboard() {
               <SubjectGrid
                 subjects={filteredSubjects}
                 loading={loading}
-                onDuplicate={async (subjectId) => {
-                  const success = await duplicateSubject(subjectId);
-                  if (success) {
-                    showToast('Disciplina duplicada com sucesso!', 'success');
-                    // Dispara evento para atualizar dashboard
-                    if (typeof window !== 'undefined') {
-                      window.dispatchEvent(new CustomEvent('dashboard:update'));
-                    }
-                  } else {
-                    showToast('Erro ao duplicar disciplina', 'error');
-                  }
-                }}
               />
             ) : (
               <div className="text-center py-12 bg-white rounded-xl border border-gray-200">

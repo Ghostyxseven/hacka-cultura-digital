@@ -121,42 +121,6 @@ export function useDashboard() {
     loadDashboard();
   }, [loadDashboard]);
 
-  const duplicateSubject = useCallback(async (subjectId: string): Promise<boolean> => {
-    try {
-      const subjectService = ApplicationServiceFactory.createSubjectService();
-      const unitService = ApplicationServiceFactory.createUnitService();
-      
-      const originalSubject = await subjectService.findById(subjectId);
-      if (!originalSubject) {
-        throw new Error('Disciplina não encontrada');
-      }
-
-      // Cria cópia da disciplina
-      const duplicatedSubject = await subjectService.create({
-        name: `${originalSubject.name} (Cópia)`,
-        description: originalSubject.description,
-        schoolYears: originalSubject.schoolYears,
-      });
-
-      // Duplica todas as unidades da disciplina
-      const units = await unitService.findBySubject(subjectId);
-      for (const unit of units) {
-        await unitService.create({
-          subjectId: duplicatedSubject.id,
-          title: unit.title,
-          theme: unit.theme,
-          isAIGenerated: unit.isAIGenerated,
-        });
-      }
-
-      await loadDashboard();
-      return true;
-    } catch (err: any) {
-      console.error('Erro ao duplicar disciplina:', err);
-      return false;
-    }
-  }, [loadDashboard]);
-
   return {
     subjects,
     subjectsWithStats,
@@ -165,6 +129,5 @@ export function useDashboard() {
     stats,
     archivedStats,
     reload: loadDashboard,
-    duplicateSubject,
   };
 }

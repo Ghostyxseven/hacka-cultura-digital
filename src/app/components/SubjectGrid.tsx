@@ -10,7 +10,6 @@ interface SubjectWithUnits extends Subject {
 interface SubjectGridProps {
   subjects: Subject[] | SubjectWithUnits[];
   loading?: boolean;
-  onDuplicate?: (subjectId: string) => void;
 }
 
 /**
@@ -23,7 +22,7 @@ interface SubjectGridProps {
  * - Anos escolares em badges
  * - Hover effects para melhor interação
  */
-export function SubjectGrid({ subjects, loading, onDuplicate }: SubjectGridProps) {
+export function SubjectGrid({ subjects, loading }: SubjectGridProps) {
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -83,20 +82,6 @@ export function SubjectGrid({ subjects, loading, onDuplicate }: SubjectGridProps
                 
                 {/* Menu de ações */}
                 <div className="flex items-center gap-2">
-                  {onDuplicate && (
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onDuplicate(subject.id);
-                      }}
-                      className="p-2 rounded-lg hover:bg-indigo-100 transition-colors group/btn"
-                      title="Duplicar disciplina"
-                      aria-label="Duplicar disciplina"
-                    >
-                      <span className="text-gray-600 group-hover/btn:text-indigo-600 transition-colors">📋</span>
-                    </button>
-                  )}
                   <Link
                     href={`/professor/disciplinas/${subject.id}`}
                     className="text-2xl text-gray-400 group-hover:text-indigo-600 transition-all transform group-hover:translate-x-1"
